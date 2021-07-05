@@ -6,6 +6,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <ncurses.h>
+#include "render.h"
 
 room_t* load_room(const char* filename){
     FILE* file = fopen(filename, "r");
@@ -90,10 +91,10 @@ void print_room(room_t* room){
     }
 }
 
-void draw_room(WINDOW* window, room_t* room, int x_offset, int y_offset){
+void draw_room(WINDOW* window, palette_t* palette, room_t* room, int x_offset, int y_offset){
     for (int i = 0; i < room->height; i++){
         for (int j = 0; j < room->width; j++){
-            mvwaddch(window, y_offset + i, x_offset + j, room->data[i][j]);
+            mvwaddch(window, y_offset + i, x_offset + j, palette->symbol[room->data[i][j]]);
         }
     }
 }
@@ -105,7 +106,7 @@ void destroy_room_pool(room_pool_t* room_pool){
 }
 
 void destroy_room(room_t* room){
-    for (int i = 0; i < room->width; i++) free(room->data[i]);
+    for (int i = 0; i < room->height; i++) free(room->data[i]);
     free(room->data);
     free(room);
 }
