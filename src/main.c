@@ -6,8 +6,12 @@
 
 int main() {
 
-    room_t* room = load_room("rces/rooms/testroom.txt");
-    print_room(room);
+    room_pool_t* room_pool = load_room_directory("resources/rooms");
+
+    for (int i = 0; i < room_pool->count; i++) {
+        print_room(room_pool->rooms[i]);
+        putchar('\n');
+    }
     fflush(stdout);
     getchar();
 
