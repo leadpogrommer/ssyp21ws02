@@ -5,6 +5,7 @@
 #include <stdarg.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <ncurses.h>
 
 room_t* load_room(const char* filename){
     FILE* file = fopen(filename, "r");
@@ -86,6 +87,14 @@ void print_room(room_t* room){
             putchar(room->data[i][j]);
         }
         putchar('\n');
+    }
+}
+
+void draw_room(WINDOW* window, room_t* room, int x_offset, int y_offset){
+    for (int i = 0; i < room->height; i++){
+        for (int j = 0; j < room->width; j++){
+            mvwaddch(window, y_offset + i, x_offset + j, room->data[i][j]);
+        }
     }
 }
 
