@@ -11,3 +11,21 @@ void fail_gracefully(const char* format_string, ...){
     getchar();
     exit(1);
 }
+
+vector2_t sum(vector2_t a, vector2_t b){
+    return (vector2_t) { .x = a.x + b.x, .y = a.y + b.y };
+}
+
+/**
+ *
+ * @param a Vector from which subtracting
+ * @param b Vector which is subtracted
+ * @return
+ */
+vector2_t sub(vector2_t a, vector2_t b){
+    return (vector2_t) { .x = a.x - b.x, .y = a.y - b.y };
+}
+
+vector2_t multi(vector2_t a, int magnitude){
+    return (vector2_t) { .x = a.x * magnitude, .y = a.y * magnitude };
+}

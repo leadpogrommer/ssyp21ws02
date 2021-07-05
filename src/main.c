@@ -30,16 +30,16 @@ int handle_input(world_t* world){
     char input = getch();
     switch (input){
         case 'a':
-            move_player(world->player, -1, 0);
+            move_player(world->player, VEC2_LEFT);
             break;
         case 'd':
-            move_player(world->player, 1, 0);
+            move_player(world->player, VEC2_RIGHT);
             break;
         case 'w':
-            move_player(world->player, 0, -1);
+            move_player(world->player, VEC2_UP);
             break;
         case 's':
-            move_player(world->player, 0, 1);
+            move_player(world->player, VEC2_DOWN);
             break;
         case 'q':
             return 1;
@@ -56,13 +56,13 @@ int process(world_t* world){
 int draw(WINDOW* window, world_t* world, palette_t* palette, room_pool_t* room_pool){
     werase(window);
 
-    int y_offset = 0;
+    vector2_t offset = {.x = 0, .y = 0};
     for (int i = 0; i < room_pool->count; i++){
-        draw_room(window, palette, room_pool->rooms[i], -world->player->x + world->player->x_screen, -world->player->y + world->player->y_screen + y_offset);
-        y_offset += room_pool->rooms[i]->height;
+        draw_room(window, palette, room_pool->rooms[i], sum(get_origin_on_screen(world), offset));
+        offset.y += room_pool->rooms[i]->height;
     }
 
-    mvwaddch(window, world->player->y_screen, world->player->x_screen, palette->symbol['P']);
+    mvwaddch(window, world->player->screen_pos.y, world->player->screen_pos.x, palette->symbol['P']);
 
     wrefresh(window);
     return 0;
@@ -76,8 +76,8 @@ int main() {
     room_pool_t* room_pool = load_room_directory("resources/rooms");
 
     world_t* world = init_world();
-    world->player->x_screen = getmaxx(stdscr)/2;
-    world->player->y_screen = getmaxy(stdscr)/2;
+    world->player->screen_pos.x = getmaxx(stdscr)/2;
+    world->player->screen_pos.y = getmaxy(stdscr)/2;
 
     int state = 0;
     while (state == 0){

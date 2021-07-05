@@ -1,12 +1,11 @@
 #include "room.h"
-#include "utility.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <dirent.h>
 #include <unistd.h>
 #include <ncurses.h>
-#include "render.h"
+
 
 room_t* load_room(const char* filename){
     FILE* file = fopen(filename, "r");
@@ -91,10 +90,10 @@ void print_room(room_t* room){
     }
 }
 
-void draw_room(WINDOW* window, palette_t* palette, room_t* room, int x_offset, int y_offset){
+void draw_room(WINDOW* window, palette_t* palette, room_t* room, vector2_t offset){
     for (int i = 0; i < room->height; i++){
         for (int j = 0; j < room->width; j++){
-            mvwaddch(window, y_offset + i, x_offset + j, palette->symbol[room->data[i][j]]);
+            mvwaddch(window, offset.y + i, offset.x + j, palette->symbol[room->data[i][j]]);
         }
     }
 }

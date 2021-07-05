@@ -12,3 +12,6 @@ void destroy_world(world_t* world){
     free(world);
 }
 
+vector2_t get_origin_on_screen(world_t* world){
+    return sub(world->player->screen_pos, world->player->pos);
+}
