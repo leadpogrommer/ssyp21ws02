@@ -37,13 +37,26 @@ int title_screen_handle_input(title_screen_data* data) {
     return -1;
 }
 
-void title_screen_draw(WINDOW* window, title_screen_data* data) {
-    werase(window);
+void title_screen_draw(WINDOW* window, title_screen_data* data, int frame) {
+    if(!frame) werase(window);
+    else {
+        int maxw = strlen(data->items[0]);
+        for(int i = 1; i < data->count; i++)
+            if(strlen(data->items[i]) > maxw)
+                maxw = strlen(data->items[i]);
+        int offset_x = (getmaxx(window) - maxw - 4) / 2 - 2;
+        int offset_y_start = (getmaxy(window) - data->count * 2) / 2 - 2;
+        int offset_y_end = offset_y_start + data->count * 2 + 2;
+        mvhline(offset_y_start, offset_x, '=', maxw + 4 + 4);
+        for(int i = offset_y_start + 1; i < offset_y_end; i++)
+            mvhline(i, offset_x, ' ', maxw + 4 + 4);
+        mvhline(offset_y_end, offset_x, '=', maxw + 4 + 4);
+    }
 
     int offset_y = (getmaxy(window) - data->count * 2) / 2;
     for(int i = 0; i < data->count; i++) {
-        int offset_x = (getmaxx(window) - strlen(data->items[i]) - (data->pos == i ? 4 : 0)) / 2;
-        mvwprintw(window, offset_y + i * 2, offset_x, data->pos == i ? "> %s <" : "%s", data->items[i]);
+        int offset_x = (getmaxx(window) - strlen(data->items[i]) - 4) / 2;
+        mvwprintw(window, offset_y + i * 2, offset_x, data->pos == i ? "> %s <" : "  %s  ", data->items[i]);
     }
 
     wrefresh(window);
