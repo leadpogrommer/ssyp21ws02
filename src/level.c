@@ -21,7 +21,7 @@ level_t* generate_level(int room_count, room_pool_t* room_pool){
     level->size = sub(right_down, left_up);
     level->size = sum(level->size, VEC2_ONE); // Setting as size of cropped map
 
-    vector2_t cell_size = sum(room_pool->max_size, scale(VEC2_ONE, 2));
+    vector2_t cell_size = sum(room_pool->max_size, VEC2_SQUARE(2));
     level->size = scale_accordingly(level->size, cell_size);
     // Scaling according with maximum room so any room will fit + space for corridor
 
@@ -135,7 +135,7 @@ int room_placer(int rooms_left, room_pool_t* room_pool, int room_count, room_t* 
 
     for (int i = 0; i < 4; i++) {
         vector2_t next_cell = sum(pos, directions[i]);
-        if (!is_valid_rect_index(next_cell, scale(VEC2_ONE, room_count * 2 + 1))
+        if (!is_valid_rect_index(next_cell, VEC2_SQUARE( room_count * 2 + 1))
             || equal(rooms[pos.y][pos.x]->doors[directions[i].y + 1][directions[i].x + 1], VEC2_UP)){
             continue;
         }

@@ -6,6 +6,7 @@
 #define VEC2_RIGHT ((vector2_t) { .x = 1, .y = 0})
 #define VEC2_UP ((vector2_t) { .x = 0, .y = -1})
 #define VEC2_DOWN ((vector2_t) { .x = 0, .y = 1})
+#define VEC2_SQUARE(a) (scale(VEC2_ONE, (a)))
 
 void fail_gracefully(const char* format_string, ...);
 
