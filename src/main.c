@@ -2,10 +2,12 @@
 #include <unistd.h>
 #include <ncurses.h>
 #include <stdlib.h>
+#include <time.h>
 #include "room.h"
 #include "render.h"
 #include "world.h"
 #include "player.h"
+#include "level.h"
 
 void init_window(){
     initscr();
@@ -53,14 +55,11 @@ int process(world_t* world){
     return 0;
 }
 
-int draw(WINDOW* window, world_t* world, palette_t* palette, room_pool_t* room_pool){
+int draw(WINDOW* window, world_t* world, palette_t* palette, level_t* level){
     werase(window);
 
     vector2_t offset = {.x = 0, .y = 0};
-    for (int i = 0; i < room_pool->count; i++){
-        draw_room(window, palette, room_pool->rooms[i], sum(get_origin_on_screen(world), offset));
-        offset.y += room_pool->rooms[i]->height;
-    }
+    draw_level(window, palette, level, get_origin_on_screen(world));
 
     mvwaddch(window, world->player->screen_pos.y, world->player->screen_pos.x, palette->symbol['P']);
 
@@ -69,11 +68,20 @@ int draw(WINDOW* window, world_t* world, palette_t* palette, room_pool_t* room_p
 }
 
 int main() {
+    srand(time(NULL));
+
     init_window();
 
     palette_t* palette = set_up_palette();
 
     room_pool_t* room_pool = load_room_directory("resources/rooms");
+
+    /*level_t* level;
+    for (time_t i = 0; i < 1000000000; i++){
+        srand(i);
+        level = generate_level(5, room_pool);
+    }*/
+    level_t* level = generate_level(5, room_pool);
 
     world_t* world = init_world();
     world->player->screen_pos.x = getmaxx(stdscr)/2;
@@ -84,7 +92,7 @@ int main() {
         state = 0;
         state |= handle_input(world);
         state |= process(world);
-        state |= draw(stdscr, world, palette, room_pool);
+        state |= draw(stdscr, world, palette, level);
         usleep(16 * 1000);
     }
 

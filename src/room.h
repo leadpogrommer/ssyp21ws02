@@ -4,14 +4,16 @@
 #include "utility.h"
 
 typedef struct room_t{
-    int width, height;
+    vector2_t size;
     char** data;
-}room_t;
+    vector2_t doors[3][3]; // Created so indices are vector2_t direction coords like so: [y+1][x+1]
+}room_t;                   // Contains position of a door and VEC2_UP if it
 
 typedef struct room_pool_t{
     room_t** rooms;
     int count;
     int capacity;
+    vector2_t max_size;
 }room_pool_t;
 
 room_t* load_room(const char* filename);
