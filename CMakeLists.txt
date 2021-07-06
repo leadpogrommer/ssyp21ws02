@@ -7,6 +7,10 @@ set(CURSES_NEED_NCURSES TRUE)
 set(CURSES_NEED_WIDE TRUE)
 find_package(Curses REQUIRED)
 
-add_executable(game src/main.c src/room.c src/room.h src/utility.c src/utility.h src/render.c src/render.h src/world.c src/world.h src/player.c src/player.h src/title_screen.c src/title_screen.h)
+add_library(discord SHARED IMPORTED)
+set_target_properties(discord PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/libs/discord_game_sdk.so)
+set(CMAKE_INSTALL_RPATH "libs")
 
-target_link_libraries(game ${CURSES_LIBRARIES})
+add_executable(game src/main.c src/room.c src/room.h src/utility.c src/utility.h src/render.c src/render.h src/world.c src/world.h src/player.c src/player.h src/title_screen.c src/title_screen.h src/rich_presence.c)
+
+target_link_libraries(game ${CURSES_LIBRARIES}  m discord)

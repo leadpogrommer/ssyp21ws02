@@ -5,6 +5,7 @@
 #include "world.h"
 #include "player.h"
 #include "title_screen.h"
+#include "rich_presence.h"
 
 typedef struct {
     palette_t* palette;
@@ -79,6 +80,10 @@ int draw(WINDOW* window, game_state_t* game_state){
 }
 
 int main() {
+    rp_init();
+    sleep(10);
+}
+int maina() {
     init_window();
 
     title_screen_data menu_main;
