@@ -30,6 +30,10 @@ vector2_t scale(vector2_t a, int magnitude){
     return (vector2_t) { .x = a.x * magnitude, .y = a.y * magnitude };
 }
 
+int cross(vector2_t a, vector2_t b){
+    return a.x * b.y - a.y * b.x;
+}
+
 int equal(vector2_t a, vector2_t b){
     if (a.x == b.x && a.y == b.y) return 1;
     return 0;

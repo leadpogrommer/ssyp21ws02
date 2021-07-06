@@ -23,6 +23,7 @@ vector2_t sum(vector2_t a, vector2_t b);
 vector2_t sub(vector2_t a, vector2_t b);
 vector2_t scale(vector2_t a, int magnitude);
 vector2_t scale_accordingly(vector2_t a, vector2_t b);
+int cross(vector2_t a, vector2_t b);
 int equal(vector2_t a, vector2_t b);
 
 vector2_t* get_shuffled_directions();

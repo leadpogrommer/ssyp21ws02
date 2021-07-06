@@ -68,27 +68,21 @@ level_t* generate_level(int room_count, room_pool_t* room_pool){
         level->data[entry.y][entry.x] = '#';
         vector2_t current = sum(entry, path[i]);
 
-        if (equal(path[i], VEC2_UP) || equal(path[i], VEC2_DOWN)){
-            while (current.x != exit.x){
-                level->data[current.y][current.x] = '#';
-                current.x += current.x > exit.x ? -1 : 1;
-            }
-            while (current.y != exit.y){
-                level->data[current.y][current.x] = '#';
-                current.y += current.y > exit.y ? -1 : 1;
+        vector2_t forward_direction = path[i];
+        vector2_t sideways_direction = { .x = path[i].y, .y = path[i].x};
+
+        sideways_direction.y *= (exit.y - current.y) * sideways_direction.y > 0 ? 1 : -1;
+        sideways_direction.x *= (exit.x - current.x) * sideways_direction.x > 0 ? 1 : -1;
+
+        vector2_t move_direction = sideways_direction;
+        while (!equal(current, exit)){
+            level->data[current.y][current.x] = '#';
+            current = sum(current, move_direction);
+            if (!cross(sub(exit, current), forward_direction)){
+                move_direction = forward_direction;
             }
         }
 
-        if (equal(path[i], VEC2_LEFT) || equal(path[i], VEC2_RIGHT)){
-            while (current.y != exit.y){
-                level->data[current.y][current.x] = '#';
-                current.y += current.y > exit.y ? -1 : 1;
-            }
-            while (current.x != exit.x){
-                level->data[current.y][current.x] = '#';
-                current.x += current.x > exit.x ? -1 : 1;
-            }
-        }
         level->data[current.y][current.x] = '#';
         start_room_position_rel = end_room_position_rel;
         start_room = end_room;
