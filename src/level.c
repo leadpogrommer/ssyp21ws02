@@ -68,7 +68,7 @@ level_t* generate_level(int room_count, room_pool_t* room_pool){
         level->data[entry.y][entry.x] = '#';
         vector2_t current = sum(entry, path[i]);
 
-        if (equal(path[i], VEC2_UP) == 1 || equal(path[i], VEC2_DOWN) == 1){
+        if (equal(path[i], VEC2_UP) || equal(path[i], VEC2_DOWN)){
             while (current.x != exit.x){
                 level->data[current.y][current.x] = '#';
                 current.x += current.x > exit.x ? -1 : 1;
@@ -79,7 +79,7 @@ level_t* generate_level(int room_count, room_pool_t* room_pool){
             }
         }
 
-        if (equal(path[i], VEC2_LEFT) == 1 || equal(path[i], VEC2_RIGHT) == 1){
+        if (equal(path[i], VEC2_LEFT) || equal(path[i], VEC2_RIGHT)){
             while (current.y != exit.y){
                 level->data[current.y][current.x] = '#';
                 current.y += current.y > exit.y ? -1 : 1;
@@ -95,6 +95,14 @@ level_t* generate_level(int room_count, room_pool_t* room_pool){
     }
 
     return level;
+}
+
+void destroy_level(level_t* level){
+    for (int i = 0; i < level->size.y; i++){
+        free(level->data[i]);
+    }
+    free(level->data);
+    free(level);
 }
 
 int room_placer(int rooms_left, room_pool_t* room_pool, int room_count, room_t* rooms[room_count * 2 + 1][room_count * 2 + 1], vector2_t pos, vector2_t path[room_count]){
@@ -127,8 +135,8 @@ int room_placer(int rooms_left, room_pool_t* room_pool, int room_count, room_t* 
 
     for (int i = 0; i < 4; i++) {
         vector2_t next_cell = sum(pos, directions[i]);
-        if (next_cell.x < 0 || next_cell.x >= room_count * 2 + 1 || next_cell.y < 0 || next_cell.y >= room_count * 2 + 1
-            || equal(rooms[pos.y][pos.x]->doors[directions[i].y + 1][directions[i].x + 1], VEC2_UP) == 1){
+        if (!is_valid_rect_index(next_cell, scale(VEC2_ONE, room_count * 2 + 1))
+            || equal(rooms[pos.y][pos.x]->doors[directions[i].y + 1][directions[i].x + 1], VEC2_UP)){
             continue;
         }
 
@@ -147,15 +155,15 @@ int room_placer(int rooms_left, room_pool_t* room_pool, int room_count, room_t* 
     return 0;
 }
 
-void draw_level(WINDOW* window, palette_t* palette, level_t* level, vector2_t offset){
-    FILE* file = fopen("generated_level.txt", "w");
+void log_level_to_file(level_t* level, const char* filename){
+    FILE* file = fopen(filename, "w");
+    if (!file) fail_gracefully("Couldn't open file to log a level: %s", filename);
+
     for (int i = 0; i < level->size.y; i++){
         for (int j = 0; j < level->size.x; j++){
-            if (level->data[i][j] == 0){
-                mvwaddch(window, i + offset.y, j + offset.x, palette->symbol['.']);
-                putc('.', file);
+            if (!level->data[i][j]){
+                putc(' ', file);
             }else{
-                mvwaddch(window, i + offset.y, j + offset.x, palette->symbol[level->data[i][j]]);
                 putc(level->data[i][j], file);
             }
         }
@@ -164,10 +172,22 @@ void draw_level(WINDOW* window, palette_t* palette, level_t* level, vector2_t of
     fclose(file);
 }
 
+void draw_level(WINDOW* window, palette_t* palette, level_t* level, vector2_t offset){
+    for (int i = 0; i < level->size.y; i++){
+        for (int j = 0; j < level->size.x; j++){
+            if (!level->data[i][j]){
+                mvwaddch(window, i + offset.y, j + offset.x, palette->symbol['.']);
+            }else{
+                mvwaddch(window, i + offset.y, j + offset.x, palette->symbol[level->data[i][j]]);
+            }
+        }
+    }
+}
+
 vector2_t get_upper_left_corner_of_cropped_map(int map_size, room_t* rooms[map_size][map_size]){
     vector2_t result = { .x = -1, .y = -1 }; // it's because of it |
     int ready = 0;                           //                    |
-    while (ready == 0){                      //                   \|/
+    while (!ready){                      //                   \|/
         result.y++;                          //incrementing and then checking so first check will be with .y = 0
         for (int i = 0; i < map_size; i++){
             if (rooms[result.y][i] != NULL){
@@ -178,7 +198,7 @@ vector2_t get_upper_left_corner_of_cropped_map(int map_size, room_t* rooms[map_s
     }
 
     ready = 0;                              //It's the same but with x
-    while (ready == 0){
+    while (!ready){
         result.x++;
         for (int i = 0; i < map_size; i++){
             if (rooms[i][result.x] != NULL){
@@ -193,9 +213,9 @@ vector2_t get_upper_left_corner_of_cropped_map(int map_size, room_t* rooms[map_s
 
 vector2_t get_down_right_corner_of_cropped_map(int map_size, room_t* rooms[map_size][map_size]){
     vector2_t result = { .x = map_size, .y = map_size }; // it's because of it |
-    int ready = 0;                                           //                    |
-    while (ready == 0){                                      //                   \|/
-        result.y--;                                          //decrementing and then checking so first check will be valid
+    int ready = 0;                                       //                    |
+    while (!ready){                                  //                   \|/
+        result.y--;                                      //decrementing and then checking so first check will be valid
         for (int i = 0; i < map_size; i++){
             if (rooms[result.y][i] != NULL){
                 ready = 1;
@@ -205,7 +225,7 @@ vector2_t get_down_right_corner_of_cropped_map(int map_size, room_t* rooms[map_s
     }
 
     ready = 0;                              //It's the same but with x
-    while (ready == 0){
+    while (!ready){
         result.x--;
         for (int i = 0; i < map_size; i++){
             if (rooms[i][result.x] != NULL){
@@ -213,24 +233,6 @@ vector2_t get_down_right_corner_of_cropped_map(int map_size, room_t* rooms[map_s
                 break;
             }
         }
-    }
-
-    return result;
-}
-
-vector2_t* get_shuffled_directions(){
-    vector2_t* result = malloc(sizeof(vector2_t) * 4);
-    result[0] = VEC2_LEFT;
-    result[1] = VEC2_UP;
-    result[2] = VEC2_DOWN;
-    result[3] = VEC2_RIGHT;
-
-    for (int i = 0; i < 3; i++){
-        int j = rand() % (4 - i) + i; // Pick random
-
-        vector2_t tmp = result[i]; // Swap two elements
-        result[i] = result[j];
-        result[j] = tmp;
     }
 
     return result;

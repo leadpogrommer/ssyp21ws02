@@ -22,10 +22,9 @@ vector2_t sum(vector2_t a, vector2_t b);
 vector2_t sub(vector2_t a, vector2_t b);
 vector2_t scale(vector2_t a, int magnitude);
 vector2_t scale_accordingly(vector2_t a, vector2_t b);
-
-vectors_t* init_vectors();
-void push_back_vector2(vectors_t* vectors, vector2_t vector);
-void destroy_vectors(vectors_t* vectors);
-
 int equal(vector2_t a, vector2_t b);
 
+vector2_t* get_shuffled_directions();
+
+int is_valid_index(int index, int size);
+int is_valid_rect_index(vector2_t index, vector2_t size);

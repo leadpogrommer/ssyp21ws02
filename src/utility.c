@@ -60,3 +60,29 @@ void destroy_vectors(vectors_t* vectors){
     free(vectors->data);
     free(vectors);
 }
+
+vector2_t* get_shuffled_directions(){
+    vector2_t* result = malloc(sizeof(vector2_t) * 4);
+    result[0] = VEC2_LEFT;
+    result[1] = VEC2_UP;
+    result[2] = VEC2_DOWN;
+    result[3] = VEC2_RIGHT;
+
+    for (int i = 0; i < 3; i++){
+        int j = rand() % (4 - i) + i; // Pick random
+
+        vector2_t tmp = result[i]; // Swap two elements
+        result[i] = result[j];
+        result[j] = tmp;
+    }
+
+    return result;
+}
+
+int is_valid_index(int index, int size){
+    return index >= 0 && index < size;
+}
+
+int is_valid_rect_index(vector2_t index, vector2_t size){
+    return is_valid_index(index.x, size.x) && is_valid_index(index.y, size.y);
+}

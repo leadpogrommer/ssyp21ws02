@@ -76,11 +76,6 @@ int main() {
 
     room_pool_t* room_pool = load_room_directory("resources/rooms");
 
-    /*level_t* level;
-    for (time_t i = 0; i < 1000000000; i++){
-        srand(i);
-        level = generate_level(5, room_pool);
-    }*/
     level_t* level = generate_level(5, room_pool);
 
     world_t* world = init_world();
@@ -96,6 +91,7 @@ int main() {
         usleep(16 * 1000);
     }
 
+    destroy_level(level);
     destroy_palette(palette);
     destroy_room_pool(room_pool);
     destroy_world(world);
