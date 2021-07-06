@@ -6,6 +6,7 @@
 #include "render.h"
 #include "world.h"
 #include "player.h"
+#include "title_screen.h"
 
 void init_window(){
     initscr();
@@ -71,6 +72,9 @@ int draw(WINDOW* window, world_t* world, palette_t* palette, room_pool_t* room_p
 int main() {
     init_window();
 
+    title_screen_data data;
+    title_screen_init(&data, 2, "New game", "Exit");
+
     palette_t* palette = set_up_palette();
 
     room_pool_t* room_pool = load_room_directory("resources/rooms");
@@ -79,12 +83,26 @@ int main() {
     world->player->screen_pos.x = getmaxx(stdscr)/2;
     world->player->screen_pos.y = getmaxy(stdscr)/2;
 
+    int scene = 0;
     int state = 0;
     while (state == 0){
         state = 0;
-        state |= handle_input(world);
-        state |= process(world);
-        state |= draw(stdscr, world, palette, room_pool);
+        switch(scene) {
+            case 0:
+                switch(title_screen_handle_input(&data)) {
+                    case 0:
+                        scene = 1;
+                        break;
+                    case 1:
+                        state = 1;
+                }
+                title_screen_draw(stdscr, &data);
+                break;
+            case 1:
+                state |= handle_input(world);
+                state |= process(world);
+                state |= draw(stdscr, world, palette, room_pool);
+        }
         usleep(16 * 1000);
     }
 
