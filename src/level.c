@@ -4,75 +4,42 @@
 #include <stdlib.h>
 
 level_t* generate_level(int room_count, room_pool_t* room_pool){
-    level_t* level = malloc(sizeof(level_t));
-    room_t* rooms[room_count * 2 + 1][room_count * 2 + 1];
-    memset(rooms, 0, sizeof(rooms));
+    level_t* level = get_level_populated_with_rooms(room_count, room_pool);
 
-    vector2_t path[room_count];
+    connect_doors_on_level(level);
 
-    vector2_t start_position_abs = {.x = room_count, .y = room_count};
-    if (room_placer(room_count, room_pool, room_count, rooms, start_position_abs, path) == 0){
-        fail_gracefully("Couldn't generate level");
-    }
+    return level;
+}
 
-    vector2_t left_up = get_upper_left_corner_of_cropped_map(room_count * 2 + 1, rooms); // Cropping map to rooms
-    vector2_t right_down = get_down_right_corner_of_cropped_map(room_count * 2 + 1, rooms);
+void connect_doors_on_level(level_t* level){
+    room_t* start_room = level->room_grid[level->start_room_grid_position.y][level->start_room_grid_position.x];
+    vector2_t start_room_position = level->start_room_grid_position;
 
-    level->size = sub(right_down, left_up);
-    level->size = sum(level->size, VEC2_ONE); // Setting as size of cropped map
+    for (int i = 0; i < level->room_count - 1; i++){
+        vector2_t end_room_position = sum(start_room_position, level->path[i]);
+        room_t* end_room = level->room_grid[end_room_position.y][end_room_position.x];
 
-    vector2_t cell_size = sum(room_pool->max_size, VEC2_SQUARE(2));
-    level->size = scale_accordingly(level->size, cell_size);
-    // Scaling according with maximum room so any room will fit + space for corridor
+        vector2_t start_room_position_on_level = scale_accordingly(start_room_position, level->room_grid_cell_size);
+        vector2_t end_room_position_on_level = scale_accordingly(end_room_position, level->room_grid_cell_size);
 
-    level->data = calloc(sizeof(char*), level->size.y);
-    for (int i = 0; i < level->size.y; i++){
-        level->data[i] = calloc(sizeof(char), level->size.x);
-    }
+        // Entry - position of a door that needs to be connected from
+        vector2_t entry = sum(start_room_position_on_level, start_room->doors[level->path[i].y + 1][level->path[i].x + 1]);
+        entry = sum(entry, VEC2_ONE); // All room_grid are drawn with padding of 1
 
-    vector2_t offset = VEC2_ONE;
-    for (int i = left_up.y; i < right_down.y + 1; i++){
-        offset.x = 1;
-        for (int j = left_up.x; j < right_down.x + 1; j++){
-            if (rooms[i][j] != NULL){
-                for (int k = 0; k < rooms[i][j]->size.y; k++){
-                    for (int l = 0; l < rooms[i][j]->size.x; l++){
-                        level->data[offset.y + k][offset.x + l] = rooms[i][j]->data[k][l];
-                    }
-                }
-            }
-            offset.x += cell_size.x;
-        }
-        offset.y += cell_size.y;
-    }
-
-    room_t* start_room = rooms[start_position_abs.y][start_position_abs.x];
-    vector2_t start_room_position_rel = sub(start_position_abs, left_up);
-
-    for (int i = 0; i < room_count - 1; i++){
-        vector2_t end_room_position_rel = sum(start_room_position_rel, path[i]);
-
-        room_t* end_room = rooms[end_room_position_rel.y + left_up.y][end_room_position_rel.x + left_up.x];
-
-        vector2_t start_room_position_on_level = scale_accordingly(start_room_position_rel, cell_size);
-        vector2_t end_room_position_on_level = scale_accordingly(end_room_position_rel, cell_size);
-
-        vector2_t entry = sum(start_room_position_on_level, start_room->doors[path[i].y + 1][path[i].x + 1]);
-        entry = sum(entry, VEC2_ONE); // All rooms are drawn with padding of 1
-
-        vector2_t negative_path = scale(path[i], -1);
+        // Exit - position of a door that needs to be connected to
+        vector2_t negative_path = scale(level->path[i], -1);
         vector2_t exit = sum( end_room_position_on_level, end_room->doors[negative_path.y + 1][negative_path.x + 1] );
         exit = sum(exit, VEC2_ONE);
 
 
         level->data[entry.y][entry.x] = '#';
-        vector2_t current = sum(entry, path[i]);
+        vector2_t current = sum(entry, level->path[i]);
 
-        vector2_t forward_direction = path[i];
-        vector2_t sideways_direction = { .x = path[i].y, .y = path[i].x};
+        vector2_t forward_direction = level->path[i];
+        vector2_t sideways_direction = { .x = level->path[i].y, .y = level->path[i].x};
 
-        sideways_direction.y *= (exit.y - current.y) * sideways_direction.y > 0 ? 1 : -1;
-        sideways_direction.x *= (exit.x - current.x) * sideways_direction.x > 0 ? 1 : -1;
+        sideways_direction.y *= ((exit.y - current.y) * sideways_direction.y) > 0 ? 1 : -1;
+        sideways_direction.x *= ((exit.x - current.x) * sideways_direction.x) > 0 ? 1 : -1;
 
         vector2_t move_direction = sideways_direction;
         while (!equal(current, exit)){
@@ -84,14 +51,78 @@ level_t* generate_level(int room_count, room_pool_t* room_pool){
         }
 
         level->data[current.y][current.x] = '#';
-        start_room_position_rel = end_room_position_rel;
+        start_room_position = end_room_position;
         start_room = end_room;
+    }
+}
+
+level_t* get_level_populated_with_rooms(int room_count, room_pool_t* room_pool){
+    int map_size = room_count * 2 + 1;
+    room_t* room_grid[map_size][map_size];
+    memset(room_grid, 0, sizeof(room_grid));
+
+    vector2_t path[room_count];
+
+    vector2_t start_position_abs = VEC2_SQUARE(room_count);
+    if (room_placer(room_count, room_pool, room_count, room_grid, start_position_abs, path) == 0){
+        fail_gracefully("Couldn't generate level");
+    }
+
+    vector2_t left_up = get_upper_left_corner_of_cropped_map(map_size, room_grid); // Cropping room_grid to contents
+    vector2_t right_down = get_down_right_corner_of_cropped_map(map_size, room_grid);
+    vector2_t cropped_map_size = sum( sub(right_down, left_up), VEC2_ONE );
+
+
+    level_t* level = init_level(room_count, cropped_map_size, sum(room_pool->max_size, VEC2_SQUARE(2)));
+    level->path = path;
+    level->start_room_grid_position = sub( start_position_abs, left_up );
+
+    vector2_t offset = VEC2_ONE;
+    for (int i = left_up.y; i < right_down.y + 1; i++){
+        offset.x = 1;
+        for (int j = left_up.x; j < right_down.x + 1; j++){
+            level->room_grid[i - left_up.y][j - left_up.x] = room_grid[i][j];
+            if (room_grid[i][j]){
+                for (int k = 0; k < room_grid[i][j]->size.y; k++){
+                    for (int l = 0; l < room_grid[i][j]->size.x; l++){
+                        level->data[offset.y + k][offset.x + l] = room_grid[i][j]->data[k][l];
+                    }
+                }
+            }
+            offset.x += level->room_grid_cell_size.x;
+        }
+        offset.y += level->room_grid_cell_size.y;
+    }
+
+    return level;
+}
+
+level_t* init_level(int room_count, vector2_t room_grid_size, vector2_t room_grid_cell_size){
+    level_t* level = malloc(sizeof(level_t));
+    level->size = scale_accordingly(room_grid_size, room_grid_cell_size);
+    level->room_count = room_count;
+    level->room_grid_size = room_grid_size;
+    level->room_grid_cell_size = room_grid_cell_size;
+
+    level->room_grid = calloc(sizeof(room_t**), room_grid_size.y);
+    for (int i = 0; i < level->room_grid_size.y; i++){
+        level->room_grid[i] = calloc(sizeof(room_t*), level->room_grid_size.x);
+    }
+
+    level->data = calloc(sizeof(char*), level->size.y);
+    for (int i = 0; i < level->size.y; i++){
+        level->data[i] = calloc(sizeof(char), level->size.x);
     }
 
     return level;
 }
 
 void destroy_level(level_t* level){
+    for (int i = 0; i < level->room_grid_size.y; i++){
+        free(level->room_grid[i]);
+    }
+    free(level->room_grid);
+
     for (int i = 0; i < level->size.y; i++){
         free(level->data[i]);
     }
