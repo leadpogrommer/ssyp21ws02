@@ -10,6 +10,7 @@ typedef struct level_t{
     vector2_t room_grid_size;
     vector2_t room_grid_cell_size;
     vector2_t start_room_grid_position;
+    vector2_t end_room_grid_position;
     vector2_t* path;
 }level_t;
 
@@ -26,5 +27,7 @@ void log_level_to_file(level_t* level, const char* filename);
 
 vector2_t get_upper_left_corner_of_cropped_map(int map_size, room_t* rooms[map_size][map_size]);
 vector2_t get_down_right_corner_of_cropped_map(int map_size, room_t* rooms[map_size][map_size]);
+
+vector2_t get_level_position(level_t* level, vector2_t room_grid_pos, vector2_t in_room_position);
 
 void destroy_level(level_t* level);

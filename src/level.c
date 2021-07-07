@@ -29,17 +29,12 @@ void connect_doors_along_the_path(level_t* level){
         vector2_t end_room_position = sum(start_room_position, level->path[i]);
         room_t* end_room = level->room_grid[end_room_position.y][end_room_position.x];
 
-        vector2_t start_room_position_on_level = scale_accordingly(start_room_position, level->room_grid_cell_size);
-        vector2_t end_room_position_on_level = scale_accordingly(end_room_position, level->room_grid_cell_size);
-
         // Entry - position of a door that needs to be connected from
-        vector2_t entry = sum(start_room_position_on_level, start_room->doors[level->path[i].y + 1][level->path[i].x + 1]);
-        entry = sum(entry, VEC2_ONE); // All room_grid are drawn with padding of 1
+        vector2_t entry = get_level_position(level, start_room_position, start_room->doors[level->path[i].y + 1][level->path[i].x + 1]);
 
         // Exit - position of a door that needs to be connected to
         vector2_t negative_path = scale(level->path[i], -1);
-        vector2_t exit = sum( end_room_position_on_level, end_room->doors[negative_path.y + 1][negative_path.x + 1] );
-        exit = sum(exit, VEC2_ONE);
+        vector2_t exit = get_level_position(level, end_room_position, end_room->doors[negative_path.y + 1][negative_path.x + 1] );
 
 
         level->data[entry.y][entry.x] = '#';
@@ -82,10 +77,15 @@ level_t* get_level_populated_with_rooms(int room_count, room_pool_t* room_pool){
     vector2_t right_down = get_down_right_corner_of_cropped_map(map_size, room_grid);
     vector2_t cropped_map_size = sum( sub(right_down, left_up), VEC2_ONE );
 
+    vector2_t cell_size = sum(room_pool->max_size, VEC2_SQUARE(2));
 
-    level_t* level = init_level(room_count, cropped_map_size, sum(room_pool->max_size, VEC2_SQUARE(2)));
+    level_t* level = init_level(room_count, cropped_map_size, cell_size);
     level->path = path;
     level->start_room_grid_position = sub( start_position_abs, left_up );
+    level->end_room_grid_position = level->start_room_grid_position;
+    for (int i = 0; i < room_count - 1; i++){
+        level->end_room_grid_position = sum( level->end_room_grid_position, path[i] );
+    }
 
     vector2_t offset = VEC2_ONE;
     for (int i = left_up.y; i < right_down.y + 1; i++){
@@ -279,6 +279,21 @@ vector2_t get_down_right_corner_of_cropped_map(int map_size, room_t* rooms[map_s
                 break;
             }
         }
+    }
+
+    return result;
+}
+
+vector2_t get_level_position(level_t* level, vector2_t room_grid_pos, vector2_t in_room_position){
+    if (!is_valid_rect_index(room_grid_pos, level->room_grid_size)){
+        fail_gracefully("There is no room with position: x = %d y = %d ", room_grid_pos.x, room_grid_pos.y);
+    }
+
+    vector2_t room_position_on_level = scale_accordingly(room_grid_pos, level->room_grid_cell_size);
+    vector2_t result = sum( room_position_on_level, sum( VEC2_ONE, in_room_position ));
+
+    if (!is_valid_rect_index(result, level->size)){
+        fail_gracefully("There is no point in room: %d %d with pos %d %d", room_grid_pos.x, room_grid_pos.y, in_room_position.x, in_room_position.y);
     }
 
     return result;

@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <unistd.h>
 #include <ncurses.h>
 #include <stdlib.h>
@@ -6,8 +5,6 @@
 #include "room.h"
 #include "render.h"
 #include "world.h"
-#include "player.h"
-#include "level.h"
 
 void init_window(){
     initscr();
@@ -32,16 +29,16 @@ int handle_input(world_t* world){
     char input = getch();
     switch (input){
         case 'a':
-            move_player(world->player, VEC2_LEFT);
+            move_player_in_world(world, VEC2_LEFT);
             break;
         case 'd':
-            move_player(world->player, VEC2_RIGHT);
+            move_player_in_world(world, VEC2_RIGHT);
             break;
         case 'w':
-            move_player(world->player, VEC2_UP);
+            move_player_in_world(world, VEC2_UP);
             break;
         case 's':
-            move_player(world->player, VEC2_DOWN);
+            move_player_in_world(world, VEC2_DOWN);
             break;
         case 'q':
             return 1;
@@ -52,14 +49,15 @@ int handle_input(world_t* world){
 }
 
 int process(world_t* world){
+    process_world(world);
     return 0;
 }
 
-int draw(WINDOW* window, world_t* world, palette_t* palette, level_t* level){
+int draw(WINDOW* window, world_t* world, palette_t* palette){
     werase(window);
 
     vector2_t offset = {.x = 0, .y = 0};
-    draw_level(window, palette, level, get_origin_on_screen(world));
+    draw_level(window, palette, world->current_level, get_origin_on_screen(world));
 
     mvwaddch(window, world->player->screen_pos.y, world->player->screen_pos.x, palette->symbol['P']);
 
@@ -74,10 +72,6 @@ int main() {
 
     palette_t* palette = set_up_palette();
 
-    room_pool_t* room_pool = load_room_directory("resources/rooms");
-
-    level_t* level = generate_level(5, room_pool);
-
     world_t* world = init_world();
     world->player->screen_pos.x = getmaxx(stdscr)/2;
     world->player->screen_pos.y = getmaxy(stdscr)/2;
@@ -87,13 +81,11 @@ int main() {
         state = 0;
         state |= handle_input(world);
         state |= process(world);
-        state |= draw(stdscr, world, palette, level);
+        state |= draw(stdscr, world, palette);
         usleep(16 * 1000);
     }
 
-    destroy_level(level);
     destroy_palette(palette);
-    destroy_room_pool(room_pool);
     destroy_world(world);
     endwin();
     return 0;
