@@ -5,6 +5,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <ncurses.h>
+#include <string.h>
 
 
 room_t* load_room(const char* filename){
@@ -93,7 +94,13 @@ room_pool_t* load_room_directory(const char* directory){
     struct dirent* current_el = readdir(dir); // Reading next element
     while (current_el != NULL){
         if (current_el->d_type == DT_REG){ // Element needs to be a file
-            add_room_to_pool(room_pool, load_room(current_el->d_name));
+            if (!strcmp(current_el->d_name, "start_room.txt")){
+                room_pool->start_room = load_room(current_el->d_name);
+            }else if (!strcmp(current_el->d_name, "end_room.txt")){
+                room_pool->end_room = load_room(current_el->d_name);
+            }else{
+                add_room_to_pool(room_pool, load_room(current_el->d_name));
+            }
         }
         current_el = readdir(dir);
     }

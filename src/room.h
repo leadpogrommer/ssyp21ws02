@@ -14,6 +14,8 @@ typedef struct room_pool_t{
     int count;
     int capacity;
     vector2_t max_size;
+    room_t* start_room;
+    room_t* end_room;
 }room_pool_t;
 
 room_t* load_room(const char* filename);

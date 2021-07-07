@@ -54,10 +54,10 @@ void connect_doors_along_the_path(level_t* level){
         vector2_t move_direction = sideways_direction;
         while (!equal(current, exit)){
             level->data[current.y][current.x] = '#';
-            current = sum(current, move_direction);
             if (!cross(sub(exit, current), forward_direction)){
                 move_direction = forward_direction;
             }
+            current = sum(current, move_direction);
         }
 
         level->data[current.y][current.x] = '#';
@@ -148,17 +148,28 @@ int room_placer(int rooms_left, room_pool_t* room_pool, int room_count, room_t* 
     int current_room_index = room_count - rooms_left;
 
     // First we need to build a room in cell
-    room_t *random_room;
-    if (current_room_index != 0) { // If it's first room there is no need to check doors
+    room_t *next_room;
+
+    if (current_room_index == 0){
+        if (room_pool->start_room){
+            next_room = room_pool->start_room;
+        }else{
+            next_room = room_pool->rooms[rand() % room_pool->count];
+        }
+    }else if (current_room_index == room_count - 1){
+        if (room_pool->end_room){
+            next_room = room_pool->end_room;
+        }else{
+            next_room = room_pool->rooms[rand() % room_pool->count];
+        }
+    }else{
         vector2_t needed_door = scale(path[current_room_index - 1], -1); // Door should be open on the opposite side
         do {
-            random_room = room_pool->rooms[rand() % room_pool->count];
-        } while (equal(random_room->doors[needed_door.y + 1][needed_door.x + 1], VEC2_UP) == 1); // While there is no needed door
+            next_room = room_pool->rooms[rand() % room_pool->count];
+        } while (equal(next_room->doors[needed_door.y + 1][needed_door.x + 1], VEC2_UP) == 1); // While there is no needed door
         // This while is not gonna loop because we assume that there are enough rooms with all kind of doors
-    }else{
-        random_room = room_pool->rooms[rand() % room_pool->count];
     }
-    rooms[pos.y][pos.x] = random_room;
+    rooms[pos.y][pos.x] = next_room;
 
     // If all that was needed is to build one room, then we succeeded
     if (rooms_left == 1){
