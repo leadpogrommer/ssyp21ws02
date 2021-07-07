@@ -5,7 +5,7 @@ world_t* init_world(){
     world_t* world = malloc(sizeof(world_t));
     world->player = init_player();
     world->room_pool = load_room_directory("resources/rooms");
-    load_level(world, 2);
+    load_level(world, 7);
 
     return world;
 }

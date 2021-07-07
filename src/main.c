@@ -79,7 +79,7 @@ int draw(WINDOW* window, game_state_t* game_state){
 }
 
 int main() {
-    srand(time(NULL));
+    srand(15);
 
     init_window();
 
