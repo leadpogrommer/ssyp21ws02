@@ -6,12 +6,22 @@
 level_t* generate_level(int room_count, room_pool_t* room_pool){
     level_t* level = get_level_populated_with_rooms(room_count, room_pool);
 
-    connect_doors_on_level(level);
+    connect_doors_along_the_path(level);
+
+    shut_all_open_doors(level);
 
     return level;
 }
 
-void connect_doors_on_level(level_t* level){
+void shut_all_open_doors(level_t* level){
+    for (int i = 0; i < level->size.y; i++){
+        for (int j = 0; j < level->size.x; j++){
+            level->data[i][j] = level->data[i][j] == 'd' ? '*' : level->data[i][j];
+        }
+    }
+}
+
+void connect_doors_along_the_path(level_t* level){
     room_t* start_room = level->room_grid[level->start_room_grid_position.y][level->start_room_grid_position.x];
     vector2_t start_room_position = level->start_room_grid_position;
 
