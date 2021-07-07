@@ -7,7 +7,6 @@ typedef struct world_t{
     player_t* player;
     level_t* current_level;
     room_pool_t* room_pool;
-    vector2_t end_position;
 }world_t;
 
 world_t* init_world();

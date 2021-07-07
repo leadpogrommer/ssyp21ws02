@@ -11,7 +11,7 @@ world_t* init_world(){
 }
 
 void process_world(world_t* world){
-    if (equal(world->player->pos, world->end_position)){
+    if (world->current_level->data[world->player->pos.y][world->player->pos.x] == 'E'){
         load_level(world, world->current_level->room_count + 1);
     }
 }
@@ -26,9 +26,6 @@ void load_level(world_t* world, int room_count){
     // Move player to start
     move_player_to(world->player, get_level_position(world->current_level, world->current_level->start_room_grid_position,
                                                      VEC2_SQUARE(2)));
-
-    world->end_position = get_level_position(world->current_level, world->current_level->end_room_grid_position,
-                                             VEC2_SQUARE(2));
 }
 
 void destroy_world(world_t* world){
