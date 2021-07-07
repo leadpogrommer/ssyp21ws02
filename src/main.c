@@ -5,8 +5,16 @@
 #include "room.h"
 #include "render.h"
 #include "world.h"
+#include "title_screen.h"
+#include "rich_presence.h"
 
-void init_window(){
+typedef struct {
+    palette_t* palette;
+    world_t* world;
+    int state;
+} game_state_t;
+
+void init_window() {
     initscr();
     cbreak();
     noecho();
@@ -25,41 +33,46 @@ palette_t* set_up_palette(){
     return palette;
 }
 
-int handle_input(world_t* world){
+int handle_input(game_state_t* game_state){
     char input = getch();
     switch (input){
         case 'a':
-            move_player_in_world(world, VEC2_LEFT);
+            move_player_in_world(game_state->world, VEC2_LEFT);
             break;
         case 'd':
-            move_player_in_world(world, VEC2_RIGHT);
+            move_player_in_world(game_state->world, VEC2_RIGHT);
             break;
         case 'w':
-            move_player_in_world(world, VEC2_UP);
+            move_player_in_world(game_state->world, VEC2_UP);
             break;
         case 's':
-            move_player_in_world(world, VEC2_DOWN);
+            move_player_in_world(game_state->world, VEC2_DOWN);
             break;
         case 'q':
-            return 1;
+            game_state->state = 1;
+            break;
+        case 'p':
+            game_state->state = 3;
+            break;
         default:
             break;
     }
     return 0;
 }
 
-int process(world_t* world){
-    process_world(world);
+
+int process(game_state_t* game_state){
+    process_world(game_state->world);
     return 0;
 }
 
-int draw(WINDOW* window, world_t* world, palette_t* palette){
+int draw(WINDOW* window, game_state_t* game_state){
     werase(window);
 
     vector2_t offset = {.x = 0, .y = 0};
-    draw_level(window, palette, world->current_level, get_origin_on_screen(world));
+    draw_level(window, game_state->palette, game_state->world->current_level, get_origin_on_screen(game_state->world));
 
-    mvwaddch(window, world->player->screen_pos.y, world->player->screen_pos.x, palette->symbol['P']);
+    mvwaddch(window, game_state->world->player->screen_pos.y, game_state->world->player->screen_pos.x, game_state->palette->symbol['P']);
 
     wrefresh(window);
     return 0;
@@ -70,23 +83,53 @@ int main() {
 
     init_window();
 
-    palette_t* palette = set_up_palette();
+    title_screen_data menu_main;
+    title_screen_init(&menu_main, 2, "New game", "Exit");
 
-    world_t* world = init_world();
-    world->player->screen_pos.x = getmaxx(stdscr)/2;
-    world->player->screen_pos.y = getmaxy(stdscr)/2;
+    title_screen_data menu_pause;
+    title_screen_init(&menu_pause, 2, "Continue", "Exit");
 
-    int state = 0;
-    while (state == 0){
-        state = 0;
-        state |= handle_input(world);
-        state |= process(world);
-        state |= draw(stdscr, world, palette);
+    game_state_t game_state = {
+        .palette = set_up_palette(),
+        .world = init_world(),
+        .state = 2
+    };
+    game_state.world->player->screen_pos.x = getmaxx(stdscr)/2;
+    game_state.world->player->screen_pos.y = getmaxy(stdscr)/2;
+
+    while (game_state.state != 1) {
+        switch(game_state.state) {
+            case 0:
+                handle_input(&game_state);
+                process(&game_state);
+                draw(stdscr, &game_state);
+                break;
+            case 2:
+                switch(title_screen_handle_input(&menu_main)) {
+                    case 0:
+                        game_state.state = 0;
+                        break;
+                    case 1:
+                        game_state.state = 1;
+                }
+                title_screen_draw(stdscr, &menu_main, FALSE);
+                break;
+            case 3:
+                switch(title_screen_handle_input(&menu_pause)) {
+                    case 0:
+                        game_state.state = 0;
+                        break;
+                    case 1:
+                        game_state.state = 1;
+                }
+                title_screen_draw(stdscr, &menu_pause, TRUE);
+                break;
+        }
         usleep(16 * 1000);
     }
 
-    destroy_palette(palette);
-    destroy_world(world);
+    destroy_palette(game_state.palette);
+    destroy_world(game_state.world);
     endwin();
     return 0;
 }
