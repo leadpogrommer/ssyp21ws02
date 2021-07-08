@@ -29,7 +29,7 @@ add_executable(game
                 includes/title_screen.h
                 src/rich_presence.c
                 src/level.c
-                includes/level.h src/heap.c includes/heap.h src/pathfinder.c includes/pathfinder.h src/hud.c includes/hud.h)
+                includes/level.h src/heap.c includes/heap.h src/pathfinder.c includes/pathfinder.h src/hud.c includes/hud.h src/inventory.c includes/inventory.h)
 target_include_directories(game PRIVATE includes)
 
 

@@ -6,6 +6,7 @@ world_t* init_world(){
     world->player = init_player(10);
     world->room_pool = load_room_directory("resources/rooms");
     load_level(world, 2);
+    load_items(world);
 
     return world;
 }
@@ -19,6 +20,11 @@ void process_world(world_t* world){
         case 'h':
             world->player->max_health += 10;
             world->current_level->data[world->player->pos.y][world->player->pos.x] = '.';
+            break;
+        case '?':
+            pick_up_item(world->player, get_random_item(world->items));
+            world->current_level->data[world->player->pos.y][world->player->pos.x] = '.';
+            print_message(world->hud, "Picked up an iteghhsssssssssshhhhhhhhm: %s", world->player->inventory->items[world->player->inventory->item_count - 1]->name);
             break;
     }
 }
@@ -37,10 +43,19 @@ void load_level(world_t* world, int room_count){
                                                      VEC2_SQUARE(2)));
 }
 
+void load_items(world_t* world){
+    world->items = init_inventory(1);
+    item_t* power_up = calloc(sizeof(item_t), 1);
+    power_up->hp_buff = 10;
+    power_up->name = "Apple of Edem";
+    add_item_to_inventory(world->items, power_up);
+}
+
 void destroy_world(world_t* world){
     destroy_player(world->player);
     destroy_level(world->current_level);
     destroy_room_pool(world->room_pool);
+    destroy_inventory(world->items);
     free(world);
 }
 

@@ -155,7 +155,7 @@ void init_level_char_grid(level_t* level){
     positions[0] = calloc(sizeof(int), level->room_grid_size.y + 1);
     positions[1] = calloc(sizeof(int), level->room_grid_size.x + 1);
 
-    // From cell size now just calculating prefix sum
+    // From cell item_count now just calculating prefix sum
     for (int i = 0; i < level->room_grid_size.y; i++){
         positions[0][i + 1] = positions[0][i] + level->room_grid_positions[0][i];
     }
@@ -223,7 +223,7 @@ void destroy_level(level_t* level){
     free(level);
 }
 
-// TODO we need to give map size instead of hard-coded value for rooms size
+// TODO we need to give map item_count instead of hard-coded value for rooms item_count
 int room_placer(int rooms_left, int* branches_left, room_pool_t* room_pool, int room_count, room_t* rooms[room_count * 2 + 1][room_count * 2 + 1], vector2_t previous_direction, vector2_t pos, vector2_pair_array_t* connected_rooms){
     if (rooms[pos.y][pos.x] != NULL) {
         return 0;

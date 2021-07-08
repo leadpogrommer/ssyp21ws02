@@ -13,7 +13,7 @@ typedef struct {
     palette_t* palette;
     world_t* world;
     WINDOW* game_window;
-    hud_t* hud;
+
     int state;
 } game_state_t;
 
@@ -78,7 +78,7 @@ int draw(game_state_t* game_state){
 
     wnoutrefresh(game_state->game_window);
 
-    draw_hud(game_state->hud);
+    draw_hud(game_state->world->hud);
     doupdate();
     return 0;
 }
@@ -102,7 +102,7 @@ int main() {
     };
     game_state.world->player->screen_pos.x = getmaxx(stdscr)/2;
     game_state.world->player->screen_pos.y = getmaxy(stdscr)/2;
-    game_state.hud = init_hud(game_state.game_window, 3, game_state.world);
+    game_state.world->hud = init_hud(game_state.game_window, 3, game_state.world->player, &(game_state.world->level));
 
     while (game_state.state != 1) {
         switch(game_state.state) {
@@ -137,7 +137,7 @@ int main() {
 
     destroy_palette(game_state.palette);
     destroy_world(game_state.world);
-    destroy_hud(game_state.hud);
+    destroy_hud(game_state.world->hud);
     endwin();
     return 0;
 }
