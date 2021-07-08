@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.19)
-project(NCurces_roguelike C)
+project(ncurses_roguelike C)
 
 set(CMAKE_C_STANDARD 11)
 
@@ -16,19 +16,21 @@ add_link_options(-L${CMAKE_SOURCE_DIR} -Wl,-rpath,.)
 add_executable(game
                 src/main.c
                 src/room.c
-                src/room.h
+                includes/room.h
                 src/utility.c
-                src/utility.h
+                includes/utility.h
                 src/render.c
-                src/render.h
+                includes/render.h
                 src/world.c
-                src/world.h
+                includes/world.h
                 src/player.c
-                src/player.h
+                includes/player.h
                 src/title_screen.c
-                src/title_screen.h
+                includes/title_screen.h
                 src/rich_presence.c
                 src/level.c
-                src/level.h src/heap.c src/heap.h src/pathfinder.c src/pathfinder.h src/hud.c src/hud.h)
+                includes/level.h src/heap.c includes/heap.h src/pathfinder.c includes/pathfinder.h src/hud.c includes/hud.h)
+target_include_directories(game PRIVATE includes)
+
 
 target_link_libraries(game ${CURSES_LIBRARIES}  m discord_game_sdk)
