@@ -6,7 +6,6 @@
 #include "render.h"
 #include "world.h"
 #include "title_screen.h"
-#include "pathfinder.h"
 #include "rich_presence.h"
 
 typedef struct {
@@ -36,7 +35,6 @@ palette_t* set_up_palette(){
 
 int handle_input(game_state_t* game_state){
     int input = getch();
-    MEVENT event;
     switch (input){
         case 'a':
             move_player_in_world(game_state->world, VEC2_LEFT);
