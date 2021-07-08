@@ -8,7 +8,7 @@ typedef struct player_t{
     int gold;
 } player_t;
 
-player_t* init_player();
+player_t* init_player(int max_health);
 void destroy_player(player_t* player);
 
 void move_player(player_t* player, vector2_t);

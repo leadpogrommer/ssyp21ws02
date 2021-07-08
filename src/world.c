@@ -3,7 +3,7 @@
 
 world_t* init_world(){
     world_t* world = malloc(sizeof(world_t));
-    world->player = init_player();
+    world->player = init_player(10);
     world->room_pool = load_room_directory("resources/rooms");
     load_level(world, 2);
 
@@ -12,6 +12,7 @@ world_t* init_world(){
 
 void process_world(world_t* world){
     if (world->current_level->data[world->player->pos.y][world->player->pos.x] == 'E'){
+        world->level++;
         load_level(world, world->current_level->room_count + 1);
     }
 }
