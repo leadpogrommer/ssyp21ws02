@@ -11,9 +11,15 @@ world_t* init_world(){
 }
 
 void process_world(world_t* world){
-    if (world->current_level->data[world->player->pos.y][world->player->pos.x] == 'e'){
-        world->level++;
-        load_level(world, world->current_level->room_count + 1);
+    switch (world->current_level->data[world->player->pos.y][world->player->pos.x]){
+        case 'e':
+            world->level++;
+            load_level(world, world->current_level->room_count + 1);
+            break;
+        case 'h':
+            world->player->max_health += 10;
+            world->current_level->data[world->player->pos.y][world->player->pos.x] = '.';
+            break;
     }
 }
 
