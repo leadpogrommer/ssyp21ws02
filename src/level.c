@@ -6,7 +6,7 @@
 level_t* generate_level(int room_count, room_pool_t* room_pool){
     level_t* level = get_level_populated_with_rooms(room_count, room_pool);
 
-    connect_doors_along_the_path(level);
+    connect_doors(level);
 
     shut_all_open_doors(level);
 
@@ -21,23 +21,21 @@ void shut_all_open_doors(level_t* level){
     }
 }
 
-void connect_doors_along_the_path(level_t* level){
-    room_t* start_room = level->room_grid[level->start_room_grid_position.y][level->start_room_grid_position.x];
-    vector2_t start_room_position = level->start_room_grid_position;
+void connect_doors(level_t* level){
+    for (int i = 0; i < level->connected_rooms->size; i++){
+        room_t* start_room = level->room_grid[level->connected_rooms->data[i].first.y][level->connected_rooms->data[i].first.x];
 
-    for (int i = 0; i < level->room_count - 1; i++){
-        vector2_t end_room_position = sum(start_room_position, level->path[i]);
-        room_t* end_room = level->room_grid[end_room_position.y][end_room_position.x];
+        room_t* end_room = level->room_grid[level->connected_rooms->data[i].second.y][level->connected_rooms->data[i].second.x];
 
+        vector2_t forward_direction = sub( level->connected_rooms->data[i].second, level->connected_rooms->data[i].first );
         // Entry - position of a door that needs to be connected from
-        vector2_t entry = get_level_position(level, start_room_position, start_room->doors[level->path[i].y + 1][level->path[i].x + 1]);
+        vector2_t entry = get_level_position(level, level->connected_rooms->data[i].first, start_room->doors[forward_direction.y + 1][forward_direction.x + 1]);
 
         // Exit - position of a door that needs to be connected to
-        vector2_t negative_path = scale(level->path[i], -1);
-        vector2_t exit = get_level_position(level, end_room_position, end_room->doors[negative_path.y + 1][negative_path.x + 1] );
+        vector2_t negative_path = scale(forward_direction, -1);
+        vector2_t exit = get_level_position(level, level->connected_rooms->data[i].second, end_room->doors[negative_path.y + 1][negative_path.x + 1] );
 
         vector2_t current = entry;
-        vector2_t forward_direction = level->path[i];
         //   entry
         //    |
         // ___|
@@ -45,10 +43,10 @@ void connect_doors_along_the_path(level_t* level){
         //|
         //exit
         int first_steps = 1;
-        if (equal(level->path[i], VEC2_UP) || equal(level->path[i], VEC2_DOWN)){
-            first_steps += rand() % (sub(exit, entry).y * level->path[i].y - 1);
+        if (equal(forward_direction, VEC2_UP) || equal(forward_direction, VEC2_DOWN)){
+            first_steps += rand() % (sub(exit, entry).y * forward_direction.y - 1);
         }else{
-            first_steps += rand() % (sub(exit, entry).x * level->path[i].x - 1);
+            first_steps += rand() % (sub(exit, entry).x * forward_direction.x - 1);
         }
 
         for (int j = 0; j < first_steps; j++){
@@ -56,7 +54,7 @@ void connect_doors_along_the_path(level_t* level){
             current = sum( current, forward_direction);
         }
 
-        vector2_t sideways_direction = { .x = level->path[i].y, .y = level->path[i].x };
+        vector2_t sideways_direction = { .x = forward_direction.y, .y = forward_direction.x };
         sideways_direction.y *= ((exit.y - current.y) * sideways_direction.y) > 0 ? 1 : -1;
         sideways_direction.x *= ((exit.x - current.x) * sideways_direction.x) > 0 ? 1 : -1;
 
@@ -70,8 +68,6 @@ void connect_doors_along_the_path(level_t* level){
         }
 
         level->data[current.y][current.x] = '#';
-        start_room_position = end_room_position;
-        start_room = end_room;
     }
 }
 
@@ -102,12 +98,17 @@ level_t* get_level_with_room_grid(int room_count, room_pool_t* room_pool){
     room_t* room_grid[map_size][map_size];
     memset(room_grid, 0, sizeof(room_grid));
 
-    vector2_t path[room_count];
+    vector2_pair_array_t* connected_rooms = init_vector2_pair_array();
 
-    vector2_t start_position_abs = VEC2_SQUARE(room_count);
-    if (room_placer(room_count, room_pool, room_count, room_grid, start_position_abs, path) == 0){
+    int branch_count = (room_count - 2)/2;
+    if (room_placer(room_count, &branch_count, room_pool, room_count, room_grid, VEC2_ZERO, VEC2_SQUARE(room_count), connected_rooms) == 0){
         fail_gracefully("Couldn't generate level");
     }
+
+    return cropped_level(map_size, room_count, room_grid, connected_rooms);
+}
+
+level_t* cropped_level(int map_size, int room_count, room_t *room_grid[map_size][map_size], vector2_pair_array_t* connected_rooms){
 
     vector2_t left_up = get_upper_left_corner_of_cropped_map(map_size, room_grid); // Cropping room_grid to contents
     vector2_t right_down = get_down_right_corner_of_cropped_map(map_size, room_grid);
@@ -115,19 +116,25 @@ level_t* get_level_with_room_grid(int room_count, room_pool_t* room_pool){
 
 
     level_t* level = init_level_room_grid(room_count, cropped_map_size);
-    level->path = path;
-    level->start_room_grid_position = sub( start_position_abs, left_up );
-    level->end_room_grid_position = level->start_room_grid_position;
-    for (int i = 0; i < room_count - 1; i++){
-        level->end_room_grid_position = sum( level->end_room_grid_position, path[i] );
-    }
+    level->connected_rooms = connected_rooms;
+    level->start_room_grid_position = sub(VEC2_SQUARE(room_count), left_up );
+
+    correct_connected_rooms_grid_pos(level, left_up);
 
     for (int i = left_up.y; i < right_down.y + 1; i++){
         for (int j = left_up.x; j < right_down.x + 1; j++){
             level->room_grid[i - left_up.y][j - left_up.x] = room_grid[i][j];
         }
     }
+
     return level;
+}
+
+void correct_connected_rooms_grid_pos(level_t* level, vector2_t left_up_corner){
+    for (int i = 0; i < level->connected_rooms->size; i++){
+        level->connected_rooms->data[i].first = sub( level->connected_rooms->data[i].first, left_up_corner );
+        level->connected_rooms->data[i].second = sub( level->connected_rooms->data[i].second, left_up_corner );
+    }
 }
 
 level_t* init_level_room_grid(int room_count, vector2_t room_grid_size){
@@ -217,7 +224,7 @@ void destroy_level(level_t* level){
 }
 
 // TODO we need to give map size instead of hard-coded value for rooms size
-int room_placer(int rooms_left, room_pool_t* room_pool, int room_count, room_t* rooms[room_count * 2 + 1][room_count * 2 + 1], vector2_t pos, vector2_t path[room_count]){
+int room_placer(int rooms_left, int* branches_left, room_pool_t* room_pool, int room_count, room_t* rooms[room_count * 2 + 1][room_count * 2 + 1], vector2_t previous_direction, vector2_t pos, vector2_pair_array_t* connected_rooms){
     if (rooms[pos.y][pos.x] != NULL) {
         return 0;
     }
@@ -230,9 +237,13 @@ int room_placer(int rooms_left, room_pool_t* room_pool, int room_count, room_t* 
     if (current_room_index == 0){
         next_room = room_pool->start_room;
     }else if (current_room_index == room_count - 1){
-        next_room = room_pool->end_room;
+        if (branches_left){
+            next_room = room_pool->end_room;
+        }else{
+            next_room = room_pool->shrine_rooms[rand() % room_pool->shrine_count];
+        }
     }else{
-        vector2_t needed_door = scale(path[current_room_index - 1], -1); // Door should be open on the opposite side
+        vector2_t needed_door = scale(previous_direction, -1);
         do {
             next_room = room_pool->rooms[rand() % room_pool->count];
         } while (equal(next_room->doors[needed_door.y + 1][needed_door.x + 1], VEC2_UP)); // While there is no needed door
@@ -249,24 +260,39 @@ int room_placer(int rooms_left, room_pool_t* room_pool, int room_count, room_t* 
     vector2_t directions[4];
     get_shuffled_directions(directions);
 
+    int successful = 0;
     for (int i = 0; i < 4; i++) {
+        // First we check if we can place a room in this direction
         vector2_t next_cell = sum(pos, directions[i]);
         if (!is_valid_rect_index(next_cell, VEC2_SQUARE( room_count * 2 + 1))
             || equal(rooms[pos.y][pos.x]->doors[directions[i].y + 1][directions[i].x + 1], VEC2_UP)){
             continue;
         }
 
-        // Let's go find out if this variant viable
-        path[current_room_index] = directions[i]; // Remembering the path
-        if (room_placer(rooms_left - 1, room_pool, room_count, rooms, next_cell, path)) {
-            return 1;
+        // Then we start placing
+        if (successful && branches_left && *branches_left > 0 && rand() % 2 > 0){
+            // If we already placed main path we try our chance at branches
+            push_back_vector2_pair(connected_rooms, (vector2_pair_t){ pos, next_cell });
+            if (room_placer(3, 0, room_pool, room_count, rooms, directions[i], next_cell, connected_rooms)){
+                (*branches_left)--;
+            }else{
+                delete_last_vector2_pair(connected_rooms);
+            }
+        }else if (!successful){
+            // Let's go find out if this variant viable This is the main path
+            push_back_vector2_pair(connected_rooms, (vector2_pair_t) { pos, next_cell });
+            successful = room_placer(rooms_left - 1, branches_left, room_pool, room_count, rooms, directions[i], next_cell, connected_rooms);
+            if (!successful){
+                delete_last_vector2_pair(connected_rooms);
+            }
         }
-        path[current_room_index] = VEC2_ZERO;
     }
 
-    // Well, we couldn't do it from here, let's rewind
-    rooms[pos.y][pos.x] = NULL;
-    return 0;
+    if (!successful){
+        rooms[pos.y][pos.x] = NULL;
+    }
+
+    return successful;
 }
 
 void log_level_to_file(level_t* level, const char* filename){

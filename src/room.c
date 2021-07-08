@@ -19,7 +19,7 @@ room_t* load_room(const char* filename){
         }
     }
 
-    fscanf(file, "%d %d", &room->size.x, &room->size.y);
+    fscanf(file, "%d %d %hd", &room->size.x, &room->size.y, &room->is_shrine);
 
     room->data = malloc(sizeof(char*) * room->size.y);
 
@@ -55,10 +55,7 @@ room_t* load_room(const char* filename){
 }
 
 room_pool_t* load_room_pool(int room_count, ...){
-    room_pool_t* room_pool = malloc(sizeof(room_pool_t));
-    room_pool->count = room_count;
-    room_pool->capacity = room_count + 1;
-    room_pool->rooms = malloc(sizeof(room_t*) * room_pool->capacity);
+    room_pool_t* room_pool = init_room_pool();
 
     va_list paths;
     va_start(paths, room_count);
@@ -70,14 +67,21 @@ room_pool_t* load_room_pool(int room_count, ...){
 }
 
 void add_room_to_pool(room_pool_t* room_pool, room_t* room){
-    if (room_pool->count == room_pool->capacity){
-        room_pool->capacity *= 2;
-        room_pool->rooms = realloc(room_pool->rooms, sizeof(room_t*) * room_pool->capacity);
-    }
+    if (!room->is_shrine) {
+        if (room_pool->count == room_pool->capacity) {
+            room_pool->capacity *= 2;
+            room_pool->rooms = realloc(room_pool->rooms, sizeof(room_t *) * room_pool->capacity);
+        }
 
-    room_pool->rooms[room_pool->count++] = room;
-    room_pool->max_size.x = room->size.x > room_pool->max_size.x ? room->size.x : room_pool->max_size.x;
-    room_pool->max_size.y = room->size.y > room_pool->max_size.y ? room->size.y : room_pool->max_size.y;
+        room_pool->rooms[room_pool->count++] = room;
+    }else{
+        if (room_pool->shrine_count == room_pool->shrine_capacity) {
+            room_pool->shrine_capacity *= 2;
+            room_pool->shrine_rooms = realloc(room_pool->shrine_rooms, sizeof(room_t *) * room_pool->shrine_capacity);
+        }
+
+        room_pool->shrine_rooms[room_pool->shrine_count++] = room;
+    }
 }
 
 room_pool_t* load_room_directory(const char* directory){
@@ -130,9 +134,28 @@ void draw_room(WINDOW* window, palette_t* palette, room_t* room, vector2_t offse
     }
 }
 
+room_pool_t* init_room_pool(){
+    room_pool_t* room_pool = malloc(sizeof(room_pool_t));
+    room_pool->count = 0;
+    room_pool->capacity = 1;
+    room_pool->shrine_count = 0;
+    room_pool->shrine_capacity = 1;
+    room_pool->rooms = malloc(sizeof(room_t*) * room_pool->capacity);
+    room_pool->shrine_rooms = malloc(sizeof(room_t*) * room_pool->shrine_capacity);
+
+    return room_pool;
+}
+
 void destroy_room_pool(room_pool_t* room_pool){
-    for (int i = 0; i < room_pool->count; i++) destroy_room(room_pool->rooms[i]);
+    for (int i = 0; i < room_pool->count; i++){
+        destroy_room(room_pool->rooms[i]);
+    }
+
+    for (int i = 0; i < room_pool->shrine_count; i++){
+        destroy_room(room_pool->shrine_rooms[i]);
+    }
     free(room_pool->rooms);
+    free(room_pool->shrine_rooms);
     free(room_pool);
 }
 

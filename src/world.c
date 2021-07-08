@@ -11,7 +11,7 @@ world_t* init_world(){
 }
 
 void process_world(world_t* world){
-    if (world->current_level->data[world->player->pos.y][world->player->pos.x] == 'E'){
+    if (world->current_level->data[world->player->pos.y][world->player->pos.x] == 'e'){
         world->level++;
         load_level(world, world->current_level->room_count + 1);
     }

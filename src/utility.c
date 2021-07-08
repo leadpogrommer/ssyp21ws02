@@ -65,6 +65,32 @@ void destroy_vector2_array(vector2_array_t* array){
     free(array);
 }
 
+vector2_pair_array_t* init_vector2_pair_array(){
+    vector2_pair_array_t* array = malloc(sizeof(vector2_pair_array_t));
+    array->size = 0;
+    array->capacity = 1;
+    array->data = malloc(sizeof(vector2_pair_t) * array->capacity);
+    return array;
+}
+
+void push_back_vector2_pair(vector2_pair_array_t* array, vector2_pair_t vector){
+    if (array->size == array->capacity){
+        array->capacity *= 2;
+        array->data = realloc(array->data, sizeof(vector2_pair_t) * array->capacity);
+    }
+
+    array->data[array->size++] = vector;
+}
+
+void delete_last_vector2_pair(vector2_pair_array_t* array){
+    array->size--;
+}
+
+void destroy_vector2_pair_array(vector2_pair_array_t* array){
+    free(array->data);
+    free(array);
+}
+
 void get_shuffled_directions(vector2_t directions[4]){
     get_straight_directions(directions);
 
