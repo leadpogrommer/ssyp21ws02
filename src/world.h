@@ -7,6 +7,7 @@ typedef struct world_t{
     unsigned long long time;
     player_t* player;
     level_t* current_level;
+    int level;
     pathfinder_t* pathfinder;
     room_pool_t* room_pool;
 }world_t;
