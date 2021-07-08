@@ -21,7 +21,8 @@ vector2_t scale_accordingly(vector2_t a, vector2_t b);
 int cross(vector2_t a, vector2_t b);
 int equal(vector2_t a, vector2_t b);
 
-vector2_t* get_shuffled_directions();
+void get_straight_directions(vector2_t directions[4]);
+void get_shuffled_directions(vector2_t directions[4]);
 void get_full_eight_directions(vector2_t directions[8]);
 
 int is_valid_index(int index, int size);

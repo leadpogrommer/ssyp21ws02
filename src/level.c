@@ -246,7 +246,8 @@ int room_placer(int rooms_left, room_pool_t* room_pool, int room_count, room_t* 
     }
 
     // Then we need to go to another room, but let's try all of them
-    vector2_t* directions = get_shuffled_directions();
+    vector2_t directions[4];
+    get_shuffled_directions(directions);
 
     for (int i = 0; i < 4; i++) {
         vector2_t next_cell = sum(pos, directions[i]);
@@ -258,14 +259,12 @@ int room_placer(int rooms_left, room_pool_t* room_pool, int room_count, room_t* 
         // Let's go find out if this variant viable
         path[current_room_index] = directions[i]; // Remembering the path
         if (room_placer(rooms_left - 1, room_pool, room_count, rooms, next_cell, path)) {
-            free(directions);
             return 1;
         }
         path[current_room_index] = VEC2_ZERO;
     }
 
     // Well, we couldn't do it from here, let's rewind
-    free(directions);
     rooms[pos.y][pos.x] = NULL;
     return 0;
 }

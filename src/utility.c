@@ -65,22 +65,23 @@ void destroy_vector2_array(vector2_array_t* array){
     free(array);
 }
 
-vector2_t* get_shuffled_directions(){
-    vector2_t* result = malloc(sizeof(vector2_t) * 4);
-    result[0] = VEC2_LEFT;
-    result[1] = VEC2_UP;
-    result[2] = VEC2_DOWN;
-    result[3] = VEC2_RIGHT;
+void get_shuffled_directions(vector2_t directions[4]){
+    get_straight_directions(directions);
 
     for (int i = 0; i < 3; i++){
         int j = rand() % (4 - i) + i; // Pick random
 
-        vector2_t tmp = result[i]; // Swap two elements
-        result[i] = result[j];
-        result[j] = tmp;
+        vector2_t tmp = directions[i]; // Swap two elements
+        directions[i] = directions[j];
+        directions[j] = tmp;
     }
+}
 
-    return result;
+void get_straight_directions(vector2_t directions[4]){
+    directions[0] = VEC2_LEFT;
+    directions[1] = VEC2_UP;
+    directions[2] = VEC2_DOWN;
+    directions[3] = VEC2_RIGHT;
 }
 
 void get_full_eight_directions(vector2_t directions[8]){

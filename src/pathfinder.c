@@ -50,7 +50,7 @@ void clear_previous_pathfinder_data(pathfinder_t* pathfinder){
     }
 }
 
-vector2_array_t* find_path(pathfinder_t* pathfinder, vector2_t start, vector2_t end){
+vector2_array_t* find_path(pathfinder_t* pathfinder, vector2_t start, vector2_t end, int use_diagonals){
     clear_previous_pathfinder_data(pathfinder);
 
     pathfinder->heap_elements[start.y][start.x]->g_cost = 0;
@@ -62,9 +62,19 @@ vector2_array_t* find_path(pathfinder_t* pathfinder, vector2_t start, vector2_t 
             return retrace_path(pathfinder, start, end);
         }
 
-        vector2_t directions[8];
-        get_full_eight_directions(directions);
-        for (int i = 0; i < 8; i++){
+        int count = 8;
+        if (!use_diagonals){
+            count = 4;
+        }
+
+        vector2_t directions[count];
+        if (use_diagonals){
+            get_full_eight_directions(directions);
+        }else{
+            get_shuffled_directions(directions);
+        }
+
+        for (int i = 0; i < count; i++){
             vector2_t neighbour_cell = sum(current->position, directions[i]);
             if (!is_valid_rect_index(neighbour_cell, pathfinder->level->size) ||
                 pathfinder->closed[neighbour_cell.y][neighbour_cell.x] ||
