@@ -3,6 +3,9 @@
 
 typedef struct player_t{
     vector2_t pos, screen_pos;
+    int max_health;
+    int health;
+    int gold;
 } player_t;
 
 player_t* init_player();
