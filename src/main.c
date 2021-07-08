@@ -7,6 +7,7 @@
 #include "world.h"
 #include "title_screen.h"
 #include "rich_presence.h"
+#include "thirdparty/discord_game_sdk.h"
 
 typedef struct {
     palette_t* palette;
@@ -78,10 +79,19 @@ int draw(WINDOW* window, game_state_t* game_state){
     return 0;
 }
 
+void update_rich_presence(game_state_t* game_state) {
+    struct DiscordActivity activity = {};
+    sprintf(activity.state, "test %d", 1);
+    sprintf(activity.details, "test 2 %d", 2);
+    rp_update(&activity);
+}
+
 int main() {
     srand(time(NULL));
 
     init_window();
+
+    rp_init();
 
     title_screen_data menu_main;
     title_screen_init(&menu_main, 2, "New game", "Exit");
@@ -96,6 +106,7 @@ int main() {
     };
     game_state.world->player->screen_pos.x = getmaxx(stdscr)/2;
     game_state.world->player->screen_pos.y = getmaxy(stdscr)/2;
+    update_rich_presence(&game_state);
 
     while (game_state.state != 1) {
         switch(game_state.state) {
@@ -105,7 +116,7 @@ int main() {
                 draw(stdscr, &game_state);
                 break;
             case 2:
-                switch(title_screen_handle_input(&menu_main)) {
+                switch (title_screen_handle_input(&menu_main)) {
                     case 0:
                         game_state.state = 0;
                         break;
@@ -115,7 +126,7 @@ int main() {
                 title_screen_draw(stdscr, &menu_main, FALSE);
                 break;
             case 3:
-                switch(title_screen_handle_input(&menu_pause)) {
+                switch (title_screen_handle_input(&menu_pause)) {
                     case 0:
                         game_state.state = 0;
                         break;
@@ -125,6 +136,7 @@ int main() {
                 title_screen_draw(stdscr, &menu_pause, TRUE);
                 break;
         }
+        rp_tick();
         usleep(16 * 1000);
     }
 
