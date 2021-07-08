@@ -106,5 +106,5 @@ int vector2_distance(vector2_t a, vector2_t b){
     int dx = b.x > a.x ? b.x - a.x : a.x - b.x;
     int dy = b.y > a.y ? b.y - a.y : a.y - b.y;
 
-    return dx > dy ? dy * 10 + (dx - dy) * 14 : dx * 10 + (dy - dx) * 14;
+    return dx > dy ? dy * 14 + (dx - dy) * 10 : dx * 14 + (dy - dx) * 10;
 }
