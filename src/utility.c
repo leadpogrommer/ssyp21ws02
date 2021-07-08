@@ -83,6 +83,17 @@ vector2_t* get_shuffled_directions(){
     return result;
 }
 
+void get_full_eight_directions(vector2_t directions[8]){
+    directions[0] = VEC2_LEFT;
+    directions[1] = VEC2_RIGHT;
+    directions[2] = VEC2_DOWN;
+    directions[3] = VEC2_UP;
+    directions[4] = sum(VEC2_LEFT, VEC2_UP);
+    directions[5] = sum(VEC2_RIGHT, VEC2_UP);
+    directions[6] = sum(VEC2_RIGHT, VEC2_DOWN);
+    directions[7] = sum(VEC2_LEFT, VEC2_DOWN);
+}
+
 int is_valid_index(int index, int size){
     return index >= 0 && index < size;
 }

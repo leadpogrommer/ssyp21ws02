@@ -62,8 +62,9 @@ vector2_array_t* find_path(pathfinder_t* pathfinder, vector2_t start, vector2_t 
             return retrace_path(pathfinder, start, end);
         }
 
-        vector2_t* directions = get_shuffled_directions();
-        for (int i = 0; i < 4; i++){
+        vector2_t directions[8];
+        get_full_eight_directions(directions);
+        for (int i = 0; i < 8; i++){
             vector2_t neighbour_cell = sum(current->position, directions[i]);
             if (!is_valid_rect_index(neighbour_cell, pathfinder->level->size) ||
                 pathfinder->closed[neighbour_cell.y][neighbour_cell.x] ||

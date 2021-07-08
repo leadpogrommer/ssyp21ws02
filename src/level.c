@@ -78,7 +78,8 @@ void connect_doors_along_the_path(level_t* level){
 level_t* get_level_populated_with_rooms(int room_count, room_pool_t* room_pool){
     level_t* level = get_level_with_room_grid(room_count, room_pool);
 
-    init_level_char_grid(level, get_room_grid_cell_size(level));
+    set_room_grid_cell_sizes(level);
+    init_level_char_grid(level);
 
     for (int i = 0; i < level->room_grid_size.y; i++){
         for (int j = 0; j < level->room_grid_size.x; j++){
@@ -141,73 +142,72 @@ level_t* init_level_room_grid(int room_count, vector2_t room_grid_size){
     return level;
 }
 
-void init_level_char_grid(level_t* level, vector2_t** room_grid_cell_size){
-    // TODO AGAIN - TWO ONE DIMENSIONAL ARRAYS
-    level->rooms_positions = calloc(sizeof(vector2_t*), level->room_grid_size.y);
+// set_level_grid_cell_sizes must be called before this one
+void init_level_char_grid(level_t* level){
+    int* positions[2];
+    positions[0] = calloc(sizeof(int), level->room_grid_size.y + 1);
+    positions[1] = calloc(sizeof(int), level->room_grid_size.x + 1);
+
+    // From cell size now just calculating prefix sum
     for (int i = 0; i < level->room_grid_size.y; i++){
-        level->rooms_positions[i] = calloc(sizeof(vector2_t), level->room_grid_size.x);
+        positions[0][i + 1] = positions[0][i] + level->room_grid_positions[0][i];
     }
 
-    for (int i = 1; i < level->room_grid_size.x; i++){
-        level->rooms_positions[0][i] = level->rooms_positions[0][i-1];
-        level->rooms_positions[0][i].x += room_grid_cell_size[0][i-1].x;
+    for (int i = 0; i < level->room_grid_size.x; i++){
+        positions[1][i + 1] = positions[1][i] + level->room_grid_positions[1][i];
     }
 
-    for (int i = 1; i < level->room_grid_size.y; i++){
-        for (int j = 0; j < level->room_grid_size.x; j++){
-            level->rooms_positions[i][j] = level->rooms_positions[i-1][j];
-            level->rooms_positions[i][j].y += room_grid_cell_size[i-1][j].y;
-        }
-    }
+    free(level->room_grid_positions[0]);
+    free(level->room_grid_positions[1]);
 
+    level->room_grid_positions[0] = positions[0];
+    level->room_grid_positions[1] = positions[1];
 
-    level->size = sum(level->rooms_positions[level->room_grid_size.y-1][level->room_grid_size.x-1], room_grid_cell_size[level->room_grid_size.y-1][level->room_grid_size.x-1]);
+    level->size = (vector2_t) { .y = level->room_grid_positions[0][level->room_grid_size.y], .x = level->room_grid_positions[1][level->room_grid_size.x] };
     level->data = calloc(sizeof(char*), level->size.y);
     for (int i = 0; i < level->size.y; i++){
         level->data[i] = calloc(sizeof(char), level->size.x);
     }
-
-    free(room_grid_cell_size);
 }
 
-vector2_t** get_room_grid_cell_size(level_t* level){
-    // TODO переписать в 2 1-мерных массива
-    vector2_t **room_grid_cell_size = calloc(sizeof(vector2_t*), level->room_grid_size.y);
+void set_room_grid_cell_sizes(level_t* level){
+    // Using this field just because it's easy; It is calculated from data this function will get anyway
+    // So no useful data is corrupted
+    level->room_grid_positions[0] = calloc(sizeof(int), level->room_grid_size.y);
+    level->room_grid_positions[1] = calloc(sizeof(int), level->room_grid_size.x);
+
+    // Finding cell sizes first
     for (int i = 0; i < level->room_grid_size.y; i++){
-        room_grid_cell_size[i] = calloc(sizeof(vector2_t), level->room_grid_size.x);
         for (int j = 0; j < level->room_grid_size.x; j++){
             if (level->room_grid[i][j]) {
-                room_grid_cell_size[i][0].y = room_grid_cell_size[i][0].y > level->room_grid[i][j]->size.y ?
-                                              room_grid_cell_size[i][0].y : level->room_grid[i][j]->size.y;
-                room_grid_cell_size[0][j].x = room_grid_cell_size[0][j].x > level->room_grid[i][j]->size.x ?
-                                              room_grid_cell_size[0][j].x : level->room_grid[i][j]->size.x;
+                level->room_grid_positions[0][i] = level->room_grid_positions[0][i] > level->room_grid[i][j]->size.y ?
+                                                   level->room_grid_positions[0][i] :
+                                                   level->room_grid[i][j]->size.y;
+
+                level->room_grid_positions[1][j] = level->room_grid_positions[1][j] > level->room_grid[i][j]->size.x ?
+                                                   level->room_grid_positions[1][j] :
+                                                   level->room_grid[i][j]->size.x;
             }
         }
     }
 
     for (int i = 0; i < level->room_grid_size.y; i++){
-        for (int j = 0; j < level->room_grid_size.x; j++){
-            room_grid_cell_size[i][j].y = room_grid_cell_size[i][0].y;
-            room_grid_cell_size[i][j].x = room_grid_cell_size[0][j].x;
-        }
+        level->room_grid_positions[0][i] += 1; // Padding for the paths
     }
 
-    for (int i = 0; i < level->room_grid_size.y; i++){
-        for (int j = 0; j < level->room_grid_size.x; j++){
-            room_grid_cell_size[i][j] = sum(room_grid_cell_size[i][j], VEC2_ONE);
-        }
+    for (int i = 0; i < level->room_grid_size.x; i++){
+        level->room_grid_positions[1][i] += 1;
     }
-
-    return room_grid_cell_size;
 }
 
 void destroy_level(level_t* level){
     for (int i = 0; i < level->room_grid_size.y; i++){
-        free(level->rooms_positions[i]);
         free(level->room_grid[i]);
     }
-    free(level->rooms_positions);
     free(level->room_grid);
+
+    free(level->room_grid_positions[0]);
+    free(level->room_grid_positions[1]);
 
     for (int i = 0; i < level->size.y; i++){
         free(level->data[i]);
@@ -358,7 +358,7 @@ vector2_t get_level_position(level_t* level, vector2_t room_grid_pos, vector2_t 
         fail_gracefully("There is no room with position: x = %d y = %d ", room_grid_pos.x, room_grid_pos.y);
     }
 
-    vector2_t room_position_on_level = level->rooms_positions[room_grid_pos.y][room_grid_pos.x];
+    vector2_t room_position_on_level = (vector2_t) { .y = level->room_grid_positions[0][room_grid_pos.y], .x = level->room_grid_positions[1][room_grid_pos.x] };
     vector2_t result = sum( room_position_on_level, sum( VEC2_ONE, in_room_position ));
 
     if (!is_valid_rect_index(result, level->size)){

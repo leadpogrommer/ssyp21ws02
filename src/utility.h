@@ -22,6 +22,7 @@ int cross(vector2_t a, vector2_t b);
 int equal(vector2_t a, vector2_t b);
 
 vector2_t* get_shuffled_directions();
+void get_full_eight_directions(vector2_t directions[8]);
 
 int is_valid_index(int index, int size);
 int is_valid_rect_index(vector2_t index, vector2_t size);
