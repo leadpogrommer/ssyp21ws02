@@ -43,26 +43,26 @@ vector2_t scale_accordingly(vector2_t a, vector2_t b){
     return (vector2_t) {.x = a.x * b.x, .y = a.y * b.y};
 }
 
-vectors_t* init_vectors(){
-    vectors_t* vectors = malloc(sizeof(vectors));
-    vectors->data = malloc(sizeof(vector2_t));
-    int size = 0;
-    int capacity = 1;
-    return vectors;
+vector2_array_t* init_vector2_array(){
+    vector2_array_t* array = malloc(sizeof(vector2_array_t));
+    array->size = 0;
+    array->capacity = 1;
+    array->data = malloc(sizeof(vector2_t) * array->capacity);
+    return array;
 }
 
-void push_back_vector2(vectors_t* vectors, vector2_t vector){
-    if (vectors->size == vectors->capacity){
-        vectors->capacity *= 2;
-        vectors->data = realloc(vectors->data, sizeof(vector2_t) * vectors->capacity);
+void push_back_vector2(vector2_array_t* array, vector2_t vector){
+    if (array->size == array->capacity){
+        array->capacity *= 2;
+        array->data = realloc(array->data, sizeof(vector2_t) * array->capacity);
     }
 
-    vectors->data[vectors->size++] = vector;
+    array->data[array->size++] = vector;
 }
 
-void destroy_vectors(vectors_t* vectors){
-    free(vectors->data);
-    free(vectors);
+void destroy_vector2_array(vector2_array_t* array){
+    free(array->data);
+    free(array);
 }
 
 vector2_t* get_shuffled_directions(){

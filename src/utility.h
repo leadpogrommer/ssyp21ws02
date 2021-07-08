@@ -14,11 +14,6 @@ typedef struct vector2_t{
     int x, y;
 }vector2_t;
 
-typedef struct vectors_t{
-    vector2_t* data;
-    int size, capacity;
-}vectors_t;
-
 vector2_t sum(vector2_t a, vector2_t b);
 vector2_t sub(vector2_t a, vector2_t b);
 vector2_t scale(vector2_t a, int magnitude);
@@ -30,3 +25,12 @@ vector2_t* get_shuffled_directions();
 
 int is_valid_index(int index, int size);
 int is_valid_rect_index(vector2_t index, vector2_t size);
+
+typedef struct vector2_array_t{
+    vector2_t* data;
+    int size, capacity;
+}vector2_array_t;
+
+vector2_array_t* init_vector2_array();
+void push_back_vector2(vector2_array_t* array, vector2_t element);
+void destroy_vector2_array();

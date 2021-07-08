@@ -91,7 +91,7 @@ room_pool_t* load_room_directory(const char* directory){
 
     chdir(directory); // Going in target directory
 
-    struct dirent* current_el = readdir(dir); // Reading next element
+    struct dirent* current_el = readdir(dir); // Reading next position
     while (current_el != NULL){
         if (current_el->d_type == DT_REG){ // Element needs to be a file
             if (!strcmp(current_el->d_name, "start_room.txt")){
@@ -103,6 +103,10 @@ room_pool_t* load_room_directory(const char* directory){
             }
         }
         current_el = readdir(dir);
+    }
+
+    if (!room_pool->start_room || !room_pool->end_room){
+        fail_gracefully("No start or end room was found. Game resources corrupted");
     }
 
     chdir(root_directory); // Going back to initial directory

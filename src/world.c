@@ -5,7 +5,7 @@ world_t* init_world(){
     world_t* world = malloc(sizeof(world_t));
     world->player = init_player();
     world->room_pool = load_room_directory("resources/rooms");
-    load_level(world, 7);
+    load_level(world, 2);
 
     return world;
 }
@@ -18,10 +18,12 @@ void process_world(world_t* world){
 
 void load_level(world_t* world, int room_count){
     if (world->current_level){
+        destroy_pathfinder(world->pathfinder);
         destroy_level(world->current_level);
     }
 
     world->current_level = generate_level(room_count, world->room_pool);
+    world->pathfinder = init_pathfinder(world->current_level);
 
     // Move player to start
     move_player_to(world->player, get_level_position(world->current_level, world->current_level->start_room_grid_position,

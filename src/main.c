@@ -6,12 +6,16 @@
 #include "render.h"
 #include "world.h"
 #include "title_screen.h"
+#include "pathfinder.h"
 #include "rich_presence.h"
 
 typedef struct {
     palette_t* palette;
     world_t* world;
     int state;
+    vector2_t start_point;
+    vector2_t end_point;
+    vector2_array_t* path;
 } game_state_t;
 
 void init_window() {
@@ -22,6 +26,7 @@ void init_window() {
     keypad(stdscr, TRUE);
     start_color();
     curs_set(0);
+    mousemask(BUTTON1_CLICKED | BUTTON3_CLICKED, NULL);
 }
 
 palette_t* set_up_palette(){
@@ -34,7 +39,8 @@ palette_t* set_up_palette(){
 }
 
 int handle_input(game_state_t* game_state){
-    char input = getch();
+    int input = getch();
+    MEVENT event;
     switch (input){
         case 'a':
             move_player_in_world(game_state->world, VEC2_LEFT);
@@ -53,6 +59,20 @@ int handle_input(game_state_t* game_state){
             break;
         case 'p':
             game_state->state = 3;
+            break;
+        case KEY_MOUSE:
+            if (getmouse(&event) == OK){
+                if (event.bstate & BUTTON1_CLICKED){
+                    game_state->start_point = (vector2_t){ .x = event.x, .y = event.y };
+                    game_state->start_point = sub(game_state->start_point, get_origin_on_screen(game_state->world));
+                }else if (event.bstate & BUTTON3_CLICKED){
+                    game_state->end_point = (vector2_t){ .x = event.x, .y = event.y };
+                    game_state->end_point = sub(game_state->end_point, get_origin_on_screen(game_state->world));
+                }
+            }
+            break;
+        case 'f':
+            game_state->path = find_path(game_state->world->pathfinder, game_state->start_point, game_state->end_point);
             break;
         default:
             break;
@@ -74,12 +94,21 @@ int draw(WINDOW* window, game_state_t* game_state){
 
     mvwaddch(window, game_state->world->player->screen_pos.y, game_state->world->player->screen_pos.x, game_state->palette->symbol['P']);
 
+    mvwaddch(window, game_state->start_point.y + get_origin_on_screen(game_state->world).y, game_state->start_point.x + get_origin_on_screen(game_state->world).x, '&');
+    mvwaddch(window, game_state->end_point.y + get_origin_on_screen(game_state->world).y, game_state->end_point.x + get_origin_on_screen(game_state->world).x, '&');
+    if (game_state->path) {
+        for (int i = 0; i < game_state->path->size; i++) {
+            vector2_t window_pos = sum(game_state->path->data[i], get_origin_on_screen(game_state->world));
+            mvwaddch(window, window_pos.y, window_pos.x, '&');
+        }
+    }
+
     wrefresh(window);
     return 0;
 }
 
 int main() {
-    srand(15);
+    srand(time(NULL));
 
     init_window();
 

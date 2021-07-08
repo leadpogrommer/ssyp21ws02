@@ -38,7 +38,12 @@ void connect_doors_along_the_path(level_t* level){
 
         vector2_t current = entry;
         vector2_t forward_direction = level->path[i];
-
+        //   entry
+        //    |
+        // ___|
+        //|
+        //|
+        //exit
         int first_steps = 1;
         if (equal(level->path[i], VEC2_UP) || equal(level->path[i], VEC2_DOWN)){
             first_steps += rand() % (sub(exit, entry).y * level->path[i].y - 1);
@@ -51,7 +56,7 @@ void connect_doors_along_the_path(level_t* level){
             current = sum( current, forward_direction);
         }
 
-        vector2_t sideways_direction = { .x = level->path[i].y, .y = level->path[i].x};
+        vector2_t sideways_direction = { .x = level->path[i].y, .y = level->path[i].x };
         sideways_direction.y *= ((exit.y - current.y) * sideways_direction.y) > 0 ? 1 : -1;
         sideways_direction.x *= ((exit.x - current.x) * sideways_direction.x) > 0 ? 1 : -1;
 
@@ -74,8 +79,6 @@ level_t* get_level_populated_with_rooms(int room_count, room_pool_t* room_pool){
     level_t* level = get_level_with_room_grid(room_count, room_pool);
 
     init_level_char_grid(level, get_room_grid_cell_size(level));
-
-    //FILE* file = fopen("output.txt", "w");
 
     for (int i = 0; i < level->room_grid_size.y; i++){
         for (int j = 0; j < level->room_grid_size.x; j++){
@@ -139,6 +142,7 @@ level_t* init_level_room_grid(int room_count, vector2_t room_grid_size){
 }
 
 void init_level_char_grid(level_t* level, vector2_t** room_grid_cell_size){
+    // TODO AGAIN - TWO ONE DIMENSIONAL ARRAYS
     level->rooms_positions = calloc(sizeof(vector2_t*), level->room_grid_size.y);
     for (int i = 0; i < level->room_grid_size.y; i++){
         level->rooms_positions[i] = calloc(sizeof(vector2_t), level->room_grid_size.x);
@@ -167,6 +171,7 @@ void init_level_char_grid(level_t* level, vector2_t** room_grid_cell_size){
 }
 
 vector2_t** get_room_grid_cell_size(level_t* level){
+    // TODO переписать в 2 1-мерных массива
     vector2_t **room_grid_cell_size = calloc(sizeof(vector2_t*), level->room_grid_size.y);
     for (int i = 0; i < level->room_grid_size.y; i++){
         room_grid_cell_size[i] = calloc(sizeof(vector2_t), level->room_grid_size.x);
@@ -211,6 +216,7 @@ void destroy_level(level_t* level){
     free(level);
 }
 
+// TODO we need to give map size instead of hard-coded value for rooms size
 int room_placer(int rooms_left, room_pool_t* room_pool, int room_count, room_t* rooms[room_count * 2 + 1][room_count * 2 + 1], vector2_t pos, vector2_t path[room_count]){
     if (rooms[pos.y][pos.x] != NULL) {
         return 0;
@@ -222,22 +228,14 @@ int room_placer(int rooms_left, room_pool_t* room_pool, int room_count, room_t* 
     room_t *next_room;
 
     if (current_room_index == 0){
-        if (room_pool->start_room){
-            next_room = room_pool->start_room;
-        }else{
-            next_room = room_pool->rooms[rand() % room_pool->count];
-        }
+        next_room = room_pool->start_room;
     }else if (current_room_index == room_count - 1){
-        if (room_pool->end_room){
-            next_room = room_pool->end_room;
-        }else{
-            next_room = room_pool->rooms[rand() % room_pool->count];
-        }
+        next_room = room_pool->end_room;
     }else{
         vector2_t needed_door = scale(path[current_room_index - 1], -1); // Door should be open on the opposite side
         do {
             next_room = room_pool->rooms[rand() % room_pool->count];
-        } while (equal(next_room->doors[needed_door.y + 1][needed_door.x + 1], VEC2_UP) == 1); // While there is no needed door
+        } while (equal(next_room->doors[needed_door.y + 1][needed_door.x + 1], VEC2_UP)); // While there is no needed door
         // This while is not gonna loop because we assume that there are enough rooms with all kind of doors
     }
     rooms[pos.y][pos.x] = next_room;
@@ -258,8 +256,8 @@ int room_placer(int rooms_left, room_pool_t* room_pool, int room_count, room_t* 
         }
 
         // Let's go find out if this variant viable
-        path[current_room_index] = sub(next_cell, pos); // Remembering the path
-        if (room_placer(rooms_left - 1, room_pool, room_count, rooms, next_cell, path) != 0) {
+        path[current_room_index] = directions[i]; // Remembering the path
+        if (room_placer(rooms_left - 1, room_pool, room_count, rooms, next_cell, path)) {
             free(directions);
             return 1;
         }
