@@ -29,9 +29,13 @@ void init_window() {
 
 palette_t* set_up_palette(){
 
-    init_color(18, 0, 0, 0);
+    init_color(18, 180, 180, 180); // Nice Black
+    init_color(21, 1000, 550, 0); // Nice Orange
+    init_color(19, 850, 850, 850); // Nice White
+    init_color(20, 0, 700, 0); // Nice Green
+    init_color(22, 700, 0, 0); // Nice Red
 
-    palette_t* palette = init_palette(18, COLOR_WHITE, COLOR_RED, COLOR_MAGENTA, COLOR_RED, COLOR_WHITE);
+    palette_t* palette = init_palette(18, 19, 20, 21, 22, 19);
 
     return palette;
 }
