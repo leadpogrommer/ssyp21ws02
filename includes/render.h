@@ -1,17 +1,16 @@
 #pragma once
-#include <ncurses.h>
 
-typedef struct palette_t{
-    chtype symbol[256];
-    int player_pair;
-    int wall_pair;
-    int floor_pair;
-    int symbol_pair;
-    int enemy_pair;
-    int text_pair;
-} palette_t;
+#include "world.h"
+#include "palette.h"
+#include "main.h"
 
-palette_t* init_palette(short background_color, short floor_color, short player_color, short symbols_color, short enemies_color, short text_color);
-void destroy_palette(palette_t* palette);
+void render(game_state_t* game_state);
 
-void fill_window_with_background_color(WINDOW* window, palette_t* palette);
+void draw_level(WINDOW* window, palette_t* palette, level_t* level, vector2_t offset);
+void draw_level_with_lighting(WINDOW* window, palette_t* palette, palette_t* light_palette, world_t* world, vector2_t offset);
+
+void draw_hud(hud_t* hud);
+
+void draw_room(WINDOW* window, palette_t* palette, room_t* room, vector2_t offset);
+
+void draw_player(WINDOW* window, player_t* player, palette_t* palette);

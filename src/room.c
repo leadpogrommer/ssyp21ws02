@@ -126,14 +126,6 @@ void print_room(room_t* room){
     }
 }
 
-void draw_room(WINDOW* window, palette_t* palette, room_t* room, vector2_t offset){
-    for (int i = 0; i < room->size.y; i++){
-        for (int j = 0; j < room->size.x; j++){
-            mvwaddch(window, offset.y + i, offset.x + j, palette->symbol[room->data[i][j]]);
-        }
-    }
-}
-
 room_pool_t* init_room_pool(){
     room_pool_t* room_pool = malloc(sizeof(room_pool_t));
     room_pool->count = 0;

@@ -11,6 +11,7 @@ player_t* init_player(int max_health){
     player->max_health = max_health;
     player->health = max_health;
     player->inventory = init_inventory(10);
+    player->vision_radius = 30;
     return player;
 }
 

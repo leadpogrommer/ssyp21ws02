@@ -4,7 +4,7 @@
 
 typedef struct player_t{
     vector2_t pos, screen_pos;
-    int max_health, health, gold, damage;
+    int max_health, health, gold, damage, vision_radius;
     inventory_t* inventory;
 } player_t;
 

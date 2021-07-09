@@ -1,48 +1,122 @@
 #include "render.h"
-#include <stdlib.h>
-
-palette_t* init_palette(short background_color, short floor_color, short player_color, short symbols_color, short enemies_color, short text_color){
-    palette_t* palette = malloc(sizeof(palette_t));
-
-    init_pair(1, floor_color, floor_color);
-    init_pair(2, symbols_color, floor_color);
-    init_pair(3, player_color, floor_color);
-    init_pair(4, background_color, background_color);
-    init_pair(5, enemies_color, floor_color);
-    init_pair(6, text_color, background_color);
-
-    palette->floor_pair = 1;
-    palette->symbol_pair = 2;
-    palette->player_pair = 3;
-    palette->wall_pair = 4;
-    palette->enemy_pair = 5;
-    palette->text_pair = 6;
+#include <string.h>
 
 
-    for (int i = 0; i < 256; i++){
-        palette->symbol[i] = i | COLOR_PAIR(palette->symbol_pair);
-    }
+void render(game_state_t* game_state){
+    werase(game_state->game_window);
 
-    for (int i = 'A'; i < 'Z' + 1; i++){
-        palette->symbol[i] = i | COLOR_PAIR(palette->enemy_pair);
-    }
+    draw_level_with_lighting(game_state->game_window, game_state->palette, game_state->light_palette, game_state->world, get_origin_on_screen(game_state->world));
 
-    palette->symbol['P'] = 'P' | COLOR_PAIR(palette->player_pair);
-    palette->symbol['.'] = ' ' | COLOR_PAIR(palette->floor_pair);
-    palette->symbol['#'] = ' ' | COLOR_PAIR(palette->floor_pair);
-    palette->symbol['*'] = ' ' | COLOR_PAIR(palette->wall_pair);
+    draw_player(game_state->game_window, game_state->world->player, game_state->light_palette);
 
-    return palette;
+    wnoutrefresh(game_state->game_window);
+
+    draw_hud(game_state->world->hud);
+    doupdate();
 }
 
-void destroy_palette(palette_t* palette){
-    free(palette);
-}
-
-void fill_window_with_background_color(WINDOW* window, palette_t* palette){
-    for (int i = 0; i < getmaxy(window); i++){
-        for (int j = 0; j < getmaxx(window); j++){
-            mvwaddch(window, i, j, ' ' | COLOR_PAIR(palette->wall_pair));
+void draw_level(WINDOW* window, palette_t* palette, level_t* level, vector2_t offset){
+    for (int i = 0; i < level->size.y; i++){
+        for (int j = 0; j < level->size.x; j++){
+            if (!level->data[i][j]){
+                mvwaddch(window, i + offset.y, j + offset.x, palette->symbol['*']);
+            }else{
+                mvwaddch(window, i + offset.y, j + offset.x, palette->symbol[level->data[i][j]]);
+            }
         }
     }
+}
+
+void mark_visible_symbols_on_line(world_t* world, vector2_t end, short is_visible[world->current_level->size.y][world->current_level->size.x]){
+    vector2_t diff = sub(end, world->player->pos);
+    vector2_t abs_diff = { .y = diff.y > 0 ? diff.y : -diff.y,  .x = diff.x > 0 ? diff.x : -diff.x};
+    int y_step = diff.y > 0 ? 1 : diff.y == 0 ? 0 : -1;
+    int x_step = diff.x > 0 ? 1 : diff.x == 0 ? 0 : -1;
+
+    vector2_t current = world->player->pos;
+    int* bigger = &(current.x);
+    int* smaller = &(current.y);
+    int bigger_step = x_step;
+    int smaller_step = y_step;
+    if (abs_diff.y > abs_diff.x){
+        bigger_step = y_step;
+        smaller_step = x_step;
+        abs_diff = (vector2_t) { .x = abs_diff.y, .y = abs_diff.x };
+        bigger = &(current.y);
+        smaller = &(current.x);
+    }
+
+    int error = 0;
+    short visible = 1;
+    int derror = (abs_diff.y);
+    for (int i = 0; i < world->player->vision_radius && visible; i++){
+        *bigger += bigger_step;
+        error += derror;
+        if (error >= abs_diff.x){
+            error -= abs_diff.x;
+            *smaller += smaller_step;
+        }
+
+        if (world->current_level->data[current.y][current.x] == 0 ||
+            world->current_level->data[current.y][current.x] == '*'){
+            visible = 0;
+        }
+        is_visible[current.y][current.x] = 1;
+
+    }
+}
+
+void draw_level_with_lighting(WINDOW* window, palette_t* palette, palette_t* light_palette, world_t* world, vector2_t offset){
+    short is_visible[world->current_level->size.y][world->current_level->size.x];
+    memset(is_visible, 0, sizeof(is_visible));
+
+    for (int i = 0; i < world->current_level->size.y; i++){
+         vector2_t level_left = { .x = 0, .y = i };
+         vector2_t level_right = { .x = world->current_level->size.x - 1, .y = i };
+         mark_visible_symbols_on_line(world, level_left, is_visible);
+         mark_visible_symbols_on_line(world, level_right, is_visible);
+    }
+
+    for (int i = 0; i < world->current_level->size.x; i++){
+        vector2_t level_left = { .x = i, .y = 0 };
+        vector2_t level_right = { .x = i, .y = world->current_level->size.y - 1 };
+        mark_visible_symbols_on_line(world, level_left, is_visible);
+        mark_visible_symbols_on_line(world, level_right, is_visible);
+    }
+
+    for (int i = 0; i < world->current_level->size.y; i++){
+        for (int j = 0; j < world->current_level->size.x; j++){
+            char character = world->current_level->data[i][j] ? world->current_level->data[i][j] : '*';
+            if (is_visible[i][j]){
+                mvwaddch(window, i + offset.y, j + offset.x, light_palette->symbol[character]);
+            }else{
+                mvwaddch(window, i + offset.y, j + offset.x, palette->symbol[character]);
+            }
+        }
+    }
+}
+
+void draw_room(WINDOW* window, palette_t* palette, room_t* room, vector2_t offset){
+    for (int i = 0; i < room->size.y; i++){
+        for (int j = 0; j < room->size.x; j++){
+            mvwaddch(window, offset.y + i, offset.x + j, palette->symbol[room->data[i][j]]);
+        }
+    }
+}
+
+void draw_hud(hud_t* hud){
+    wattron(hud->window, COLOR_PAIR(hud->palette->text_pair));
+
+    box(hud->window, 0, 0);
+    mvwprintw(hud->window, 1, 1, "gold: %d", hud->player->gold);
+    mvwprintw(hud->window, 1, 12, "hp: %d/%d", hud->player->health, hud->player->max_health);
+    mvwprintw(hud->window, 1, getmaxx(hud->window) - 9, "lvl: %d", *(hud->current_level));
+
+    wattroff(hud->window, COLOR_PAIR(hud->palette->text_pair));
+
+    wnoutrefresh(hud->window);
+}
+
+void draw_player(WINDOW* window, player_t* player, palette_t* palette){
+    mvwaddch(window, player->screen_pos.y, player->screen_pos.x, palette->symbol['P']);
 }

@@ -20,19 +20,6 @@ void destroy_hud(hud_t* hud){
     free(hud);
 }
 
-void draw_hud(hud_t* hud){
-    wattron(hud->window, COLOR_PAIR(hud->palette->text_pair));
-
-    box(hud->window, 0, 0);
-    mvwprintw(hud->window, 1, 1, "gold: %d", hud->player->gold);
-    mvwprintw(hud->window, 1, 12, "hp: %d/%d", hud->player->health, hud->player->max_health);
-    mvwprintw(hud->window, 1, getmaxx(hud->window) - 9, "lvl: %d", *(hud->current_level));
-
-    wattroff(hud->window, COLOR_PAIR(hud->palette->text_pair));
-
-    wnoutrefresh(hud->window);
-}
-
 void print_message(hud_t* hud, const char* format_string, ...){
     // Just to clear the previous message
     for (int i = 24; i < 71; i++){

@@ -1,6 +1,7 @@
 #pragma once
 #include "utility.h"
 #include "room.h"
+#include "player.h"
 
 typedef struct level_t{
     char** data;
@@ -24,8 +25,6 @@ void set_room_grid_cell_sizes(level_t* level);
 void connect_doors(level_t* level);
 void shut_all_open_doors(level_t* level);
 int room_placer(int rooms_left, int* branches_left, room_pool_t* room_pool, int room_count, room_t* rooms[room_count * 2 + 1][room_count * 2 + 1], vector2_t previous_direction, vector2_t pos, vector2_pair_array_t* connected_rooms);
-
-void draw_level(WINDOW* window, palette_t* palette, level_t* level, vector2_t offset);
 
 void log_level_to_file(level_t* level, const char* filename);
 

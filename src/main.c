@@ -2,20 +2,12 @@
 #include <ncurses.h>
 #include <stdlib.h>
 #include <time.h>
-#include "room.h"
-#include "render.h"
-#include "world.h"
+#include "palette.h"
 #include "title_screen.h"
 #include "rich_presence.h"
 #include "hud.h"
-
-typedef struct {
-    palette_t* palette;
-    world_t* world;
-    WINDOW* game_window;
-
-    int state;
-} game_state_t;
+#include "render.h"
+#include "main.h"
 
 void init_window() {
     initscr();
@@ -27,17 +19,24 @@ void init_window() {
     curs_set(0);
 }
 
-palette_t* set_up_palette(){
+void set_up_palettes(game_state_t* game_state){
 
-    init_color(18, 180, 180, 180); // Nice Black
-    init_color(21, 1000, 550, 0); // Nice Orange
-    init_color(19, 850, 850, 850); // Nice White
+    init_color(23, 750, 750, 750);
+    init_color(18, 0, 0, 0); // Nice Black
+    init_color(21, 900, 450, 0); // Nice Orange
+    init_color(19, 550, 550, 550); // Nice White
     init_color(20, 0, 700, 0); // Nice Green
-    init_color(22, 700, 0, 0); // Nice Red
+    init_color(22, 600, 0, 0); // Nice Red
 
-    palette_t* palette = init_palette(18, 19, 20, 21, 22, 19);
+    game_state->palette = init_palette(18, 19, 20, 21, 22, 23);
 
-    return palette;
+    init_color(28, 180, 180, 180); // Nice Black
+    init_color(31, 1000, 550, 0); // Nice Orange
+    init_color(29, 850, 850, 850); // Nice White
+    init_color(30, 0, 700, 0); // Nice Green
+    init_color(32, 700, 0, 0); // Nice Red
+
+    game_state->light_palette = init_palette(18, 29, 30, 31, 32, 29);
 }
 
 int handle_input(game_state_t* game_state){
@@ -74,17 +73,7 @@ int process(game_state_t* game_state){
 }
 
 int draw(game_state_t* game_state){
-    werase(game_state->game_window);
-    //fill_window_with_background_color(game_state->game_window, game_state->palette);
-
-    draw_level(game_state->game_window, game_state->palette, game_state->world->current_level, get_origin_on_screen(game_state->world));
-
-    mvwaddch(game_state->game_window, game_state->world->player->screen_pos.y, game_state->world->player->screen_pos.x, game_state->palette->symbol['P']);
-
-    wnoutrefresh(game_state->game_window);
-
-    draw_hud(game_state->world->hud);
-    doupdate();
+    render(game_state);
     return 0;
 }
 
@@ -100,11 +89,11 @@ int main() {
     title_screen_init(&menu_pause, 2, "Continue", "Exit");
 
     game_state_t game_state = {
-            .palette = set_up_palette(),
             .world = init_world(),
             .game_window = stdscr,
             .state = 2
     };
+    set_up_palettes(&game_state);
     game_state.world->player->screen_pos.x = getmaxx(stdscr)/2;
     game_state.world->player->screen_pos.y = getmaxy(stdscr)/2;
     game_state.world->hud = init_hud(game_state.game_window, 3, game_state.world->player, &(game_state.world->level), game_state.palette);
@@ -143,6 +132,7 @@ int main() {
     }
 
     destroy_palette(game_state.palette);
+    destroy_palette(game_state.light_palette);
     destroy_world(game_state.world);
     destroy_hud(game_state.world->hud);
     endwin();

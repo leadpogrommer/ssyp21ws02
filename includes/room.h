@@ -1,6 +1,6 @@
 #pragma once
 #include <ncurses.h>
-#include "render.h"
+#include "palette.h"
 #include "utility.h"
 
 typedef struct room_t{
@@ -30,4 +30,3 @@ void add_room_to_pool(room_pool_t* room_pool, room_t* room);
 room_pool_t* load_room_directory(const char* directory);
 
 void print_room(room_t* room);
-void draw_room(WINDOW* window, palette_t* palette, room_t* room, vector2_t offset);
