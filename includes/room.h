@@ -4,6 +4,7 @@
 #include "utility.h"
 
 typedef struct room_t{
+    const char* filename;
     vector2_t size;
     char** data;
     short is_shrine;
@@ -27,6 +28,6 @@ room_pool_t* init_room_pool();
 void destroy_room_pool(room_pool_t* room_pool);
 void add_room_to_pool(room_pool_t* room_pool, room_t* room);
 
-room_pool_t* load_room_directory(const char* directory);
+room_pool_t* load_room_directory();
 
 void print_room(room_t* room);

@@ -9,6 +9,7 @@
 #include "hud.h"
 #include "render.h"
 #include "main.h"
+#include "saver.h"
 
 void init_window() {
     initscr();
@@ -41,10 +42,10 @@ void set_up_palettes(game_state_t* game_state){
 }
 
 void start_up_world(game_state_t* game_state){
-    game_state->world = init_world();
+    game_state->world = start_new_world();
     game_state->world->player->screen_pos.x = getmaxx(stdscr)/2;
     game_state->world->player->screen_pos.y = getmaxy(stdscr)/2;
-    game_state->world->hud = init_hud(game_state->game_window, 3, game_state->world->player, &(game_state->world->level), game_state->palette);
+    game_state->world->hud = init_hud(game_state->game_window, 3, game_state->world->player, &(game_state->world->current_level), game_state->palette);
 }
 
 int handle_input(game_state_t* game_state){
@@ -94,10 +95,10 @@ int main() {
     update_rich_presence_menu();
 
     title_screen_data menu_main;
-    title_screen_init(&menu_main, 2, "New game", "Exit");
+    title_screen_init(&menu_main, 3, "New game", "Load", "Exit");
 
     title_screen_data menu_pause;
-    title_screen_init(&menu_pause, 2, "Continue", "Exit");
+    title_screen_init(&menu_pause, 3, "Continue", "Save", "Exit");
 
     game_state_t game_state = {
             .game_window = stdscr,
@@ -124,7 +125,13 @@ int main() {
                         game_state.state = 0;
                         break;
                     case 1:
+                        game_state.world = load_world();
+                        game_state.world->hud = init_hud(game_state.game_window, 3, game_state.world->player, &(game_state.world->current_level), game_state.palette);
+                        game_state.state = 0;
+                        break;
+                    case 2:
                         game_state.state = 1;
+                        break;
                 }
                 title_screen_draw(stdscr, &menu_main, FALSE);
                 break;
@@ -134,7 +141,12 @@ int main() {
                         game_state.state = 0;
                         break;
                     case 1:
+                        save_world(game_state.world);
+                        game_state.state = 0;
+                        break;
+                    case 2:
                         game_state.state = 1;
+                        break;
                 }
                 title_screen_draw(stdscr, &menu_pause, TRUE);
                 break;

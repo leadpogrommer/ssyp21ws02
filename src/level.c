@@ -76,7 +76,12 @@ level_t* get_level_populated_with_rooms(int room_count, room_pool_t* room_pool){
 
     set_room_grid_cell_sizes(level);
     init_level_char_grid(level);
+    map_rooms_to_chars(level);
 
+    return level;
+}
+
+void map_rooms_to_chars(level_t* level){
     for (int i = 0; i < level->room_grid_size.y; i++){
         for (int j = 0; j < level->room_grid_size.x; j++){
             if (level->room_grid[i][j]){
@@ -89,8 +94,6 @@ level_t* get_level_populated_with_rooms(int room_count, room_pool_t* room_pool){
             }
         }
     }
-
-    return level;
 }
 
 level_t* get_level_with_room_grid(int room_count, room_pool_t* room_pool){
@@ -102,7 +105,7 @@ level_t* get_level_with_room_grid(int room_count, room_pool_t* room_pool){
 
     int branch_count = (room_count - 2)/2;
     if (room_placer(room_count, &branch_count, room_pool, room_count, room_grid, VEC2_ZERO, VEC2_SQUARE(room_count), connected_rooms) == 0){
-        fail_gracefully("Couldn't generate level");
+        fail_gracefully("Couldn't generate current_level");
     }
 
     return cropped_level(map_size, room_count, room_grid, connected_rooms);
@@ -151,25 +154,6 @@ level_t* init_level_room_grid(int room_count, vector2_t room_grid_size){
 
 // set_level_grid_cell_sizes must be called before this one
 void init_level_char_grid(level_t* level){
-    int* positions[2];
-    positions[0] = calloc(sizeof(int), level->room_grid_size.y + 1);
-    positions[1] = calloc(sizeof(int), level->room_grid_size.x + 1);
-
-    // From cell item_count now just calculating prefix sum
-    for (int i = 0; i < level->room_grid_size.y; i++){
-        positions[0][i + 1] = positions[0][i] + level->room_grid_positions[0][i];
-    }
-
-    for (int i = 0; i < level->room_grid_size.x; i++){
-        positions[1][i + 1] = positions[1][i] + level->room_grid_positions[1][i];
-    }
-
-    free(level->room_grid_positions[0]);
-    free(level->room_grid_positions[1]);
-
-    level->room_grid_positions[0] = positions[0];
-    level->room_grid_positions[1] = positions[1];
-
     level->size = (vector2_t) { .y = level->room_grid_positions[0][level->room_grid_size.y], .x = level->room_grid_positions[1][level->room_grid_size.x] };
     level->data = calloc(sizeof(char*), level->size.y);
     for (int i = 0; i < level->size.y; i++){
@@ -178,32 +162,42 @@ void init_level_char_grid(level_t* level){
 }
 
 void set_room_grid_cell_sizes(level_t* level){
-    // Using this field just because it's easy; It is calculated from data this function will get anyway
-    // So no useful data is corrupted
-    level->room_grid_positions[0] = calloc(sizeof(int), level->room_grid_size.y);
-    level->room_grid_positions[1] = calloc(sizeof(int), level->room_grid_size.x);
+    int* cell_sizes[2];
+    cell_sizes[0] = calloc(sizeof(int), level->room_grid_size.y);
+    cell_sizes[1] = calloc(sizeof(int), level->room_grid_size.x);
 
     // Finding cell sizes first
     for (int i = 0; i < level->room_grid_size.y; i++){
         for (int j = 0; j < level->room_grid_size.x; j++){
             if (level->room_grid[i][j]) {
-                level->room_grid_positions[0][i] = level->room_grid_positions[0][i] > level->room_grid[i][j]->size.y ?
-                                                   level->room_grid_positions[0][i] :
-                                                   level->room_grid[i][j]->size.y;
+                cell_sizes[0][i] = cell_sizes[0][i] > level->room_grid[i][j]->size.y ?
+                                   cell_sizes[0][i] :
+                                   level->room_grid[i][j]->size.y;
 
-                level->room_grid_positions[1][j] = level->room_grid_positions[1][j] > level->room_grid[i][j]->size.x ?
-                                                   level->room_grid_positions[1][j] :
-                                                   level->room_grid[i][j]->size.x;
+                cell_sizes[1][j] = cell_sizes[1][j] > level->room_grid[i][j]->size.x ?
+                                   cell_sizes[1][j] :
+                                   level->room_grid[i][j]->size.x;
             }
         }
     }
 
     for (int i = 0; i < level->room_grid_size.y; i++){
-        level->room_grid_positions[0][i] += 1; // Padding for the paths
+        cell_sizes[0][i] += 1; // Padding for the paths
     }
 
     for (int i = 0; i < level->room_grid_size.x; i++){
-        level->room_grid_positions[1][i] += 1;
+        cell_sizes[1][i] += 1;
+    }
+    level->room_grid_positions[0] = calloc(sizeof(int), level->room_grid_size.y + 1);
+    level->room_grid_positions[1] = calloc(sizeof(int), level->room_grid_size.x + 1);
+
+    // From cell_sizes now just calculating prefix sum
+    for (int i = 0; i < level->room_grid_size.y; i++){
+        level->room_grid_positions[0][i + 1] = level->room_grid_positions[0][i] + cell_sizes[0][i];
+    }
+
+    for (int i = 0; i < level->room_grid_size.x; i++){
+        level->room_grid_positions[1][i + 1] = level->room_grid_positions[1][i] + cell_sizes[1][i];
     }
 }
 
@@ -297,7 +291,7 @@ int room_placer(int rooms_left, int* branches_left, room_pool_t* room_pool, int 
 
 void log_level_to_file(level_t* level, const char* filename){
     FILE* file = fopen(filename, "w");
-    if (!file) fail_gracefully("Couldn't open file to log a level: %s", filename);
+    if (!file) fail_gracefully("Couldn't open file to log a current_level: %s", filename);
 
     for (int i = 0; i < level->size.y; i++){
         for (int j = 0; j < level->size.x; j++){

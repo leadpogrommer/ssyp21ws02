@@ -1,6 +1,7 @@
 #include "thirdparty/discord_game_sdk.h"
 #include "rich_presence.h"
 #include <stdio.h>
+#include <time.h>
 
 static struct Application app;
 
@@ -28,7 +29,8 @@ void rp_tick() {
 
 void update_rich_presence_level(int level) {
     struct DiscordActivity activity = {};
-    sprintf(activity.details, "Playing on level %d", level);
+    sprintf(activity.details, "Playing on current_level %d", level);
+    activity.timestamps.start = time(NULL);
     rp_update(&activity);
 }
 

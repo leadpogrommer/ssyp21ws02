@@ -4,8 +4,9 @@ struct world_t;
 
 typedef struct item_t{
     const char* name;
+    int id;
     int damage_buff, hp_buff;
-    void (*use)(struct world_t* world);
+    int callback_index;
 }item_t;
 
 typedef struct inventory_t{

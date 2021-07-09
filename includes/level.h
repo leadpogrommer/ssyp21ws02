@@ -16,6 +16,7 @@ typedef struct level_t{
 
 level_t* generate_level(int room_count, room_pool_t* room_pool);
 level_t* init_level_room_grid(int room_count, vector2_t room_grid_size);
+void map_rooms_to_chars(level_t* level);
 void init_level_char_grid(level_t* level);
 level_t* get_level_populated_with_rooms(int room_count, room_pool_t* room_pool);
 level_t* get_level_with_room_grid(int room_count, room_pool_t* room_pool);
