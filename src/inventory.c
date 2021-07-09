@@ -45,7 +45,7 @@ void destroy_inventory(inventory_t* inventory){
     free(inventory);
 }
 
-void use_item(inventory_t* inventory, item_t* item, void* world){
+void use_item(inventory_t* inventory, item_t* item, struct world_t* world){
     if (item->use){
         item->use(world);
         delete_item_from_inventory(inventory, item);

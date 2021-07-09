@@ -1,9 +1,11 @@
 #pragma once
 
+struct world_t;
+
 typedef struct item_t{
     const char* name;
     int damage_buff, hp_buff;
-    void (*use)(void* world);
+    void (*use)(struct world_t* world);
 }item_t;
 
 typedef struct inventory_t{
@@ -11,7 +13,7 @@ typedef struct inventory_t{
     int item_count, size;
 }inventory_t;
 
-void use_item(inventory_t* inventory, item_t* item, void* level);
+void use_item(inventory_t* inventory, item_t* item, struct world_t* world);
 
 inventory_t* init_inventory(int size);
 void destroy_inventory(inventory_t* inventory);

@@ -20,11 +20,12 @@ void process_world(world_t* world){
         case 'h':
             world->player->max_health += 10;
             world->current_level->data[world->player->pos.y][world->player->pos.x] = '.';
+            print_message(world->hud, "You used a shrine of prosperity");
             break;
         case '?':
             pick_up_item(world->player, get_random_item(world->items));
             world->current_level->data[world->player->pos.y][world->player->pos.x] = '.';
-            print_message(world->hud, "Picked up an iteghhsssssssssshhhhhhhhm: %s", world->player->inventory->items[world->player->inventory->item_count - 1]->name);
+            print_message(world->hud, "Picked up an item: %s", world->player->inventory->items[world->player->inventory->item_count - 1]->name);
             break;
     }
 }
@@ -44,11 +45,15 @@ void load_level(world_t* world, int room_count){
 }
 
 void load_items(world_t* world){
-    world->items = init_inventory(1);
+    world->items = init_inventory(2);
     item_t* power_up = calloc(sizeof(item_t), 1);
     power_up->hp_buff = 10;
     power_up->name = "Apple of Edem";
+    item_t* item2 = calloc(sizeof(item_t), 1);
+    item2->damage_buff = 15;
+    item2->name = "Sword of the Storm";
     add_item_to_inventory(world->items, power_up);
+    add_item_to_inventory(world->items, item2);
 }
 
 void destroy_world(world_t* world){

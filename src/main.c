@@ -28,11 +28,11 @@ void init_window() {
 }
 
 palette_t* set_up_palette(){
-    init_pair(1, COLOR_CYAN, COLOR_CYAN);
 
-    palette_t* palette = init_palette();
-    palette->symbol['.'] = ' ';
-    palette->symbol['*'] = ' ' | COLOR_PAIR(1);
+    init_color(18, 0, 0, 0);
+
+    palette_t* palette = init_palette(18, COLOR_WHITE, COLOR_RED, COLOR_MAGENTA, COLOR_RED, COLOR_WHITE);
+
     return palette;
 }
 
@@ -71,6 +71,7 @@ int process(game_state_t* game_state){
 
 int draw(game_state_t* game_state){
     werase(game_state->game_window);
+    //fill_window_with_background_color(game_state->game_window, game_state->palette);
 
     draw_level(game_state->game_window, game_state->palette, game_state->world->current_level, get_origin_on_screen(game_state->world));
 
@@ -102,7 +103,9 @@ int main() {
     };
     game_state.world->player->screen_pos.x = getmaxx(stdscr)/2;
     game_state.world->player->screen_pos.y = getmaxy(stdscr)/2;
-    game_state.world->hud = init_hud(game_state.game_window, 3, game_state.world->player, &(game_state.world->level));
+    game_state.world->hud = init_hud(game_state.game_window, 3, game_state.world->player, &(game_state.world->level), game_state.palette);
+    wbkgd(stdscr, COLOR_PAIR(game_state.palette->text_pair));
+
 
     while (game_state.state != 1) {
         switch(game_state.state) {

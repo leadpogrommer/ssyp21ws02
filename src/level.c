@@ -316,7 +316,7 @@ void draw_level(WINDOW* window, palette_t* palette, level_t* level, vector2_t of
     for (int i = 0; i < level->size.y; i++){
         for (int j = 0; j < level->size.x; j++){
             if (!level->data[i][j]){
-                mvwaddch(window, i + offset.y, j + offset.x, palette->symbol['.']);
+                mvwaddch(window, i + offset.y, j + offset.x, palette->symbol['*']);
             }else{
                 mvwaddch(window, i + offset.y, j + offset.x, palette->symbol[level->data[i][j]]);
             }
