@@ -1,19 +1,34 @@
 #include "world.h"
 #include <stdlib.h>
+#include "rich_presence.h"
 
 world_t* init_world(){
     world_t* world = calloc(sizeof(world_t), 1);
     world->player = init_player(10);
     world->room_pool = load_room_directory("resources/rooms");
+    world->level = 0;
     load_level(world, 2);
+    load_items(world);
 
     return world;
 }
 
 void process_world(world_t* world){
-    if (world->current_level->data[world->player->pos.y][world->player->pos.x] == 'E'){
-        world->level++;
-        load_level(world, world->current_level->room_count + 1);
+    switch (world->current_level->data[world->player->pos.y][world->player->pos.x]){
+        case 'e':
+            world->level++;
+            load_level(world, world->current_level->room_count + 1);
+            break;
+        case 'h':
+            world->player->max_health += 10;
+            world->current_level->data[world->player->pos.y][world->player->pos.x] = '.';
+            print_message(world->hud, "You used a shrine of prosperity");
+            break;
+        case '?':
+            pick_up_item(world->player, get_random_item(world->items));
+            world->current_level->data[world->player->pos.y][world->player->pos.x] = '.';
+            print_message(world->hud, "Picked up an item: %s", world->player->inventory->items[world->player->inventory->item_count - 1]->name);
+            break;
     }
 }
 
@@ -29,12 +44,27 @@ void load_level(world_t* world, int room_count){
     // Move player to start
     move_player_to(world->player, get_level_position(world->current_level, world->current_level->start_room_grid_position,
                                                      VEC2_SQUARE(2)));
+
+    update_rich_presence_level(world->level);
+}
+
+void load_items(world_t* world){
+    world->items = init_inventory(2);
+    item_t* power_up = calloc(sizeof(item_t), 1);
+    power_up->hp_buff = 10;
+    power_up->name = "Apple of Edem";
+    item_t* item2 = calloc(sizeof(item_t), 1);
+    item2->damage_buff = 15;
+    item2->name = "Sword of the Storm";
+    add_item_to_inventory(world->items, power_up);
+    add_item_to_inventory(world->items, item2);
 }
 
 void destroy_world(world_t* world){
     destroy_player(world->player);
     destroy_level(world->current_level);
     destroy_room_pool(world->room_pool);
+    destroy_inventory(world->items);
     free(world);
 }
 

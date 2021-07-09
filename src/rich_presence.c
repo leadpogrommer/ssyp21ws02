@@ -1,5 +1,6 @@
 #include "thirdparty/discord_game_sdk.h"
 #include "rich_presence.h"
+#include <stdio.h>
 
 static struct Application app;
 
@@ -8,7 +9,7 @@ void rp_init() {
 
     struct DiscordCreateParams params;
     params.client_id = 861915127292231691l;
-    params.flags = DiscordCreateFlags_Default;
+    params.flags = DiscordCreateFlags_NoRequireDiscord;
     params.event_data = &app;
     params.events = 0;
 
@@ -16,9 +17,23 @@ void rp_init() {
 }
 
 void rp_update(struct DiscordActivity *activity) {
-    app.core->get_activity_manager(app.core)->update_activity(app.core->get_activity_manager(app.core), activity, 0, 0);
+    //if (app.core){
+        app.core->get_activity_manager(app.core)->update_activity(app.core->get_activity_manager(app.core), activity, 0, 0);
+    //}
 }
 
 void rp_tick() {
     app.core->run_callbacks(app.core);
+}
+
+void update_rich_presence_level(int level) {
+    struct DiscordActivity activity = {};
+    sprintf(activity.details, "Playing on level %d", level);
+    rp_update(&activity);
+}
+
+void update_rich_presence_menu() {
+    struct DiscordActivity activity = {};
+    sprintf(activity.details, "In main menu");
+    rp_update(&activity);
 }

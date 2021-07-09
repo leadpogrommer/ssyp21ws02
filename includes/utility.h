@@ -35,4 +35,18 @@ typedef struct vector2_array_t{
 
 vector2_array_t* init_vector2_array();
 void push_back_vector2(vector2_array_t* array, vector2_t element);
-void destroy_vector2_array();
+void destroy_vector2_array(vector2_array_t* array);
+
+typedef struct vector2_pair_t{
+    vector2_t first, second;
+}vector2_pair_t;
+
+typedef struct vector2_pair_array_t{
+    vector2_pair_t* data;
+    int size, capacity;
+}vector2_pair_array_t;
+
+vector2_pair_array_t* init_vector2_pair_array();
+void push_back_vector2_pair(vector2_pair_array_t* array, vector2_pair_t element);
+void destroy_vector2_pair_array(vector2_pair_array_t* array);
+void delete_last_vector2_pair(vector2_pair_array_t* array);
