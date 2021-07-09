@@ -6,6 +6,7 @@ inventory_t* init_inventory(int size){
     inventory->size = size;
     inventory->items = calloc(sizeof(item_t*), inventory->size);
     inventory->item_count = 0;
+    return inventory;
 }
 
 int add_item_to_inventory(inventory_t* inventory, item_t* item){

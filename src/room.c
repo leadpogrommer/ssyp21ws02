@@ -97,7 +97,10 @@ room_pool_t* load_room_directory(const char* directory){
 
     struct dirent* current_el = readdir(dir); // Reading next position
     while (current_el != NULL){
-        if (current_el->d_type == DT_REG){ // Element needs to be a file
+        if (current_el->d_stat.st_attr & FIO_SO_IFREG){ // Element needs to be a file
+            for(int i = 0; current_el->d_name[i]; i++){
+                current_el->d_name[i] = tolower(current_el->d_name[i]);
+            }
             if (!strcmp(current_el->d_name, "start_room.txt")){
                 room_pool->start_room = load_room(current_el->d_name);
             }else if (!strcmp(current_el->d_name, "end_room.txt")){

@@ -4,12 +4,14 @@
 #include <time.h>
 #include "palette.h"
 #include "title_screen.h"
-#include "rich_presence.h"
-#include "thirdparty/discord_game_sdk.h"
+//#include "rich_presence.h"
+//#include "thirdparty/discord_game_sdk.h"
 #include "hud.h"
 #include "render.h"
 #include "main.h"
+#include <SDL/SDL.h>
 
+SDL_Joystick *joystick;
 void init_window() {
     initscr();
     cbreak();
@@ -18,6 +20,8 @@ void init_window() {
     keypad(stdscr, TRUE);
     start_color();
     curs_set(0);
+    SDL_InitSubSystem(SDL_INIT_JOYSTICK);
+    joystick = SDL_JoystickOpen(0);
 }
 
 void set_up_palettes(game_state_t* game_state){
@@ -85,13 +89,30 @@ int draw(game_state_t* game_state){
     return 0;
 }
 
-int main() {
+void psp_handle_input(){
+    static Uint32 prev_time = 0;
+    Uint32 time = SDL_GetTicks();
+    if(time - prev_time > 100){
+        prev_time = time;
+    } else{
+        return 0;
+    }
+    if(SDL_JoystickGetButton(joystick, 6))ungetch('s');
+    if(SDL_JoystickGetButton(joystick, 7))ungetch('a');
+    if(SDL_JoystickGetButton(joystick, 8))ungetch('w');
+    if(SDL_JoystickGetButton(joystick, 9))ungetch('d');
+    if(SDL_JoystickGetButton(joystick, 10))ungetch('p');
+    if(SDL_JoystickGetButton(joystick, 2))ungetch(' ');
+}
+
+int SDL_main() {
+    chdir("ms0:/");
     srand(time(NULL));
 
     init_window();
 
-    rp_init();
-    update_rich_presence_menu();
+//    rp_init();
+//    update_rich_presence_menu();
 
     title_screen_data menu_main;
     title_screen_init(&menu_main, 2, "New game", "Exit");
@@ -108,6 +129,7 @@ int main() {
 
 
     while (game_state.state != 1) {
+        psp_handle_input();
         switch(game_state.state) {
             case 0:
                 if(!game_state.world){
@@ -139,8 +161,8 @@ int main() {
                 title_screen_draw(stdscr, &menu_pause, TRUE);
                 break;
         }
-        rp_tick();
-        usleep(16 * 1000);
+//        rp_tick();
+        SDL_Delay(16);
     }
 
     destroy_palette(game_state.palette);

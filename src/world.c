@@ -1,6 +1,6 @@
 #include "world.h"
 #include <stdlib.h>
-#include "rich_presence.h"
+//#include "rich_presence.h"
 
 world_t* init_world(){
     world_t* world = calloc(sizeof(world_t), 1);
@@ -45,7 +45,7 @@ void load_level(world_t* world, int room_count){
     move_player_to(world->player, get_level_position(world->current_level, world->current_level->start_room_grid_position,
                                                      VEC2_SQUARE(2)));
 
-    update_rich_presence_level(world->level);
+//    update_rich_presence_level(world->level);
 }
 
 void load_items(world_t* world){
