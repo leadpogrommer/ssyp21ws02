@@ -1,11 +1,16 @@
 #include "inventory.h"
 #include <stdlib.h>
+#include "utility.h"
+
+static void (**callbacks)(struct world_t* world);
+static int callback_count = 0;
 
 inventory_t* init_inventory(int size){
     inventory_t* inventory = calloc(sizeof(inventory_t), 1);
     inventory->size = size;
     inventory->items = calloc(sizeof(item_t*), inventory->size);
     inventory->item_count = 0;
+
     return inventory;
 }
 
@@ -38,17 +43,19 @@ int delete_item_from_inventory(inventory_t* inventory, item_t* item){
     return 1;
 }
 
-void destroy_inventory(inventory_t* inventory){
-    for (int i = 0; i < inventory->item_count; i++){
-        free(inventory->items[i]);
+void destroy_inventory(inventory_t* inventory, int destroy_items){
+    if (destroy_items) {
+        for (int i = 0; i < inventory->item_count; i++) {
+            free(inventory->items[i]);
+        }
     }
     free(inventory->items);
     free(inventory);
 }
 
 void use_item(inventory_t* inventory, item_t* item, struct world_t* world){
-    if (item->use){
-        item->use(world);
+    if (is_valid_index(item->callback_index, callback_count)){
+        callbacks[item->callback_index](world);
         delete_item_from_inventory(inventory, item);
     }
 }

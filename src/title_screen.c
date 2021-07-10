@@ -61,3 +61,7 @@ void title_screen_draw(WINDOW* window, title_screen_data* data, int frame) {
 
     wrefresh(window);
 }
+
+void title_screen_destroy(title_screen_data* data){
+    free(data->items);
+}

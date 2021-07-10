@@ -27,7 +27,7 @@ void draw_level(WINDOW* window, palette_t* palette, level_t* level, vector2_t of
     }
 }
 
-void mark_visible_symbols_on_line(world_t* world, vector2_t end, short is_visible[world->current_level->size.y][world->current_level->size.x]){
+void mark_visible_symbols_on_line(world_t* world, vector2_t end, short is_visible[world->level->size.y][world->level->size.x]){
     vector2_t diff = sub(end, world->player->pos);
     vector2_t abs_diff = { .y = diff.y > 0 ? diff.y : -diff.y,  .x = diff.x > 0 ? diff.x : -diff.x};
     int y_step = diff.y > 0 ? 1 : diff.y == 0 ? 0 : -1;
@@ -57,8 +57,8 @@ void mark_visible_symbols_on_line(world_t* world, vector2_t end, short is_visibl
             *smaller += smaller_step;
         }
 
-        if (world->current_level->data[current.y][current.x] == 0 ||
-            world->current_level->data[current.y][current.x] == '*'){
+        if (world->level->data[current.y][current.x] == 0 ||
+            world->level->data[current.y][current.x] == '*'){
             visible = 0;
         }
         is_visible[current.y][current.x] = 1;
@@ -67,26 +67,26 @@ void mark_visible_symbols_on_line(world_t* world, vector2_t end, short is_visibl
 }
 
 void draw_level_with_lighting(WINDOW* window, palette_t* palette, palette_t* light_palette, world_t* world, vector2_t offset){
-    short is_visible[world->current_level->size.y][world->current_level->size.x];
+    short is_visible[world->level->size.y][world->level->size.x];
     memset(is_visible, 0, sizeof(is_visible));
 
-    for (int i = 0; i < world->current_level->size.y; i++){
+    for (int i = 0; i < world->level->size.y; i++){
          vector2_t level_left = { .x = 0, .y = i };
-         vector2_t level_right = { .x = world->current_level->size.x - 1, .y = i };
+         vector2_t level_right = { .x = world->level->size.x - 1, .y = i };
          mark_visible_symbols_on_line(world, level_left, is_visible);
          mark_visible_symbols_on_line(world, level_right, is_visible);
     }
 
-    for (int i = 0; i < world->current_level->size.x; i++){
+    for (int i = 0; i < world->level->size.x; i++){
         vector2_t level_left = { .x = i, .y = 0 };
-        vector2_t level_right = { .x = i, .y = world->current_level->size.y - 1 };
+        vector2_t level_right = { .x = i, .y = world->level->size.y - 1 };
         mark_visible_symbols_on_line(world, level_left, is_visible);
         mark_visible_symbols_on_line(world, level_right, is_visible);
     }
 
-    for (int i = 0; i < world->current_level->size.y; i++){
-        for (int j = 0; j < world->current_level->size.x; j++){
-            char character = world->current_level->data[i][j] ? world->current_level->data[i][j] : '*';
+    for (int i = 0; i < world->level->size.y; i++){
+        for (int j = 0; j < world->level->size.x; j++){
+            char character = world->level->data[i][j] ? world->level->data[i][j] : '*';
             if (is_visible[i][j]){
                 mvwaddch(window, i + offset.y, j + offset.x, light_palette->symbol[character]);
             }else{

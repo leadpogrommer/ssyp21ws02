@@ -29,10 +29,14 @@ pathfinder_t* init_pathfinder(level_t* level){
 void destroy_pathfinder(pathfinder_t* pathfinder){
     for (int i = 0; i < pathfinder->level->size.y; i++){
         free(pathfinder->closed[i]);
+        for (int j = 0; j < pathfinder->level->size.x; j++){
+            free(pathfinder->heap_elements[i][j]);
+        }
         free(pathfinder->heap_elements[i]);
     }
     free(pathfinder->closed);
     free(pathfinder->heap_elements);
+    destroy_heap(pathfinder->heap);
     free(pathfinder);
 }
 

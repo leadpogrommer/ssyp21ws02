@@ -9,10 +9,15 @@
 
 
 room_t* load_room(const char* filename){
+    char root_directory[256];
+    getcwd(root_directory, 256); // We need to save initial directory
+
+    chdir("resources/rooms"); // Going in target directory
+
     FILE* file = fopen(filename, "r");
     if (file == NULL) fail_gracefully("Cannot open this file: %s", filename);
 
-    room_t* room = malloc(sizeof(room_t));
+    room_t* room = calloc(sizeof(room_t), 1);
     for (int i = 0; i < 3; i++){
         for (int j = 0; j < 3; j++){
             room->doors[i][j] = VEC2_UP;
@@ -21,6 +26,7 @@ room_t* load_room(const char* filename){
 
     fscanf(file, "%d %d %hd", &room->size.x, &room->size.y, &room->is_shrine);
 
+    strcpy(room->filename, filename);
     room->data = malloc(sizeof(char*) * room->size.y);
 
     while (getc(file) != '\n'); // To step into data itself
@@ -50,6 +56,8 @@ room_t* load_room(const char* filename){
             while (getc(file) != '\n'); // Last line might not contain \n bc it's last line
         }
     }
+
+    chdir(root_directory); // Going back to initial directory
 
     return room;
 }
@@ -84,16 +92,35 @@ void add_room_to_pool(room_pool_t* room_pool, room_t* room){
     }
 }
 
-room_pool_t* load_room_directory(const char* directory){
-    DIR* dir = opendir(directory);
-    if (dir == NULL) fail_gracefully("Cannot open directory: %s", directory);
+room_t* get_room_by_name(room_pool_t* room_pool, const char* filename){
+    if (!strcmp(filename, room_pool->start_room->filename)){
+        return room_pool->start_room;
+    }
 
-    char root_directory[256];
-    getcwd(root_directory, 256); // We need to save initial directory
+    if (!strcmp(filename, room_pool->end_room->filename)){
+        return room_pool->end_room;
+    }
+
+    for (int i = 0; i < room_pool->count; i++){
+        if (!strcmp(filename, room_pool->rooms[i]->filename)){
+            return room_pool->rooms[i];
+        }
+    }
+
+    for (int i = 0; i < room_pool->shrine_count; i++){
+        if (!strcmp(filename, room_pool->shrine_rooms[i]->filename)){
+            return room_pool->shrine_rooms[i];
+        }
+    }
+
+    return NULL;
+}
+
+room_pool_t* load_room_directory(){
+    DIR* dir = opendir("resources/rooms");
+    if (dir == NULL) fail_gracefully("Cannot open directory: %s", "resources/rooms");
 
     room_pool_t* room_pool = load_room_pool(0);
-
-    chdir(directory); // Going in target directory
 
     struct dirent* current_el = readdir(dir); // Reading next position
     while (current_el != NULL){
@@ -112,11 +139,12 @@ room_pool_t* load_room_directory(const char* directory){
         current_el = readdir(dir);
     }
 
+    closedir(dir);
+
     if (!room_pool->start_room || !room_pool->end_room){
         fail_gracefully("No start or end room was found. Game resources corrupted");
     }
 
-    chdir(root_directory); // Going back to initial directory
     return room_pool;
 }
 
@@ -142,6 +170,9 @@ room_pool_t* init_room_pool(){
 }
 
 void destroy_room_pool(room_pool_t* room_pool){
+    destroy_room(room_pool->start_room);
+    destroy_room(room_pool->end_room);
+
     for (int i = 0; i < room_pool->count; i++){
         destroy_room(room_pool->rooms[i]);
     }

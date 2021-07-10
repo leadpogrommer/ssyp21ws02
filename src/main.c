@@ -10,6 +10,7 @@
 #include "render.h"
 #include "main.h"
 #include <SDL/SDL.h>
+#include "saver.h"
 
 SDL_Joystick *joystick;
 void init_window() {
@@ -45,10 +46,10 @@ void set_up_palettes(game_state_t* game_state){
 }
 
 void start_up_world(game_state_t* game_state){
-    game_state->world = init_world();
+    game_state->world = start_new_world();
     game_state->world->player->screen_pos.x = getmaxx(stdscr)/2;
     game_state->world->player->screen_pos.y = getmaxy(stdscr)/2;
-    game_state->world->hud = init_hud(game_state->game_window, 3, game_state->world->player, &(game_state->world->level), game_state->palette);
+    game_state->world->hud = init_hud(game_state->game_window, 3, game_state->world->player, &(game_state->world->current_level), game_state->palette);
 }
 
 int handle_input(game_state_t* game_state){
@@ -115,10 +116,10 @@ int SDL_main() {
 //    update_rich_presence_menu();
 
     title_screen_data menu_main;
-    title_screen_init(&menu_main, 2, "New game", "Exit");
+    title_screen_init(&menu_main, 3, "New game", "Load", "Exit");
 
     title_screen_data menu_pause;
-    title_screen_init(&menu_pause, 2, "Continue", "Exit");
+    title_screen_init(&menu_pause, 3, "Continue", "Save", "Exit");
 
     game_state_t game_state = {
             .game_window = stdscr,
@@ -127,6 +128,7 @@ int SDL_main() {
     set_up_palettes(&game_state);
     wbkgd(stdscr, COLOR_PAIR(game_state.palette->text_pair));
 
+    int n = sizeof(int);
 
     while (game_state.state != 1) {
         psp_handle_input();
@@ -146,7 +148,13 @@ int SDL_main() {
                         game_state.state = 0;
                         break;
                     case 1:
+                        game_state.world = load_world();
+                        game_state.world->hud = init_hud(game_state.game_window, 3, game_state.world->player, &(game_state.world->current_level), game_state.palette);
+                        game_state.state = 0;
+                        break;
+                    case 2:
                         game_state.state = 1;
+                        break;
                 }
                 title_screen_draw(stdscr, &menu_main, FALSE);
                 break;
@@ -156,7 +164,12 @@ int SDL_main() {
                         game_state.state = 0;
                         break;
                     case 1:
+                        save_world(game_state.world);
+                        game_state.state = 0;
+                        break;
+                    case 2:
                         game_state.state = 1;
+                        break;
                 }
                 title_screen_draw(stdscr, &menu_pause, TRUE);
                 break;
@@ -165,10 +178,13 @@ int SDL_main() {
         SDL_Delay(16);
     }
 
+    title_screen_destroy(&menu_main);
+    title_screen_destroy(&menu_pause);
     destroy_palette(game_state.palette);
     destroy_palette(game_state.light_palette);
-    destroy_world(game_state.world);
-    destroy_hud(game_state.world->hud);
+    if (game_state.world){
+        destroy_world(game_state.world);
+    }
     endwin();
     return 0;
 }
