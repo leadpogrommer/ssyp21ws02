@@ -37,7 +37,7 @@ int title_screen_handle_input(title_screen_data* data) {
     return -1;
 }
 
-void title_screen_draw(WINDOW* window, title_screen_data* data, int frame) {
+void title_screen_draw(WINDOW* window, title_screen_data* data, int frame, char* title) {
     if(!frame) werase(window);
     else {
         int maxw = strlen(data->items[0]);
@@ -54,6 +54,10 @@ void title_screen_draw(WINDOW* window, title_screen_data* data, int frame) {
     }
 
     int offset_y = (getmaxy(window) - data->count * 2) / 2;
+    if(strlen(title) > 0) {
+        int offset_x = (getmaxx(window) - strlen(title) - 4) / 2;
+        mvwprintw(window, 3, offset_x, "[ %s ]", title);
+    }
     for(int i = 0; i < data->count; i++) {
         int offset_x = (getmaxx(window) - strlen(data->items[i]) - 4) / 2;
         mvwprintw(window, offset_y + i * 2, offset_x, data->pos == i ? "> %s <" : "  %s  ", data->items[i]);

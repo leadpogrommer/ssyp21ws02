@@ -78,6 +78,7 @@ int handle_input(game_state_t* game_state){
 
 int process(game_state_t* game_state){
     process_world(game_state->world);
+    if(game_state->world->player->health <= 0) game_state->state = 4;
     return 0;
 }
 
@@ -99,6 +100,9 @@ int main() {
 
     title_screen_data menu_pause;
     title_screen_init(&menu_pause, 3, "Continue", "Save", "Exit");
+
+    title_screen_data menu_gameover;
+    title_screen_init(&menu_gameover, 2, "Main menu", "Exit");
 
     game_state_t game_state = {
             .game_window = stdscr,
@@ -134,7 +138,7 @@ int main() {
                         game_state.state = 1;
                         break;
                 }
-                title_screen_draw(stdscr, &menu_main, FALSE);
+                title_screen_draw(stdscr, &menu_main, FALSE, "");
                 break;
             case 3:
                 switch (title_screen_handle_input(&menu_pause)) {
@@ -149,7 +153,20 @@ int main() {
                         game_state.state = 1;
                         break;
                 }
-                title_screen_draw(stdscr, &menu_pause, TRUE);
+                title_screen_draw(stdscr, &menu_pause, TRUE, "");
+                break;
+            case 4:
+                switch (title_screen_handle_input(&menu_gameover)) {
+                    case 0:
+                        destroy_world(game_state.world);
+                        game_state.world = NULL;
+                        game_state.state = 2;
+                        break;
+                    case 1:
+                        game_state.state = 1;
+                        break;
+                }
+                title_screen_draw(stdscr, &menu_gameover, FALSE, "Game over");
                 break;
         }
         rp_tick();
@@ -158,6 +175,7 @@ int main() {
 
     title_screen_destroy(&menu_main);
     title_screen_destroy(&menu_pause);
+    title_screen_destroy(&menu_gameover);
     destroy_palette(game_state.palette);
     destroy_palette(game_state.light_palette);
     if (game_state.world){
