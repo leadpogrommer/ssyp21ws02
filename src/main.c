@@ -2,22 +2,14 @@
 #include <ncurses.h>
 #include <stdlib.h>
 #include <time.h>
-#include "room.h"
-#include "render.h"
-#include "world.h"
+#include "palette.h"
 #include "title_screen.h"
 #include "rich_presence.h"
 #include "thirdparty/discord_game_sdk.h"
 #include "hud.h"
-#include "enemies.h"
-
-typedef struct {
-    palette_t* palette;
-    world_t* world;
-    WINDOW* game_window;
-    hud_t* hud;
-    int state;
-} game_state_t;
+#include "render.h"
+#include "main.h"
+#include "saver.h"
 
 void init_window() {
     initscr();
@@ -29,13 +21,31 @@ void init_window() {
     curs_set(0);
 }
 
-palette_t* set_up_palette(){
-    init_pair(1, COLOR_CYAN, COLOR_CYAN);
+void set_up_palettes(game_state_t* game_state){
 
-    palette_t* palette = init_palette();
-    palette->symbol['.'] = ' ';
-    palette->symbol['*'] = ' ' | COLOR_PAIR(1);
-    return palette;
+    init_color(23, 750, 750, 750);
+    init_color(18, 0, 0, 0); // Nice Black
+    init_color(21, 900, 450, 0); // Nice Orange
+    init_color(19, 550, 550, 550); // Nice White
+    init_color(20, 0, 700, 0); // Nice Green
+    init_color(22, 600, 0, 0); // Nice Red
+
+    game_state->palette = init_palette(18, 19, 20, 21, 22, 23);
+
+    init_color(28, 180, 180, 180); // Nice Black
+    init_color(31, 1000, 550, 0); // Nice Orange
+    init_color(29, 850, 850, 850); // Nice White
+    init_color(30, 0, 700, 0); // Nice Green
+    init_color(32, 700, 0, 0); // Nice Red
+
+    game_state->light_palette = init_palette(18, 29, 30, 31, 32, 29);
+}
+
+void start_up_world(game_state_t* game_state){
+    game_state->world = start_new_world();
+    game_state->world->player->screen_pos.x = getmaxx(stdscr)/2;
+    game_state->world->player->screen_pos.y = getmaxy(stdscr)/2;
+    game_state->world->hud = init_hud(game_state->game_window, 3, game_state->world->player, &(game_state->world->current_level), game_state->palette);
 }
 
 int handle_input(game_state_t* game_state){
@@ -72,26 +82,8 @@ int process(game_state_t* game_state){
 }
 
 int draw(game_state_t* game_state){
-    werase(game_state->game_window);
-
-    vector2_t offset = {.x = 0, .y = 0};
-    draw_level(game_state->game_window, game_state->palette, game_state->world->current_level, get_origin_on_screen(game_state->world));
-    draw_enemies(game_state->game_window, game_state->palette, game_state->world->enemies, get_origin_on_screen(game_state->world));
-
-    mvwaddch(game_state->game_window, game_state->world->player->screen_pos.y, game_state->world->player->screen_pos.x, game_state->palette->symbol['P']);
-
-    wnoutrefresh(game_state->game_window);
-
-    draw_hud(game_state->hud);
-    doupdate();
+    render(game_state);
     return 0;
-}
-
-void update_rich_presence(game_state_t* game_state) {
-    struct DiscordActivity activity = {};
-    sprintf(activity.state, "test %d", 1);
-    sprintf(activity.details, "test 2 %d", 2);
-    rp_update(&activity);
 }
 
 int main() {
@@ -100,27 +92,30 @@ int main() {
     init_window();
 
     rp_init();
+    update_rich_presence_menu();
 
     title_screen_data menu_main;
-    title_screen_init(&menu_main, 2, "New game", "Exit");
+    title_screen_init(&menu_main, 3, "New game", "Load", "Exit");
 
     title_screen_data menu_pause;
-    title_screen_init(&menu_pause, 2, "Continue", "Exit");
+    title_screen_init(&menu_pause, 3, "Continue", "Save", "Exit");
 
     game_state_t game_state = {
-            .palette = set_up_palette(),
-            .world = init_world(),
             .game_window = stdscr,
             .state = 2
     };
-    game_state.world->player->screen_pos.x = getmaxx(stdscr)/2;
-    game_state.world->player->screen_pos.y = getmaxy(stdscr)/2;
-    update_rich_presence(&game_state);
-    game_state.hud = init_hud(game_state.game_window, 3, game_state.world);
+    set_up_palettes(&game_state);
+    wbkgd(stdscr, COLOR_PAIR(game_state.palette->text_pair));
+
+    int n = sizeof(int);
 
     while (game_state.state != 1) {
         switch(game_state.state) {
             case 0:
+                if(!game_state.world){
+                    start_up_world(&game_state);
+                }
+
                 handle_input(&game_state);
                 process(&game_state);
                 draw(&game_state);
@@ -131,7 +126,13 @@ int main() {
                         game_state.state = 0;
                         break;
                     case 1:
+                        game_state.world = load_world();
+                        game_state.world->hud = init_hud(game_state.game_window, 3, game_state.world->player, &(game_state.world->current_level), game_state.palette);
+                        game_state.state = 0;
+                        break;
+                    case 2:
                         game_state.state = 1;
+                        break;
                 }
                 title_screen_draw(stdscr, &menu_main, FALSE);
                 break;
@@ -141,7 +142,12 @@ int main() {
                         game_state.state = 0;
                         break;
                     case 1:
+                        save_world(game_state.world);
+                        game_state.state = 0;
+                        break;
+                    case 2:
                         game_state.state = 1;
+                        break;
                 }
                 title_screen_draw(stdscr, &menu_pause, TRUE);
                 break;
@@ -150,9 +156,13 @@ int main() {
         usleep(16 * 1000);
     }
 
+    title_screen_destroy(&menu_main);
+    title_screen_destroy(&menu_pause);
     destroy_palette(game_state.palette);
-    destroy_world(game_state.world);
-    destroy_hud(game_state.hud);
+    destroy_palette(game_state.light_palette);
+    if (game_state.world){
+        destroy_world(game_state.world);
+    }
     endwin();
     return 0;
 }

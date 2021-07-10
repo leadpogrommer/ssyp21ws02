@@ -30,6 +30,10 @@ vector2_t scale(vector2_t a, int magnitude){
     return (vector2_t) { .x = a.x * magnitude, .y = a.y * magnitude };
 }
 
+vector2_t scaledown(vector2_t a, int magnitude){
+    return (vector2_t) { .x = a.x / magnitude, .y = a.y / magnitude };
+}
+
 int cross(vector2_t a, vector2_t b){
     return a.x * b.y - a.y * b.x;
 }
@@ -61,6 +65,32 @@ void push_back_vector2(vector2_array_t* array, vector2_t vector){
 }
 
 void destroy_vector2_array(vector2_array_t* array){
+    free(array->data);
+    free(array);
+}
+
+vector2_pair_array_t* init_vector2_pair_array(){
+    vector2_pair_array_t* array = malloc(sizeof(vector2_pair_array_t));
+    array->size = 0;
+    array->capacity = 1;
+    array->data = malloc(sizeof(vector2_pair_t) * array->capacity);
+    return array;
+}
+
+void push_back_vector2_pair(vector2_pair_array_t* array, vector2_pair_t vector){
+    if (array->size == array->capacity){
+        array->capacity *= 2;
+        array->data = realloc(array->data, sizeof(vector2_pair_t) * array->capacity);
+    }
+
+    array->data[array->size++] = vector;
+}
+
+void delete_last_vector2_pair(vector2_pair_array_t* array){
+    array->size--;
+}
+
+void destroy_vector2_pair_array(vector2_pair_array_t* array){
     free(array->data);
     free(array);
 }
