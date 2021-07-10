@@ -4,6 +4,7 @@
 #include "pathfinder.h"
 #include "inventory.h"
 #include "hud.h"
+#include "enemies.h"
 
 typedef struct world_t{
     unsigned long long time;
@@ -14,6 +15,7 @@ typedef struct world_t{
     room_pool_t* room_pool;
     inventory_t* items;
     hud_t* hud;
+    enemies_t* enemies;
 }world_t;
 
 world_t* start_new_world();

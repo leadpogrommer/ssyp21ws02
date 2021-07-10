@@ -1,8 +1,6 @@
-#include <malloc.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "enemies.h"
-#include "world.h"
+#include "../includes/enemies.h"
 
 enemies_t* enemies_init() {
     enemies_t* enemies = malloc(sizeof(enemies_t));
@@ -69,9 +67,4 @@ void process_enemies(pathfinder_t* pathfinder, enemies_t* enemies, player_t* pla
             if(i > 0) i--;
         }
     }
-}
-
-void draw_enemies(WINDOW* window, palette_t* palette, enemies_t* enemies, vector2_t offset){
-    for(int i = 0; i < enemies->count; i++)
-        mvwaddch(window, enemies->array[i].pos.y + offset.y, enemies->array[i].pos.x + offset.x, '&');
 }

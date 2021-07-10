@@ -25,4 +25,3 @@ void enemies_add(enemies_t* enemies, enemy_t enemy);
 void enemies_remove(enemies_t* enemies, int pos);
 void spawn_enemies(level_t* level, enemies_t* enemies);
 void process_enemies(pathfinder_t* pathfinder, enemies_t* enemies, player_t* player, unsigned long long time);
-void draw_enemies(WINDOW* window, palette_t* palette, enemies_t* enemies, vector2_t offset);
