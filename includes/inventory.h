@@ -1,5 +1,7 @@
 #pragma once
 
+#define CALLBACK_NONE (-1)
+
 struct world_t;
 
 typedef struct item_t{
@@ -14,7 +16,7 @@ typedef struct inventory_t{
     int item_count, size;
 }inventory_t;
 
-void use_item(inventory_t* inventory, item_t* item, struct world_t* world);
+int use_item(inventory_t* inventory, item_t* item, struct world_t* world);
 
 inventory_t* init_inventory(int size);
 void destroy_inventory(inventory_t* inventory, int destroy_items);

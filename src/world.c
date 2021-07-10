@@ -59,10 +59,12 @@ void load_items(world_t* world){
     power_up->hp_buff = 10;
     power_up->name = "Apple of Edem";
     power_up->id = 0;
+    power_up->callback_index = CALLBACK_NONE;
     item_t* item2 = calloc(sizeof(item_t), 1);
     item2->damage_buff = 15;
     item2->name = "Sword of the Storm";
     item2->id = 1;
+    item2->callback_index = CALLBACK_NONE;
     add_item_to_inventory(world->items, power_up);
     add_item_to_inventory(world->items, item2);
 }

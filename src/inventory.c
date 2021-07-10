@@ -53,11 +53,13 @@ void destroy_inventory(inventory_t* inventory, int destroy_items){
     free(inventory);
 }
 
-void use_item(inventory_t* inventory, item_t* item, struct world_t* world){
-    if (is_valid_index(item->callback_index, callback_count)){
+int use_item(inventory_t* inventory, item_t* item, struct world_t* world){
+    if (item->callback_index != CALLBACK_NONE){
         callbacks[item->callback_index](world);
         delete_item_from_inventory(inventory, item);
+        return 1;
     }
+    return 0;
 }
 
 void change_inventory_size(inventory_t* inventory, int new_size){
