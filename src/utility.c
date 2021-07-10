@@ -30,6 +30,10 @@ vector2_t scale(vector2_t a, int magnitude){
     return (vector2_t) { .x = a.x * magnitude, .y = a.y * magnitude };
 }
 
+vector2_t scaledown(vector2_t a, int magnitude){
+    return (vector2_t) { .x = a.x / magnitude, .y = a.y / magnitude };
+}
+
 int cross(vector2_t a, vector2_t b){
     return a.x * b.y - a.y * b.x;
 }

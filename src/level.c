@@ -372,8 +372,14 @@ vector2_t get_level_position(level_t* level, vector2_t room_grid_pos, vector2_t 
         fail_gracefully("There is no room with position: x = %d y = %d ", room_grid_pos.x, room_grid_pos.y);
     }
 
-    vector2_t room_position_on_level = (vector2_t) { .y = level->room_grid_positions[0][room_grid_pos.y], .x = level->room_grid_positions[1][room_grid_pos.x] };
-    vector2_t result = sum( room_position_on_level, sum( VEC2_ONE, in_room_position ));
+    vector2_t room_position_on_level = { .y = level->room_grid_positions[0][room_grid_pos.y], .x = level->room_grid_positions[1][room_grid_pos.x] };
+    vector2_t next = { .y = level->room_grid_positions[0][room_grid_pos.y + 1], .x = level->room_grid_positions[1][room_grid_pos.x + 1] };
+    vector2_t room_cell_size = sub(next, room_position_on_level);
+
+    vector2_t shift = sub(room_cell_size, level->room_grid[room_grid_pos.y][room_grid_pos.x]->size);
+    shift = scaledown(shift, 2);
+
+    vector2_t result = sum( room_position_on_level, sum( shift, in_room_position ));
 
     if (!is_valid_rect_index(result, level->size)){
         fail_gracefully("There is no point in room: %d %d with pos %d %d", room_grid_pos.x, room_grid_pos.y, in_room_position.x, in_room_position.y);
