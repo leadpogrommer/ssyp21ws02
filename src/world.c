@@ -13,12 +13,14 @@ world_t* start_new_world(){
 world_t* init_world(){
     world_t* world = calloc(sizeof(world_t), 1);
     world->room_pool = load_room_directory();
+    world->enemies = enemies_init();
     load_items(world);
 
     return world;
 }
 
 void process_world(world_t* world){
+    world->time++;
     switch (world->level->data[world->player->pos.y][world->player->pos.x]){
         case 'e':
             world->current_level++;
@@ -35,6 +37,7 @@ void process_world(world_t* world){
             print_message(world->hud, "Picked up an item: %s", world->player->inventory->items[world->player->inventory->item_count - 1]->name);
             break;
     }
+    process_enemies(world->pathfinder, world->enemies, world->player, world->time);
 }
 
 void generate_new_level(world_t* world, int room_count){
@@ -45,6 +48,7 @@ void generate_new_level(world_t* world, int room_count){
 
     world->level = generate_level(room_count, world->room_pool);
     world->pathfinder = init_pathfinder(world->level);
+    spawn_enemies(world->level, world->enemies);
 
     // Move player to start
     move_player_to(world->player, get_level_position(world->level, world->level->start_room_grid_position,

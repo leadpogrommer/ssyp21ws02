@@ -98,6 +98,13 @@ void draw_level_with_lighting(WINDOW* window, palette_t* palette, palette_t* lig
             }
         }
     }
+
+    for(int i = 0; i < world->enemies->count; i++) {
+        int x = world->enemies->array[i].pos.x;
+        int y = world->enemies->array[i].pos.y;
+        char ch = world->enemies->array[i].damage == 1 ? 'W' : 'T';
+        mvwaddch(window, y + offset.y, x + offset.x,(is_visible[y][x] ? light_palette : palette)->symbol[ch]);
+    }
 }
 
 void draw_room(WINDOW* window, palette_t* palette, room_t* room, vector2_t offset){
