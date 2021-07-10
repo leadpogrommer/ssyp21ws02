@@ -26,7 +26,7 @@ void set_up_palettes(game_state_t* game_state){
     init_color(23, 750, 750, 750);
     init_color(18, 0, 0, 0); // Nice Black
     init_color(21, 900, 450, 0); // Nice Orange
-    init_color(19, 550, 550, 550); // Nice White
+    init_color(19, 500, 500, 500); // Nice White
     init_color(20, 0, 700, 0); // Nice Green
     init_color(22, 600, 0, 0); // Nice Red
 
@@ -41,11 +41,15 @@ void set_up_palettes(game_state_t* game_state){
     game_state->light_palette = init_palette(18, 29, 30, 31, 32, 29);
 }
 
-void start_up_world(game_state_t* game_state){
-    game_state->world = start_new_world();
-    game_state->world->player->screen_pos.x = getmaxx(stdscr)/2;
-    game_state->world->player->screen_pos.y = getmaxy(stdscr)/2;
-    game_state->world->hud = init_hud(game_state->game_window, 3, game_state->world->player, &(game_state->world->current_level), game_state->palette);
+void set_up_world(game_state_t* game_state){
+
+    game_state->world->hud = init_hud(game_state->game_window, 3, game_state->world->player, &(game_state->world->current_level),
+                                      game_state->palette);
+
+    vector2_t inventory_left_up_padding = { .x = 24, .y = 0 };
+    vector2_t inventory_right_down_padding = { .x = 9, .y = game_state->world->hud->height };
+    game_state->inventory_display = init_inventory_display(game_state->world->player->inventory, game_state->game_window,
+                                                           game_state->palette, inventory_left_up_padding, inventory_right_down_padding);
 }
 
 int handle_input(game_state_t* game_state){
@@ -64,10 +68,33 @@ int handle_input(game_state_t* game_state){
             move_player_in_world(game_state->world, VEC2_DOWN);
             break;
         case 'q':
-            game_state->state = 1;
+            game_state->state = STATE_EXIT;
             break;
         case 'p':
-            game_state->state = 3;
+            game_state->state = STATE_PAUSE_MENU;
+            break;
+        case 'i':
+            game_state->state = (game_state->state == STATE_GAME ? STATE_INVENTORY : STATE_GAME);
+            break;
+        case KEY_DOWN:
+            if (game_state->state == STATE_INVENTORY){
+                game_state->inventory_display->current_item++;
+            }
+            break;
+        case KEY_UP:
+            if (game_state->state == STATE_INVENTORY){
+                game_state->inventory_display->current_item--;
+            }
+            break;
+        case ' ':
+            if (game_state->state == STATE_INVENTORY){
+                item_t* current_item = game_state->world->player->inventory->items[game_state->inventory_display->current_item];
+                if (use_item(game_state->world->player->inventory, current_item, game_state->world)){
+                    // Some stuff
+                }else{
+                    print_message(game_state->world->hud, "This item can't be used");
+                }
+            }
             break;
         default:
             break;
@@ -111,46 +138,46 @@ int main() {
     set_up_palettes(&game_state);
     wbkgd(stdscr, COLOR_PAIR(game_state.palette->text_pair));
 
-    int n = sizeof(int);
-
-    while (game_state.state != 1) {
+    while (game_state.state != STATE_EXIT) {
         switch(game_state.state) {
-            case 0:
+            case STATE_INVENTORY:
+            case STATE_GAME:
                 if(!game_state.world){
-                    start_up_world(&game_state);
+                    game_state.world = start_new_world();
+                    set_up_world(&game_state);
                 }
 
                 handle_input(&game_state);
                 process(&game_state);
                 draw(&game_state);
                 break;
-            case 2:
+            case STATE_MAIN_MENU:
                 switch (title_screen_handle_input(&menu_main)) {
                     case 0:
-                        game_state.state = 0;
+                        game_state.state = STATE_GAME;
                         break;
                     case 1:
                         game_state.world = load_world();
-                        game_state.world->hud = init_hud(game_state.game_window, 3, game_state.world->player, &(game_state.world->current_level), game_state.palette);
-                        game_state.state = 0;
+                        set_up_world(&game_state);
+                        game_state.state = STATE_GAME;
                         break;
                     case 2:
-                        game_state.state = 1;
+                        game_state.state = STATE_EXIT;
                         break;
                 }
                 title_screen_draw(stdscr, &menu_main, FALSE, "");
                 break;
-            case 3:
+            case STATE_PAUSE_MENU:
                 switch (title_screen_handle_input(&menu_pause)) {
                     case 0:
-                        game_state.state = 0;
+                        game_state.state = STATE_GAME;
                         break;
                     case 1:
                         save_world(game_state.world);
-                        game_state.state = 0;
+                        game_state.state = STATE_GAME;
                         break;
                     case 2:
-                        game_state.state = 1;
+                        game_state.state = STATE_EXIT;
                         break;
                 }
                 title_screen_draw(stdscr, &menu_pause, TRUE, "");
@@ -180,6 +207,7 @@ int main() {
     destroy_palette(game_state.light_palette);
     if (game_state.world){
         destroy_world(game_state.world);
+        destroy_inventory_display(game_state.inventory_display);
     }
     endwin();
     return 0;

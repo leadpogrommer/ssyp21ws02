@@ -33,3 +33,24 @@ void print_message(hud_t* hud, const char* format_string, ...){
 
     va_end(args);
 }
+
+inventory_display_t* init_inventory_display(inventory_t* inventory, WINDOW* game_window, palette_t* palette, vector2_t left_up_padding, vector2_t right_down_padding){
+    inventory_display_t* display = calloc(sizeof(inventory_display_t), 1);
+
+    display->inventory = inventory;
+    display->game_window = game_window;
+    display->palette = palette;
+
+    vector2_t display_size = { .y = getmaxy(game_window) - left_up_padding.y - right_down_padding.y,
+                               .x = getmaxx(game_window) - left_up_padding.x - right_down_padding.x};
+    display->window = newwin(display_size.y, display_size.x, left_up_padding.y, left_up_padding.x);
+    display->left_up_corner = left_up_padding;
+    display->right_down_corner = right_down_padding;
+
+    wbkgd(display->window, COLOR_PAIR(palette->text_pair));
+    return display;
+}
+
+void destroy_inventory_display(inventory_display_t* display){
+    free(display);
+}
