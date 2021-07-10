@@ -29,6 +29,6 @@ add_executable(game
                 src/title_screen.h
                 src/rich_presence.c
                 src/level.c
-                src/level.h src/heap.c src/heap.h src/pathfinder.c src/pathfinder.h src/hud.c src/hud.h)
+                src/level.h src/heap.c src/heap.h src/pathfinder.c src/pathfinder.h src/hud.c src/hud.h src/enemies.c src/enemies.h)
 
 target_link_libraries(game ${CURSES_LIBRARIES}  m discord_game_sdk)

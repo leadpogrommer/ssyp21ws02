@@ -2,6 +2,7 @@
 #include "player.h"
 #include "level.h"
 #include "pathfinder.h"
+#include "enemies.h"
 
 typedef struct world_t{
     unsigned long long time;
@@ -10,6 +11,7 @@ typedef struct world_t{
     int level;
     pathfinder_t* pathfinder;
     room_pool_t* room_pool;
+    enemies_t* enemies;
 }world_t;
 
 world_t* init_world();

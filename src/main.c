@@ -9,6 +9,7 @@
 #include "rich_presence.h"
 #include "thirdparty/discord_game_sdk.h"
 #include "hud.h"
+#include "enemies.h"
 
 typedef struct {
     palette_t* palette;
@@ -75,6 +76,7 @@ int draw(game_state_t* game_state){
 
     vector2_t offset = {.x = 0, .y = 0};
     draw_level(game_state->game_window, game_state->palette, game_state->world->current_level, get_origin_on_screen(game_state->world));
+    draw_enemies(game_state->game_window, game_state->palette, game_state->world->enemies, get_origin_on_screen(game_state->world));
 
     mvwaddch(game_state->game_window, game_state->world->player->screen_pos.y, game_state->world->player->screen_pos.x, game_state->palette->symbol['P']);
 

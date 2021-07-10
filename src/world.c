@@ -5,16 +5,19 @@ world_t* init_world(){
     world_t* world = calloc(sizeof(world_t), 1);
     world->player = init_player(10);
     world->room_pool = load_room_directory("resources/rooms");
+    world->enemies = enemies_init();
     load_level(world, 2);
 
     return world;
 }
 
 void process_world(world_t* world){
+    world->time++;
     if (world->current_level->data[world->player->pos.y][world->player->pos.x] == 'E'){
         world->level++;
         load_level(world, world->current_level->room_count + 1);
     }
+    process_enemies(world->pathfinder, world->enemies, world->player, world->time);
 }
 
 void load_level(world_t* world, int room_count){
@@ -24,6 +27,7 @@ void load_level(world_t* world, int room_count){
     }
 
     world->current_level = generate_level(room_count, world->room_pool);
+    spawn_enemies(world->current_level, world->enemies);
     world->pathfinder = init_pathfinder(world->current_level);
 
     // Move player to start
