@@ -5,6 +5,7 @@
 #define STATE_GAME 0
 #define STATE_INVENTORY 4
 #define STATE_EXIT 1
+#define STATE_GAMEOVER 5
 
 typedef struct {
     palette_t* palette;

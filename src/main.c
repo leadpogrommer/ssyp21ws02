@@ -105,7 +105,7 @@ int handle_input(game_state_t* game_state){
 
 int process(game_state_t* game_state){
     process_world(game_state->world);
-    if(game_state->world->player->health <= 0) game_state->state = 4;
+    if(game_state->world->player->health <= 0) game_state->state = STATE_GAMEOVER;
     return 0;
 }
 
@@ -182,15 +182,15 @@ int main() {
                 }
                 title_screen_draw(stdscr, &menu_pause, TRUE, "");
                 break;
-            case 4:
+            case STATE_GAMEOVER:
                 switch (title_screen_handle_input(&menu_gameover)) {
                     case 0:
                         destroy_world(game_state.world);
                         game_state.world = NULL;
-                        game_state.state = 2;
+                        game_state.state = STATE_MAIN_MENU;
                         break;
                     case 1:
-                        game_state.state = 1;
+                        game_state.state = STATE_EXIT;
                         break;
                 }
                 title_screen_draw(stdscr, &menu_gameover, FALSE, "Game over");
