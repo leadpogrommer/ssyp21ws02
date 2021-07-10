@@ -1,9 +1,20 @@
 #include "inventory.h"
 #include <stdlib.h>
-#include "utility.h"
+#include "player.h"
+#include "world.h"
 
-static void (**callbacks)(struct world_t* world);
-static int callback_count = 0;
+void ability0(world_t* world){
+    heal_player(world->player, 10);
+}
+
+void ability1(world_t* world){
+    int count = world->enemies->count;
+    for (int i = 0; i < count; i++){
+        enemies_remove(world->enemies, 0);
+    }
+}
+
+static void (*callbacks[2])(world_t* world) = { ability0, ability1 };
 
 inventory_t* init_inventory(int size){
     inventory_t* inventory = calloc(sizeof(inventory_t), 1);
@@ -53,10 +64,11 @@ void destroy_inventory(inventory_t* inventory, int destroy_items){
     free(inventory);
 }
 
-int use_item(inventory_t* inventory, item_t* item, struct world_t* world){
+int use_item(player_t* player, item_t* item, struct world_t* world){
     if (item->callback_index != CALLBACK_NONE){
         callbacks[item->callback_index](world);
-        delete_item_from_inventory(inventory, item);
+        deapply_item_to_player(player, item);
+        delete_item_from_inventory(player->inventory, item);
         return 1;
     }
     return 0;

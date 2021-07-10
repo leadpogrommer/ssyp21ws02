@@ -29,6 +29,15 @@ void apply_item_to_player(player_t* player, item_t* item){
     player->damage += item->damage_buff;
 }
 
+void deapply_item_to_player(player_t* player, item_t* item){
+    player->max_health -= item->hp_buff;
+    player->damage -= item->damage_buff;
+}
+
+void heal_player(player_t* player, int amount){
+    player->health = player->health + amount > player->max_health ? player->max_health : player->health + amount;
+}
+
 void pick_up_item(player_t* player, item_t* item){
     if (add_item_to_inventory(player->inventory, item)){
         apply_item_to_player(player, item);

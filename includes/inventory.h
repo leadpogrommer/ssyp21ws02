@@ -1,8 +1,11 @@
 #pragma once
 
 #define CALLBACK_NONE (-1)
+#define CALLBACK_HEAL_SMALL (0)
+#define CALLBACK_ANNIHILATION (1)
 
-struct world_t;
+typedef struct world_t world_t;
+typedef struct player_t player_t;
 
 typedef struct item_t{
     const char* name;
@@ -16,7 +19,7 @@ typedef struct inventory_t{
     int item_count, size;
 }inventory_t;
 
-int use_item(inventory_t* inventory, item_t* item, struct world_t* world);
+int use_item(player_t* player, item_t* item, struct world_t* world);
 
 inventory_t* init_inventory(int size);
 void destroy_inventory(inventory_t* inventory, int destroy_items);
