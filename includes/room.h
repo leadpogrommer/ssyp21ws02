@@ -27,6 +27,7 @@ room_pool_t* load_room_pool(int room_count, ...);
 room_pool_t* init_room_pool();
 void destroy_room_pool(room_pool_t* room_pool);
 void add_room_to_pool(room_pool_t* room_pool, room_t* room);
+room_t* get_room_by_name(room_pool_t* room_pool, const char* filename);
 
 room_pool_t* load_room_directory();
 

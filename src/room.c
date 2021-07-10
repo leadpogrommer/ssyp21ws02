@@ -17,7 +17,7 @@ room_t* load_room(const char* filename){
     FILE* file = fopen(filename, "r");
     if (file == NULL) fail_gracefully("Cannot open this file: %s", filename);
 
-    room_t* room = malloc(sizeof(room_t));
+    room_t* room = calloc(sizeof(room_t), 1);
     for (int i = 0; i < 3; i++){
         for (int j = 0; j < 3; j++){
             room->doors[i][j] = VEC2_UP;
@@ -90,6 +90,30 @@ void add_room_to_pool(room_pool_t* room_pool, room_t* room){
 
         room_pool->shrine_rooms[room_pool->shrine_count++] = room;
     }
+}
+
+room_t* get_room_by_name(room_pool_t* room_pool, const char* filename){
+    if (!strcmp(filename, room_pool->start_room->filename)){
+        return room_pool->start_room;
+    }
+
+    if (!strcmp(filename, room_pool->end_room->filename)){
+        return room_pool->end_room;
+    }
+
+    for (int i = 0; i < room_pool->count; i++){
+        if (!strcmp(filename, room_pool->rooms[i]->filename)){
+            return room_pool->rooms[i];
+        }
+    }
+
+    for (int i = 0; i < room_pool->shrine_count; i++){
+        if (!strcmp(filename, room_pool->shrine_rooms[i]->filename)){
+            return room_pool->shrine_rooms[i];
+        }
+    }
+
+    return NULL;
 }
 
 room_pool_t* load_room_directory(){

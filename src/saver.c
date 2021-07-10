@@ -4,6 +4,8 @@
 void save_world(world_t* world){
     FILE* file = fopen("save", "w");
 
+    setvbuf(file, NULL, _IOFBF, 0);
+
     save_player(world->player, file);
     save_level(world->level, file);
 
@@ -60,7 +62,7 @@ world_t* load_world(){
     world_t* world = init_world();
 
     world->player = load_player(file, world->items);
-    world->level = load_level(file);
+    world->level = load_level(file, world->room_pool);
 
     fread(&(world->current_level), sizeof(int), 1, file);
     fread(&(world->time), sizeof(unsigned long long), 1, file);
@@ -87,8 +89,9 @@ inventory_t* load_inventory(FILE* file, inventory_t* parent_inventory){
     int size;
     fread(&size, sizeof(int), 1, file);
     inventory_t* inventory = init_inventory(size);
-    fread(&(inventory->item_count), sizeof(int), 1, file);
-    for (int i = 0; i < inventory->item_count; i++){
+    int item_count;
+    fread(&(item_count), sizeof(int), 1, file);
+    for (int i = 0; i < item_count; i++){
         int id;
         fread(&id, sizeof(int), 1, file);
         if (is_valid_index(id, parent_inventory->item_count)){
@@ -99,7 +102,7 @@ inventory_t* load_inventory(FILE* file, inventory_t* parent_inventory){
     return inventory;
 }
 
-level_t* load_level(FILE* file){
+level_t* load_level(FILE* file, room_pool_t* room_pool){
     vector2_t room_grid_size;
     int room_count;
     fread(&room_count, sizeof(int), 1, file);
@@ -109,7 +112,7 @@ level_t* load_level(FILE* file){
 
     for (int i = 0; i < level->room_grid_size.y; i++){
         for (int j = 0; j < level->room_grid_size.x; j++){
-            level->room_grid[i][j] = load_saved_room(file);
+            level->room_grid[i][j] = load_saved_room(file, room_pool);
         }
     }
 
@@ -125,13 +128,17 @@ level_t* load_level(FILE* file){
     return level;
 }
 
-room_t* load_saved_room(FILE* file){
+room_t* load_saved_room(FILE* file, room_pool_t* room_pool){
     char null;
     fread(&null, sizeof(char), 1, file);
     if (!null){
         char filename[256];
         fread(filename, sizeof(char), 256, file);
-        return load_room(filename);
+        room_t* room = get_room_by_name(room_pool, filename);
+        if (!room){
+            fail_gracefully("Room with name: %s was not found", filename);
+        }
+        return room;
     }else{
         return NULL;
     }

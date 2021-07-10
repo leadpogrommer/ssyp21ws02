@@ -107,6 +107,7 @@ int main() {
     set_up_palettes(&game_state);
     wbkgd(stdscr, COLOR_PAIR(game_state.palette->text_pair));
 
+    int n = sizeof(int);
 
     while (game_state.state != 1) {
         switch(game_state.state) {
