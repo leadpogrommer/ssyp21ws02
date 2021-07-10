@@ -17,7 +17,7 @@ typedef struct inventory_t{
 void use_item(inventory_t* inventory, item_t* item, struct world_t* world);
 
 inventory_t* init_inventory(int size);
-void destroy_inventory(inventory_t* inventory);
+void destroy_inventory(inventory_t* inventory, int destroy_items);
 
 item_t* get_random_item(inventory_t* inventory);
 

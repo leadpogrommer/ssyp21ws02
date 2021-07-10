@@ -47,9 +47,7 @@ void save_room(room_t* room, FILE* file){
     if (room){
         char null = 0;
         fwrite(&null, sizeof(char), 1, file);
-        int len = strlen(room->filename) + 1;
-        fwrite(&len, sizeof(int), 1, file);
-        fwrite(room->filename, sizeof(char), len, file);
+        fwrite(room->filename, sizeof(char), 256, file);
     }else{
         char null = 1;
         fwrite(&null, sizeof(char), 1, file);
@@ -76,6 +74,7 @@ world_t* load_world(){
 
 player_t* load_player(FILE* file, inventory_t* parent_inventory){
     player_t* player = init_player(0);
+    destroy_inventory(player->inventory, 0);
 
     fread(player, sizeof(player_t), 1, file);
 
@@ -130,10 +129,8 @@ room_t* load_saved_room(FILE* file){
     char null;
     fread(&null, sizeof(char), 1, file);
     if (!null){
-        int len;
-        fread(&len, sizeof(int), 1, file);
-        char filename[len];
-        fread(filename, sizeof(char), len, file);
+        char filename[256];
+        fread(filename, sizeof(char), 256, file);
         return load_room(filename);
     }else{
         return NULL;

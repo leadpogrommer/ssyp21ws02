@@ -43,9 +43,11 @@ int delete_item_from_inventory(inventory_t* inventory, item_t* item){
     return 1;
 }
 
-void destroy_inventory(inventory_t* inventory){
-    for (int i = 0; i < inventory->item_count; i++){
-        free(inventory->items[i]);
+void destroy_inventory(inventory_t* inventory, int destroy_items){
+    if (destroy_items) {
+        for (int i = 0; i < inventory->item_count; i++) {
+            free(inventory->items[i]);
+        }
     }
     free(inventory->items);
     free(inventory);

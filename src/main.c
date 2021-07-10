@@ -155,10 +155,13 @@ int main() {
         usleep(16 * 1000);
     }
 
+    title_screen_destroy(&menu_main);
+    title_screen_destroy(&menu_pause);
     destroy_palette(game_state.palette);
     destroy_palette(game_state.light_palette);
-    destroy_world(game_state.world);
-    destroy_hud(game_state.world->hud);
+    if (game_state.world){
+        destroy_world(game_state.world);
+    }
     endwin();
     return 0;
 }

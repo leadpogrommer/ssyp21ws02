@@ -4,7 +4,7 @@
 #include "utility.h"
 
 typedef struct room_t{
-    const char* filename;
+    char filename[256];
     vector2_t size;
     char** data;
     short is_shrine;

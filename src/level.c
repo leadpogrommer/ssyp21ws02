@@ -141,7 +141,7 @@ void correct_connected_rooms_grid_pos(level_t* level, vector2_t left_up_corner){
 }
 
 level_t* init_level_room_grid(int room_count, vector2_t room_grid_size){
-    level_t* level = malloc(sizeof(level_t));
+    level_t* level = calloc(sizeof(level_t), 1);
     level->room_count = room_count;
     level->room_grid_size = room_grid_size;
     level->room_grid = calloc(sizeof(room_t**), room_grid_size.y);
@@ -199,9 +199,16 @@ void set_room_grid_cell_sizes(level_t* level){
     for (int i = 0; i < level->room_grid_size.x; i++){
         level->room_grid_positions[1][i + 1] = level->room_grid_positions[1][i] + cell_sizes[1][i];
     }
+
+    free(cell_sizes[0]);
+    free(cell_sizes[1]);
 }
 
 void destroy_level(level_t* level){
+    if (level->connected_rooms){
+        destroy_vector2_pair_array(level->connected_rooms);
+    }
+
     for (int i = 0; i < level->room_grid_size.y; i++){
         free(level->room_grid[i]);
     }

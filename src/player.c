@@ -2,11 +2,7 @@
 #include <stdlib.h>
 
 player_t* init_player(int max_health){
-    player_t* player = malloc(sizeof(player_t));
-    player->pos.x = 0;
-    player->pos.y = 0;
-    player->screen_pos.y = 0;
-    player->screen_pos.x = 0;
+    player_t* player = calloc(sizeof(player_t), 1);
     player->gold = 1;
     player->max_health = max_health;
     player->health = max_health;
@@ -16,7 +12,7 @@ player_t* init_player(int max_health){
 }
 
 void destroy_player(player_t* player){
-    destroy_inventory(player->inventory);
+    destroy_inventory(player->inventory, 0);
     free(player);
 }
 

@@ -26,7 +26,7 @@ room_t* load_room(const char* filename){
 
     fscanf(file, "%d %d %hd", &room->size.x, &room->size.y, &room->is_shrine);
 
-    room->filename = filename;
+    strcpy(room->filename, filename);
     room->data = malloc(sizeof(char*) * room->size.y);
 
     while (getc(file) != '\n'); // To step into data itself
@@ -96,8 +96,6 @@ room_pool_t* load_room_directory(){
     DIR* dir = opendir("resources/rooms");
     if (dir == NULL) fail_gracefully("Cannot open directory: %s", "resources/rooms");
 
-
-
     room_pool_t* room_pool = load_room_pool(0);
 
     struct dirent* current_el = readdir(dir); // Reading next position
@@ -113,6 +111,8 @@ room_pool_t* load_room_directory(){
         }
         current_el = readdir(dir);
     }
+
+    closedir(dir);
 
     if (!room_pool->start_room || !room_pool->end_room){
         fail_gracefully("No start or end room was found. Game resources corrupted");
@@ -143,6 +143,9 @@ room_pool_t* init_room_pool(){
 }
 
 void destroy_room_pool(room_pool_t* room_pool){
+    destroy_room(room_pool->start_room);
+    destroy_room(room_pool->end_room);
+
     for (int i = 0; i < room_pool->count; i++){
         destroy_room(room_pool->rooms[i]);
     }
