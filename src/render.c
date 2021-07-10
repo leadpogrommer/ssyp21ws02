@@ -105,14 +105,18 @@ void draw_room(WINDOW* window, palette_t* palette, room_t* room, vector2_t offse
 }
 
 void draw_hud(hud_t* hud){
-    wattron(hud->window, COLOR_PAIR(hud->palette->text_pair));
+    mvwin(hud->window, getmaxy(hud->game_window) - hud->height, 0);
+
+    //wattron(hud->window, COLOR_PAIR(hud->palette->text_pair));
+    werase(hud->window);
 
     box(hud->window, 0, 0);
     mvwprintw(hud->window, 1, 1, "gold: %d", hud->player->gold);
     mvwprintw(hud->window, 1, 12, "hp: %d/%d", hud->player->health, hud->player->max_health);
+    mvwprintw(hud->window, 1, 24, hud->message);
     mvwprintw(hud->window, 1, getmaxx(hud->window) - 9, "lvl: %d", *(hud->current_level));
 
-    wattroff(hud->window, COLOR_PAIR(hud->palette->text_pair));
+    //wattroff(hud->window, COLOR_PAIR(hud->palette->text_pair));
 
     wnoutrefresh(hud->window);
 }

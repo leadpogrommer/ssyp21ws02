@@ -6,9 +6,12 @@
 
 typedef struct hud_t{
     WINDOW* window;
+    WINDOW* game_window;
     player_t* player;
     int* current_level;
     palette_t* palette;
+    int height;
+    char message[256];
 }hud_t;
 
 
