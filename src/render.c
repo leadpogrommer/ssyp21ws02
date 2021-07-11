@@ -105,6 +105,11 @@ void draw_level_with_lighting(WINDOW* window, palette_t* palette, palette_t* lig
         char ch = world->enemies->array[i].damage == 1 ? 'W' : 'T';
         mvwaddch(window, y + offset.y, x + offset.x,(is_visible[y][x] ? light_palette : palette)->symbol[ch]);
     }
+    for(int i = 0; i < world->bullets->count; i++) {
+        int x = world->bullets->array[i].pos.x;
+        int y = world->bullets->array[i].pos.y;
+        mvwaddch(window, y + offset.y, x + offset.x, (is_visible[y][x] ? light_palette : palette)->symbol['-']);
+    }
 }
 
 void draw_room(WINDOW* window, palette_t* palette, room_t* room, vector2_t offset){

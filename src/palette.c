@@ -3,7 +3,7 @@
 
 static short pair_count = 1;
 
-palette_t* init_palette(short background_color, short floor_color, short player_color, short symbols_color, short enemies_color, short text_color){
+palette_t* init_palette(short background_color, short floor_color, short player_color, short symbols_color, short enemies_color, short text_color, short bullet_color){
     palette_t* palette = malloc(sizeof(palette_t));
 
     palette->floor_pair = pair_count;
@@ -18,7 +18,8 @@ palette_t* init_palette(short background_color, short floor_color, short player_
     init_pair(pair_count++, enemies_color, floor_color);
     palette->text_pair = pair_count;
     init_pair(pair_count++, text_color, background_color);
-
+    palette->bullet_pair = pair_count;
+    init_pair(pair_count++, bullet_color, floor_color);
 
 
     for (int i = 0; i < 256; i++){
@@ -33,6 +34,7 @@ palette_t* init_palette(short background_color, short floor_color, short player_
     palette->symbol['.'] = ' ' | COLOR_PAIR(palette->floor_pair);
     palette->symbol['#'] = ' ' | COLOR_PAIR(palette->floor_pair);
     palette->symbol['*'] = ' ' | COLOR_PAIR(palette->wall_pair);
+    palette->symbol['-'] = '*' | COLOR_PAIR(palette->bullet_pair);
 
     return palette;
 }

@@ -29,8 +29,9 @@ void set_up_palettes(game_state_t* game_state){
     init_color(19, 500, 500, 500); // Nice White
     init_color(20, 0, 700, 0); // Nice Green
     init_color(22, 600, 0, 0); // Nice Red
+    init_color(33, 400, 700, 400); // Bullet; Lgreen
 
-    game_state->palette = init_palette(18, 19, 20, 21, 22, 23);
+    game_state->palette = init_palette(18, 19, 20, 21, 22, 23, 33);
 
     init_color(28, 180, 180, 180); // Nice Black
     init_color(31, 1000, 550, 0); // Nice Orange
@@ -38,7 +39,7 @@ void set_up_palettes(game_state_t* game_state){
     init_color(30, 0, 700, 0); // Nice Green
     init_color(32, 700, 0, 0); // Nice Red
 
-    game_state->light_palette = init_palette(18, 29, 30, 31, 32, 29);
+    game_state->light_palette = init_palette(18, 29, 30, 31, 32, 29, 33);
 }
 
 void set_up_world(game_state_t* game_state){
@@ -79,13 +80,26 @@ int handle_input(game_state_t* game_state){
         case KEY_DOWN:
             if (game_state->state == STATE_INVENTORY){
                 game_state->inventory_display->current_item++;
+            } else if(game_state->state == STATE_GAME) {
+                fire(game_state->world->bullets, game_state->world->player, VEC2_DOWN);
             }
             break;
         case KEY_UP:
             if (game_state->state == STATE_INVENTORY){
                 game_state->inventory_display->current_item--;
+            } else if(game_state->state == STATE_GAME) {
+                fire(game_state->world->bullets, game_state->world->player, VEC2_UP);
             }
             break;
+        case KEY_RIGHT:
+            if(game_state->state == STATE_GAME) {
+                fire(game_state->world->bullets, game_state->world->player, VEC2_RIGHT);
+            }
+            break;
+        case KEY_LEFT:
+            if(game_state->state == STATE_GAME) {
+                fire(game_state->world->bullets, game_state->world->player, VEC2_LEFT);
+            }
         case ' ':
             if (game_state->state == STATE_INVENTORY){
                 item_t* current_item = game_state->world->player->inventory->items[game_state->inventory_display->current_item];

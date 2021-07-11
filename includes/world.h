@@ -5,6 +5,7 @@
 #include "inventory.h"
 #include "hud.h"
 #include "enemies.h"
+#include "bullet.h"
 
 typedef struct world_t{
     unsigned long long time;
@@ -16,6 +17,7 @@ typedef struct world_t{
     inventory_t* items;
     hud_t* hud;
     enemies_t* enemies;
+    bullets_t* bullets;
 }world_t;
 
 world_t* start_new_world();
