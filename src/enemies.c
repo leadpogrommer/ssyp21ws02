@@ -26,6 +26,11 @@ void enemies_remove(enemies_t* enemies, int pos) {
     enemies->count--;
 }
 
+void enemies_destroy(enemies_t* enemies) {
+    free(enemies->array);
+    free(enemies);
+}
+
 void enemies_clear(enemies_t* enemies) {
     enemies->count = 0;
 }

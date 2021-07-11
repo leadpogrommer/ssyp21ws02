@@ -80,6 +80,7 @@ void destroy_world(world_t* world){
     destroy_room_pool(world->room_pool);
     destroy_inventory(world->items, 1);
     destroy_hud(world->hud);
+    enemies_destroy(world->enemies);
     free(world);
 }
 
