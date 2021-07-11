@@ -42,7 +42,7 @@ void fire(bullets_t* bullets, player_t* player, vector2_t vel) {
     bullets_add(bullets, player->pos, vel);
 }
 
-void process_bullets(bullets_t* bullets, enemies_t* enemies, level_t* level, unsigned long long time) {
+void process_bullets(bullets_t* bullets, enemies_t* enemies, level_t* level, player_t* player, unsigned long long time) {
     for(int i = 0; i < bullets->count; i++) {
         if(time % BULLET_SPEED == 0) bullets->array[i].pos = sum(bullets->array[i].pos, bullets->array[i].vel);
         char tile = level->data[bullets->array[i].pos.y][bullets->array[i].pos.x];
@@ -55,6 +55,7 @@ void process_bullets(bullets_t* bullets, enemies_t* enemies, level_t* level, uns
                 if(j > 0) j--;
                 bullets_remove(bullets, i);
                 if(i > 0) i--;
+                player->gold++;
                 break;
             }
         }

@@ -38,7 +38,7 @@ void process_world(world_t* world){
             print_message(world->hud, "Picked up an item: %s", world->player->inventory->items[world->player->inventory->item_count - 1]->name);
             break;
     }
-    process_bullets(world->bullets, world->enemies, world->level, world->time);
+    process_bullets(world->bullets, world->enemies, world->level, world->player, world->time);
     process_enemies(world->pathfinder, world->enemies, world->player, world->time);
 }
 

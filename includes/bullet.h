@@ -21,4 +21,4 @@ void bullets_destroy(bullets_t* bullets);
 void bullets_clear(bullets_t* bullets);
 
 void fire(bullets_t* bullets, player_t* player, vector2_t vel);
-void process_bullets(bullets_t* bullets, enemies_t* enemies, level_t* level, unsigned long long time);
+void process_bullets(bullets_t* bullets, enemies_t* enemies, level_t* level, player_t* player, unsigned long long time);
