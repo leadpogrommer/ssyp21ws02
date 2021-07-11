@@ -65,6 +65,7 @@ void process_enemies(pathfinder_t* pathfinder, enemies_t* enemies, player_t* pla
         if(time % enemies->array[i].speed == 0) {
             vector2_array_t* path = find_path(pathfinder, enemies->array[i].pos, player->pos, 1);
             enemies->array[i].pos = path->data[path->size - 1];
+            destroy_vector2_array(path);
         }
         if(equal(enemies->array[i].pos, player->pos)) {
             player->health -= enemies->array[i].damage;
