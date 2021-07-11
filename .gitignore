@@ -1,6 +1,8 @@
 .idea/
 cmake-build-debug/
 build/
+save
+vkonsole
 *.o
 *.elf
 *.SFO

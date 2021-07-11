@@ -4,7 +4,7 @@ O = o
 
 # OBJS = src/sdltest.o
 OBJS += src/main.o src/heap.o src/hud.o src/inventory.o src/level.o src/palette.o  src/pathfinder.o src/player.o \
-src/render.o src/room.o src/title_screen.o src/utility.o src/world.o src/saver.o
+src/render.o src/room.o src/title_screen.o src/utility.o src/world.o src/saver.o src/enemies.o
 
 
 PSP_LARGE_MEMORY = 1

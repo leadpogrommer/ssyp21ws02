@@ -14,3 +14,4 @@ void draw_hud(hud_t* hud);
 void draw_room(WINDOW* window, palette_t* palette, room_t* room, vector2_t offset);
 
 void draw_player(WINDOW* window, player_t* player, palette_t* palette);
+void draw_inventory(inventory_display_t* inventory_display);

@@ -11,6 +11,10 @@ void render(game_state_t* game_state){
 
     wnoutrefresh(game_state->game_window);
 
+    if (game_state->state == STATE_INVENTORY){
+        draw_inventory(game_state->inventory_display);
+    }
+
     draw_hud(game_state->world->hud);
     doupdate();
 }
@@ -94,6 +98,13 @@ void draw_level_with_lighting(WINDOW* window, palette_t* palette, palette_t* lig
             }
         }
     }
+
+    for(int i = 0; i < world->enemies->count; i++) {
+        int x = world->enemies->array[i].pos.x;
+        int y = world->enemies->array[i].pos.y;
+        char ch = world->enemies->array[i].damage == 1 ? 'W' : 'T';
+        mvwaddch(window, y + offset.y, x + offset.x,(is_visible[y][x] ? light_palette : palette)->symbol[ch]);
+    }
 }
 
 void draw_room(WINDOW* window, palette_t* palette, room_t* room, vector2_t offset){
@@ -105,18 +116,50 @@ void draw_room(WINDOW* window, palette_t* palette, room_t* room, vector2_t offse
 }
 
 void draw_hud(hud_t* hud){
-    wattron(hud->window, COLOR_PAIR(hud->palette->text_pair));
+    mvwin(hud->window, getmaxy(hud->game_window) - hud->height, 0);
+
+    werase(hud->window);
 
     box(hud->window, 0, 0);
     mvwprintw(hud->window, 1, 1, "gold: %d", hud->player->gold);
     mvwprintw(hud->window, 1, 12, "hp: %d/%d", hud->player->health, hud->player->max_health);
+    mvwprintw(hud->window, 1, 24, hud->message);
     mvwprintw(hud->window, 1, getmaxx(hud->window) - 9, "lvl: %d", *(hud->current_level));
-
-    wattroff(hud->window, COLOR_PAIR(hud->palette->text_pair));
 
     wnoutrefresh(hud->window);
 }
 
 void draw_player(WINDOW* window, player_t* player, palette_t* palette){
+    player->screen_pos.x = getmaxx(window)/2;
+    player->screen_pos.y = getmaxy(window)/2;
+
     mvwaddch(window, player->screen_pos.y, player->screen_pos.x, palette->symbol['P']);
+}
+
+void draw_inventory(inventory_display_t* display){
+    werase(display->window);
+
+
+    vector2_t display_size = { .y = getmaxy(display->game_window) - display->left_up_corner.y - display->right_down_corner.y,
+                               .x = getmaxx(display->game_window) - display->left_up_corner.x - display->right_down_corner.x};
+    wresize(display->window, display_size.y, display_size.x);
+
+    box(display->window, 0, 0);
+
+    vector2_t half;
+    getmaxyx(display->window, half.y, half.x);
+    half = scaledown(half, 2);
+    display->current_item = display->current_item >= display->inventory->item_count ? display->inventory->item_count - 1
+                            : (display->current_item < 0 ? 0 : display->current_item);
+
+    mvwprintw(display->window, 1, half.x - 4, "INVENTORY");
+    for (int i = 0; i < display->inventory->item_count; i++){
+        if (display->current_item == i){
+            mvwprintw(display->window, 3 + i, 2, "%s <", display->inventory->items[i]->name);
+        }else{
+            mvwprintw(display->window, 3 + i, 2, "%s", display->inventory->items[i]->name);
+        }
+    }
+
+    wnoutrefresh(display->window);
 }
