@@ -58,6 +58,9 @@ void save_room(room_t* room, FILE* file){
 
 world_t* load_world(){
     FILE* file = fopen("save", "r");
+    if (!file){
+        fail_gracefully("Looks like there is no save file");
+    }
 
     world_t* world = init_world();
 
