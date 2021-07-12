@@ -10,6 +10,14 @@ enemies_t* enemies_init() {
     return enemies;
 }
 
+void enemies_resize(enemies_t* enemies, int new_size){
+    while (new_size > enemies->capacity){
+        enemies->capacity *= 2;
+    }
+    enemies->array = realloc(enemies->array, sizeof(enemy_t) * enemies->capacity);
+    enemies->count = new_size;
+}
+
 void enemies_add(enemies_t* enemies, enemy_t enemy) {
     if(enemies->count + 1 > enemies->capacity) {
         enemies->array = realloc(enemies->array, sizeof(enemy_t) * enemies->capacity * 2);
