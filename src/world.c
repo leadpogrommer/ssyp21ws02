@@ -40,6 +40,9 @@ void process_world(world_t* world){
     }
     process_bullets(world->bullets, world->enemies, world->level, world->player, world->time);
     process_enemies(world->pathfinder, world->enemies, world->player, world->time);
+    if (world->level_popup){
+        process_popup(&world->level_popup);
+    }
 }
 
 void generate_new_level(world_t* world, int room_count){
@@ -58,6 +61,7 @@ void generate_new_level(world_t* world, int room_count){
                                                      VEC2_SQUARE(2)));
 
     update_rich_presence_level(world->current_level);
+    world->level_popup = init_popup("New level", 1);
 }
 
 void load_items(world_t* world){

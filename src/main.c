@@ -40,6 +40,10 @@ void set_up_palettes(game_state_t* game_state){
     init_color(32, 700, 0, 0); // Nice Red
 
     game_state->light_palette = init_palette(18, 29, 30, 31, 32, 29, 33);
+
+    init_color(41, 0, 0, 800);
+
+    game_state->level_popup_palette = init_palette(41, 0, 0, 0, 0, 29, 0);
 }
 
 void set_up_world(game_state_t* game_state){

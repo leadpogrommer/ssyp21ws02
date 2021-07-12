@@ -15,6 +15,10 @@ void render(game_state_t* game_state){
     }
 
     draw_hud(game_state->world->hud);
+
+    if (game_state->world->level_popup){
+        draw_popup(game_state->world->level_popup, game_state->level_popup_palette, game_state->palette);
+    }
     doupdate();
 }
 
@@ -166,4 +170,46 @@ void draw_inventory(inventory_display_t* display){
     }
 
     wnoutrefresh(display->window);
+}
+void draw_popup(popup_t* popup, palette_t* popup_palette, palette_t* main_palette){
+    wbkgd(popup->window, COLOR_PAIR(main_palette->text_pair));
+    werase(popup->window);
+
+    int portion;
+    if (popup->progress > 100 - popup->move_fraction){
+        portion = 100 * ((double)(100 - popup->progress) / popup->move_fraction);
+    }else if (popup->progress > popup->move_fraction){
+        portion = 100;
+    }else {
+        portion = 100 * ((double)(popup->progress) / popup->move_fraction);
+    }
+
+    int text_position = getmaxy(popup->window) + 1;
+    text_position *= portion;
+    text_position /= 100;
+    text_position -= getmaxy(popup->window);
+
+
+    wattron(popup->window, COLOR_PAIR(popup_palette->text_pair));
+
+    // filling all the space with color
+    for (int i = 0; i < popup->message_size.y; i++){
+        mvwhline(popup->window,text_position + i, 1, ' ', popup->message_size.x);
+    }
+
+    mvwprintw(popup->window, text_position, 1, popup->message);
+
+    // drawing moving box around text
+    mvwhline(popup->window,text_position + popup->message_size.y, 1, ACS_HLINE, popup->message_size.x);
+    mvwhline(popup->window,text_position - 1, 1, ACS_HLINE, popup->message_size.x);
+    mvwvline(popup->window, text_position < 0 ? 0 : text_position, 0, ACS_VLINE, popup->message_size.y + text_position);
+    mvwvline(popup->window, text_position < 0 ? 0 : text_position, getmaxx(popup->window) - 1, ACS_VLINE, popup->message_size.y + text_position);
+    mvwaddch(popup->window, text_position - 1, 0, ACS_ULCORNER);
+    mvwaddch(popup->window, text_position - 1, popup->message_size.x + 1, ACS_URCORNER);
+    mvwaddch(popup->window, text_position + popup->message_size.y, 0, ACS_LLCORNER);
+    mvwaddch(popup->window, text_position + popup->message_size.y, popup->message_size.x + 1, ACS_LRCORNER);
+
+    wattroff(popup->window,  COLOR_PAIR(popup_palette->text_pair));
+
+    wnoutrefresh(popup->window);
 }

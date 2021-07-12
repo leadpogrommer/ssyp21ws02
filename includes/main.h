@@ -8,8 +8,7 @@
 #define STATE_GAMEOVER 5
 
 typedef struct {
-    palette_t* palette;
-    palette_t* light_palette;
+    palette_t* palette, *light_palette, *level_popup_palette;
     world_t* world;
     WINDOW* game_window;
     inventory_display_t* inventory_display;

@@ -6,6 +6,8 @@
 #include "hud.h"
 #include "enemies.h"
 #include "bullet.h"
+#include "statistics.h"
+#include "popup.h"
 
 typedef struct world_t{
     unsigned long long time;
@@ -18,6 +20,7 @@ typedef struct world_t{
     hud_t* hud;
     enemies_t* enemies;
     bullets_t* bullets;
+    popup_t* level_popup;
 }world_t;
 
 world_t* start_new_world();
