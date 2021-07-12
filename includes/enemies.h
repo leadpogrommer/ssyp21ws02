@@ -21,6 +21,7 @@ typedef struct {
 } enemies_t;
 
 enemies_t* enemies_init();
+void enemies_resize(enemies_t* enemies, int new_size);
 void enemies_add(enemies_t* enemies, enemy_t enemy);
 void enemies_remove(enemies_t* enemies, int pos);
 void enemies_destroy(enemies_t* enemies);
