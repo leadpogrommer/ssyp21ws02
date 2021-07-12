@@ -1,6 +1,7 @@
 #include "world.h"
 #include <stdlib.h>
 #include "rich_presence.h"
+#include "saver.h"
 
 world_t* start_new_world(){
     world_t* world = init_world();
@@ -15,6 +16,7 @@ world_t* init_world(){
     world->room_pool = load_room_directory();
     world->enemies = enemies_init();
     world->bullets = bullets_init();
+    world->stats = load_statistics();
     load_items(world);
 
     return world;
@@ -31,18 +33,21 @@ void process_world(world_t* world){
             world->player->max_health += 10;
             world->level->data[world->player->pos.y][world->player->pos.x] = '.';
             print_message(world->hud, "You used a shrine of prosperity");
+            world->stats->shrines_used++;
             break;
         case '?':
             pick_up_item(world->player, get_random_item(world->items));
             world->level->data[world->player->pos.y][world->player->pos.x] = '.';
             print_message(world->hud, "Picked up an item: %s", world->player->inventory->items[world->player->inventory->item_count - 1]->name);
+            world->stats->items_picked_up++;
             break;
     }
-    process_bullets(world->bullets, world->enemies, world->level, world->player, world->time);
+    process_bullets(world->bullets, world->enemies, world->level, world->player, world->stats, world->time);
     process_enemies(world->pathfinder, world->enemies, world->player, world->time);
     if (world->level_popup){
         process_popup(&world->level_popup);
     }
+    world->stats->max_gold = MAX(world->stats->max_gold, world->player->gold);
 }
 
 void generate_new_level(world_t* world, int room_count){
@@ -55,6 +60,8 @@ void generate_new_level(world_t* world, int room_count){
     world->pathfinder = init_pathfinder(world->level);
     spawn_enemies(world->level, world->enemies);
     bullets_clear(world->bullets);
+
+    world->stats->max_level = MAX(world->stats->max_level, world->current_level);
 
     // Move player to start
     move_player_to(world->player, get_level_position(world->level, world->level->start_room_grid_position,

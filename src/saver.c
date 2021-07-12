@@ -45,6 +45,14 @@ void save_level(level_t* level, FILE* file){
 
 }
 
+void save_statistics(statistics_t* statistics){
+    FILE* file = fopen("statistics", "w");
+
+    fwrite(statistics, sizeof(statistics_t), 1, file);
+
+    fclose(file);
+}
+
 void save_room(room_t* room, FILE* file){
     if (room){
         char null = 0;
@@ -142,4 +150,15 @@ room_t* load_saved_room(FILE* file, room_pool_t* room_pool){
     }else{
         return NULL;
     }
+}
+
+statistics_t* load_statistics(){
+    statistics_t* stats = init_statistics();
+
+    FILE* file = fopen("statistics", "r");
+    if (file){
+        fread(stats, sizeof(statistics_t), 1, file);
+    }
+
+    return stats;
 }

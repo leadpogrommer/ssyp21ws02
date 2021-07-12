@@ -5,8 +5,8 @@
 #include "pathfinder.h"
 #include "hud.h"
 #include "enemies.h"
-#include "bullet.h"
 #include "statistics.h"
+#include "bullet.h"
 #include "popup.h"
 
 typedef struct world_t{
@@ -21,6 +21,7 @@ typedef struct world_t{
     enemies_t* enemies;
     bullets_t* bullets;
     popup_t* level_popup;
+    statistics_t* stats;
 }world_t;
 
 world_t* start_new_world();

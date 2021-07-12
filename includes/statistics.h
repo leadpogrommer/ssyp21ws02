@@ -1,5 +1,8 @@
 #pragma once
 
 typedef struct statistics_t{
-    int enemies_killed, shrines_used, most_enemies_killed_in_one_run, enemies_killed_in_current_run;
+    int enemies_killed, shrines_used, max_level, deaths, items_picked_up, max_gold;
 }statistics_t;
+
+statistics_t* init_statistics();
+void destroy_statistics();

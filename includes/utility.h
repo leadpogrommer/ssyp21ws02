@@ -8,6 +8,9 @@
 #define VEC2_DOWN ((vector2_t) { .x = 0, .y = 1})
 #define VEC2_SQUARE(a) (scale(VEC2_ONE, (a)))
 
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MIN(a, b) ((a) > (b) ? (b) : (a))
+
 void fail_gracefully(const char* format_string, ...);
 
 typedef struct vector2_t{

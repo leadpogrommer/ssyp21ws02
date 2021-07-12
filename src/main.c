@@ -57,20 +57,34 @@ void set_up_world(game_state_t* game_state){
                                                            game_state->palette, inventory_left_up_padding, inventory_right_down_padding);
 }
 
+void end_game(game_state_t* game_state){
+    save_statistics(game_state->world->stats);
+    destroy_world(game_state->world);
+    destroy_inventory_display(game_state->inventory_display);
+}
+
 int handle_input(game_state_t* game_state){
     int input = getch();
     switch (input){
         case 'a':
-            move_player_in_world(game_state->world, VEC2_LEFT);
+            if(game_state->state == STATE_GAME) {
+                move_player_in_world(game_state->world, VEC2_LEFT);
+            }
             break;
         case 'd':
-            move_player_in_world(game_state->world, VEC2_RIGHT);
+            if(game_state->state == STATE_GAME) {
+                move_player_in_world(game_state->world, VEC2_RIGHT);
+            }
             break;
         case 'w':
-            move_player_in_world(game_state->world, VEC2_UP);
+            if(game_state->state == STATE_GAME) {
+                move_player_in_world(game_state->world, VEC2_UP);
+            }
             break;
         case 's':
-            move_player_in_world(game_state->world, VEC2_DOWN);
+            if(game_state->state == STATE_GAME) {
+                move_player_in_world(game_state->world, VEC2_DOWN);
+            }
             break;
         case 'q':
             game_state->state = STATE_EXIT;
@@ -104,11 +118,12 @@ int handle_input(game_state_t* game_state){
             if(game_state->state == STATE_GAME) {
                 fire(game_state->world->bullets, game_state->world->player, VEC2_LEFT);
             }
+            break;
         case ' ':
-            if (game_state->state == STATE_INVENTORY){
+            if (game_state->state == STATE_INVENTORY && game_state->world->player->inventory->item_count > 0){
                 item_t* current_item = game_state->world->player->inventory->items[game_state->inventory_display->current_item];
                 if (use_item(game_state->world->player, current_item, game_state->world)){
-                    // Some stuff
+                    print_message(game_state->world->hud, "You have just used %s", current_item->name);
                 }else{
                     print_message(game_state->world->hud, "This item can't be used");
                 }
@@ -123,7 +138,11 @@ int handle_input(game_state_t* game_state){
 
 int process(game_state_t* game_state){
     process_world(game_state->world);
-    if(game_state->world->player->health <= 0) game_state->state = STATE_GAMEOVER;
+    if(game_state->world->player->health <= 0){
+        game_state->state = STATE_GAMEOVER;
+        game_state->world->stats->deaths++;
+        save_statistics(game_state->world->stats);
+    }
     return 0;
 }
 
@@ -202,7 +221,7 @@ int main() {
             case STATE_GAMEOVER:
                 switch (title_screen_handle_input(&menu_gameover)) {
                     case 0:
-                        destroy_world(game_state.world);
+                        end_game(&game_state);
                         game_state.world = NULL;
                         game_state.state = STATE_MAIN_MENU;
                         break;
@@ -223,8 +242,7 @@ int main() {
     destroy_palette(game_state.palette);
     destroy_palette(game_state.light_palette);
     if (game_state.world){
-        destroy_world(game_state.world);
-        destroy_inventory_display(game_state.inventory_display);
+        end_game(&game_state);
     }
     endwin();
     return 0;
