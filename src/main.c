@@ -103,7 +103,7 @@ int handle_input(game_state_t* game_state){
         case ' ':
             if (game_state->state == STATE_INVENTORY){
                 item_t* current_item = game_state->world->player->inventory->items[game_state->inventory_display->current_item];
-                if (use_item(game_state->world->player->inventory, current_item, game_state->world)){
+                if (use_item(game_state->world->player, current_item, game_state->world)){
                     // Some stuff
                 }else{
                     print_message(game_state->world->hud, "This item can't be used");
@@ -154,15 +154,14 @@ int main() {
 
     while (game_state.state != STATE_EXIT) {
         switch(game_state.state) {
-            case STATE_INVENTORY:
             case STATE_GAME:
                 if(!game_state.world){
                     game_state.world = start_new_world();
                     set_up_world(&game_state);
                 }
-
-                handle_input(&game_state);
                 process(&game_state);
+            case STATE_INVENTORY:
+                handle_input(&game_state);
                 draw(&game_state);
                 break;
             case STATE_MAIN_MENU:

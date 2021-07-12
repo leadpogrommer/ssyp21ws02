@@ -1,8 +1,8 @@
 #pragma once
+
 #include <ncurses.h>
 #include "player.h"
 #include "palette.h"
-
 
 typedef struct hud_t{
     WINDOW* window;

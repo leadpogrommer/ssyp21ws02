@@ -1,7 +1,6 @@
 #include "render.h"
 #include <string.h>
 
-
 void render(game_state_t* game_state){
     werase(game_state->game_window);
 

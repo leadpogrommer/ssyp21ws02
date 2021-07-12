@@ -12,6 +12,7 @@ hud_t* init_hud(WINDOW* game_window, int height, player_t* player, int* current_
     hud->player = player;
     hud->current_level = current_level;
     hud->palette = palette;
+    hud->message[0] = 0;
 
     wbkgd(hud->window, COLOR_PAIR(hud->palette->text_pair));
 

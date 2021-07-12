@@ -1,8 +1,8 @@
 #pragma once
+
 #include "player.h"
 #include "level.h"
 #include "pathfinder.h"
-#include "inventory.h"
 #include "hud.h"
 #include "enemies.h"
 #include "bullet.h"

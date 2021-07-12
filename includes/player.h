@@ -1,4 +1,5 @@
 #pragma once
+
 #include "utility.h"
 #include "inventory.h"
 
@@ -16,3 +17,6 @@ void move_player_to(player_t* player, vector2_t);
 
 void apply_item_to_player(player_t* player, item_t* item);
 void pick_up_item(player_t* player, item_t* item);
+void deapply_item_to_player(player_t* player, item_t* item);
+
+void heal_player(player_t* player, int amount);
