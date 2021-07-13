@@ -1,14 +1,9 @@
 #include "render.h"
-#include <string.h>
+#include <stdlib.h>
 
 void render(game_state_t* game_state){
-    werase(game_state->game_window);
 
-    draw_level_with_lighting(game_state->game_window, game_state->palette, game_state->light_palette, game_state->world, get_origin_on_screen(game_state->world));
-
-    draw_player(game_state->game_window, game_state->world->player, game_state->light_palette);
-
-    wnoutrefresh(game_state->game_window);
+    draw_game_window(game_state);
 
     if (game_state->state == STATE_INVENTORY){
         draw_inventory(game_state->inventory_display);
@@ -26,6 +21,35 @@ void render(game_state_t* game_state){
     doupdate();
 }
 
+void draw_game_window(game_state_t* game_state){
+    werase(game_state->game_window);
+
+    short** is_visible = calloc(sizeof(short*), game_state->world->level->size.y);
+    for (int i = 0; i < game_state->world->level->size.y; i++){
+        is_visible[i] = calloc(sizeof(short), game_state->world->level->size.x);
+    }
+
+    bake_lighting(game_state->world, is_visible);
+
+    draw_level_with_lighting(game_state->game_window, game_state->palette, game_state->light_palette, game_state->world->level,
+                             get_origin_on_screen(game_state->world), is_visible);
+
+    draw_enemies_with_lighting(game_state->game_window, game_state->palette, game_state->light_palette, game_state->world->enemies,
+                               get_origin_on_screen(game_state->world), is_visible);
+
+    draw_bullets_with_lighting(game_state->game_window, game_state->palette, game_state->light_palette, game_state->world->bullets,
+                               get_origin_on_screen(game_state->world), is_visible);
+
+    draw_player(game_state->game_window, game_state->world->player, game_state->light_palette);
+
+    for (int i = 0; i < game_state->world->level->size.y; i++){
+        free(is_visible[i]);
+    }
+    free(is_visible);
+
+    wnoutrefresh(game_state->game_window);
+}
+
 void draw_level(WINDOW* window, palette_t* palette, level_t* level, vector2_t offset){
     for (int i = 0; i < level->size.y; i++){
         for (int j = 0; j < level->size.x; j++){
@@ -38,7 +62,7 @@ void draw_level(WINDOW* window, palette_t* palette, level_t* level, vector2_t of
     }
 }
 
-void mark_visible_symbols_on_line(world_t* world, vector2_t end, short is_visible[world->level->size.y][world->level->size.x]){
+void mark_visible_symbols_on_line(world_t* world, vector2_t end, short** is_visible){
     vector2_t diff = sub(end, world->player->pos);
     vector2_t abs_diff = { .y = diff.y > 0 ? diff.y : -diff.y,  .x = diff.x > 0 ? diff.x : -diff.x};
     int y_step = diff.y > 0 ? 1 : diff.y == 0 ? 0 : -1;
@@ -77,15 +101,12 @@ void mark_visible_symbols_on_line(world_t* world, vector2_t end, short is_visibl
     }
 }
 
-void draw_level_with_lighting(WINDOW* window, palette_t* palette, palette_t* light_palette, world_t* world, vector2_t offset){
-    short is_visible[world->level->size.y][world->level->size.x];
-    memset(is_visible, 0, sizeof(is_visible));
-
+void bake_lighting(world_t* world, short** is_visible){
     for (int i = 0; i < world->level->size.y; i++){
-         vector2_t level_left = { .x = 0, .y = i };
-         vector2_t level_right = { .x = world->level->size.x - 1, .y = i };
-         mark_visible_symbols_on_line(world, level_left, is_visible);
-         mark_visible_symbols_on_line(world, level_right, is_visible);
+        vector2_t level_left = { .x = 0, .y = i };
+        vector2_t level_right = { .x = world->level->size.x - 1, .y = i };
+        mark_visible_symbols_on_line(world, level_left, is_visible);
+        mark_visible_symbols_on_line(world, level_right, is_visible);
     }
 
     for (int i = 0; i < world->level->size.x; i++){
@@ -94,10 +115,14 @@ void draw_level_with_lighting(WINDOW* window, palette_t* palette, palette_t* lig
         mark_visible_symbols_on_line(world, level_left, is_visible);
         mark_visible_symbols_on_line(world, level_right, is_visible);
     }
+}
 
-    for (int i = 0; i < world->level->size.y; i++){
-        for (int j = 0; j < world->level->size.x; j++){
-            char character = world->level->data[i][j] ? world->level->data[i][j] : '*';
+void draw_level_with_lighting(WINDOW* window, palette_t* palette, palette_t* light_palette, level_t* level, vector2_t offset,
+                              short** is_visible){
+
+    for (int i = 0; i < level->size.y; i++){
+        for (int j = 0; j < level->size.x; j++){
+            char character = level->data[i][j] ? level->data[i][j] : '*';
             if (is_visible[i][j]){
                 mvwaddch(window, i + offset.y, j + offset.x, light_palette->symbol[character]);
             }else{
@@ -105,17 +130,27 @@ void draw_level_with_lighting(WINDOW* window, palette_t* palette, palette_t* lig
             }
         }
     }
+}
 
-    for(int i = 0; i < world->enemies->count; i++) {
-        int x = world->enemies->array[i].pos.x;
-        int y = world->enemies->array[i].pos.y;
-        char ch = world->enemies->array[i].damage == 1 ? 'W' : 'T';
+void draw_enemies_with_lighting(WINDOW* window, palette_t* palette, palette_t* light_palette, enemies_t* enemies, vector2_t offset,
+                                short** is_visible){
+
+    for(int i = 0; i < enemies->count; i++) {
+        int x = enemies->array[i].pos.x;
+        int y = enemies->array[i].pos.y;
+        char ch = is_visible[y][x] ? (enemies->array[i].damage == 1 ? 'W' : 'T') : ' ';
         mvwaddch(window, y + offset.y, x + offset.x,(is_visible[y][x] ? light_palette : palette)->symbol[ch]);
     }
-    for(int i = 0; i < world->bullets->count; i++) {
-        int x = world->bullets->array[i].pos.x;
-        int y = world->bullets->array[i].pos.y;
-        mvwaddch(window, y + offset.y, x + offset.x, (is_visible[y][x] ? light_palette : palette)->symbol['-']);
+}
+
+void draw_bullets_with_lighting(WINDOW* window, palette_t* palette, palette_t* light_palette, bullets_t* bullets, vector2_t offset,
+                                short** is_visible){
+
+    for(int i = 0; i < bullets->count; i++) {
+        int x = bullets->array[i].pos.x;
+        int y = bullets->array[i].pos.y;
+        char ch = is_visible[y][x] ? '-' : ' ';
+        mvwaddch(window, y + offset.y, x + offset.x, (is_visible[y][x] ? light_palette : palette)->symbol[ch]);
     }
 }
 
