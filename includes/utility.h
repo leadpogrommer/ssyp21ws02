@@ -11,22 +11,6 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) > (b) ? (b) : (a))
 
-#define ONLYDEFINE
-#define TYPE int
-#define NAME int
-#include "generic_array.h"
-
-#define ONLYDEFINE
-#define TYPE vector2_t
-#define NAME vector2
-#include "generic_array.h"
-
-#define ONLYDEFINE
-#define TYPE vector2_pair_t
-#define NAME vector2_pair
-#include "generic_array.h"
-
-
 void fail_gracefully(const char* format_string, ...);
 
 typedef struct vector2_t{
@@ -51,3 +35,18 @@ int is_valid_rect_index(vector2_t index, vector2_t size);
 typedef struct vector2_pair_t{
     vector2_t first, second;
 }vector2_pair_t;
+
+#define ONLYDEFINE
+#define TYPE int
+#define NAME int
+#include "generic_array.h"
+
+#define ONLYDEFINE
+#define TYPE vector2_t
+#define NAME vector2
+#include "generic_array.h"
+
+#define ONLYDEFINE
+#define TYPE vector2_pair_t
+#define NAME vector2_pair
+#include "generic_array.h"
