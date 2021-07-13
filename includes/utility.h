@@ -54,3 +54,13 @@ vector2_pair_array_t* init_vector2_pair_array();
 void push_back_vector2_pair(vector2_pair_array_t* array, vector2_pair_t element);
 void destroy_vector2_pair_array(vector2_pair_array_t* array);
 void delete_last_vector2_pair(vector2_pair_array_t* array);
+
+typedef struct int_array_t{
+    int* data;
+    int size, capacity;
+}int_array_t;
+
+int_array_t* init_int_array();
+void push_back_int(int_array_t* array, int element);
+void delete_element(int_array_t* array, int index);
+void destroy_int_array(int_array_t* array);

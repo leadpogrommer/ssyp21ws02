@@ -68,7 +68,7 @@ void generate_new_level(world_t* world, int room_count){
                                                      VEC2_SQUARE(2)));
 
     update_rich_presence_level(world->current_level);
-    world->level_popup = init_popup("New level", 1);
+    world->level_popup = init_popup(NULL, 7, POPUP_ULCORNER, "Level %d", world->current_level);
 }
 
 void load_items(world_t* world){
@@ -96,6 +96,7 @@ void destroy_world(world_t* world){
     destroy_hud(world->hud);
     enemies_destroy(world->enemies);
     bullets_destroy(world->bullets);
+    destroy_statistics(world->stats);
     free(world);
 }
 

@@ -1,4 +1,5 @@
 #pragma once
+#include "achivements.h"
 
 #define STATE_MAIN_MENU 2
 #define STATE_PAUSE_MENU 3
@@ -12,5 +13,8 @@ typedef struct {
     world_t* world;
     WINDOW* game_window;
     inventory_display_t* inventory_display;
+    achievements_t* achievements;
+    popup_t* achievement_popup;
+    int_array_t* achievement_queue;
     int state;
 } game_state_t;

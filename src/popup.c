@@ -1,9 +1,15 @@
 #include "popup.h"
 #include <stdlib.h>
 
-popup_t* init_popup(char* message, int speed){
+popup_t* init_popup(WINDOW* main_window, int speed, char position, const char* format_string, ...){
     popup_t* popup = calloc(sizeof(popup_t), 1);
     popup->speed = speed;
+
+    va_list args;
+    va_start(args, format_string);
+    char message[256];
+    vsprintf(message, format_string, args);
+    va_end(args);
 
     int height, width, current_width, i;
     width = current_width = i = 0;
@@ -41,8 +47,16 @@ popup_t* init_popup(char* message, int speed){
     popup->message_size = (vector2_t){ width, height };
     width += 2;
     height += 2;
-    popup->window = newwin(height, width, 0, 0);
-    popup->move_fraction = 30;
+
+    vector2_t popup_position = VEC2_ZERO;
+
+    if (position == POPUP_URCORNER){
+        popup_position.x = getmaxx(main_window) - width;
+    }
+
+    popup->window = newwin(height, width, popup_position.y, popup_position.x);
+    popup->move_fraction = 250;
+    popup->live_time = 1000;
 
     return popup;
 }
@@ -55,7 +69,7 @@ void destroy_popup(popup_t* popup){
 void process_popup(popup_t** popup_ref){
     popup_t* popup = *popup_ref;
     popup->progress += popup->speed;
-    if (popup->progress >= 100){
+    if (popup->progress >= popup->live_time){
         destroy_popup(popup);
         *popup_ref = NULL;
         return;

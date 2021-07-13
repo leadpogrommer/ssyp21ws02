@@ -132,3 +132,32 @@ int is_valid_index(int index, int size){
 int is_valid_rect_index(vector2_t index, vector2_t size){
     return is_valid_index(index.x, size.x) && is_valid_index(index.y, size.y);
 }
+
+int_array_t* init_int_array(){
+    int_array_t* array = malloc(sizeof(int_array_t));
+    array->size = 0;
+    array->capacity = 1;
+    array->data = malloc(sizeof(int) * array->capacity);
+    return array;
+}
+
+void push_back_int(int_array_t* array, int vector){
+    if (array->size == array->capacity){
+        array->capacity *= 2;
+        array->data = realloc(array->data, sizeof(int) * array->capacity);
+    }
+
+    array->data[array->size++] = vector;
+}
+
+void delete_element(int_array_t* array, int index){
+    for (int i = index; i < array->size - 1; i++){
+        array->data[i] = array->data[i+1];
+    }
+    array->size--;
+}
+
+void destroy_int_array(int_array_t* array){
+    free(array->data);
+    free(array);
+}

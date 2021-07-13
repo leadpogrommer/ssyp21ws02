@@ -5,4 +5,4 @@ typedef struct statistics_t{
 }statistics_t;
 
 statistics_t* init_statistics();
-void destroy_statistics();
+void destroy_statistics(statistics_t* stats);

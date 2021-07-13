@@ -19,6 +19,10 @@ void render(game_state_t* game_state){
     if (game_state->world->level_popup){
         draw_popup(game_state->world->level_popup, game_state->level_popup_palette, game_state->palette);
     }
+
+    if (game_state->achievement_popup){
+        draw_popup(game_state->achievement_popup, game_state->level_popup_palette, game_state->palette);
+    }
     doupdate();
 }
 
@@ -176,8 +180,8 @@ void draw_popup(popup_t* popup, palette_t* popup_palette, palette_t* main_palett
     werase(popup->window);
 
     int portion;
-    if (popup->progress > 100 - popup->move_fraction){
-        portion = 100 * ((double)(100 - popup->progress) / popup->move_fraction);
+    if (popup->progress > popup->live_time - popup->move_fraction){
+        portion = 100 * ((double)(popup->live_time - popup->progress) / popup->move_fraction);
     }else if (popup->progress > popup->move_fraction){
         portion = 100;
     }else {

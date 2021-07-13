@@ -8,6 +8,7 @@
 #include "thirdparty/discord_game_sdk.h"
 #include "hud.h"
 #include "render.h"
+#include "achivements.h"
 #include "main.h"
 #include "saver.h"
 
@@ -55,6 +56,13 @@ void set_up_world(game_state_t* game_state){
     vector2_t inventory_right_down_padding = { .x = 9, .y = game_state->world->hud->height };
     game_state->inventory_display = init_inventory_display(game_state->world->player->inventory, game_state->game_window,
                                                            game_state->palette, inventory_left_up_padding, inventory_right_down_padding);
+
+    if (game_state->achievements){
+        destroy_achievements(game_state->achievements);
+        destroy_int_array(game_state->achievement_queue);
+    }
+    game_state->achievements = init_achievements(game_state->world->stats);
+    game_state->achievement_queue = init_int_array();
 }
 
 void end_game(game_state_t* game_state){
@@ -141,8 +149,27 @@ int process(game_state_t* game_state){
     if(game_state->world->player->health <= 0){
         game_state->state = STATE_GAMEOVER;
         game_state->world->stats->deaths++;
-        save_statistics(game_state->world->stats);
     }
+
+    // Processing achievements
+    for (int i = 0; i < game_state->achievements->count; i++){
+        if (!game_state->achievements->data[i].is_complete && game_state->achievements->data[i].evaluate(game_state->world->stats)){
+            push_back_int(game_state->achievement_queue, i);
+            game_state->achievements->data[i].is_complete = 1;
+        }
+    }
+
+    if (!game_state->achievement_popup && game_state->achievement_queue->size){
+        char* achievement_title = game_state->achievements->data[game_state->achievement_queue->data[0]].title;
+        game_state->achievement_popup = init_popup(game_state->game_window, 7, POPUP_URCORNER,
+                                                   "Achievement unlocked!\n%s", achievement_title);
+        delete_element(game_state->achievement_queue, 0);
+    }
+
+    if (game_state->achievement_popup){
+        process_popup(&game_state->achievement_popup);
+    }
+
     return 0;
 }
 
