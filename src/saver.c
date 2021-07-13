@@ -8,6 +8,7 @@ void save_world(world_t* world){
 
     save_player(world->player, file);
     save_level(world->level, file);
+    save_enemies(world->enemies, file);
 
     fwrite(&(world->current_level), sizeof(int), 1, file);
     fwrite(&(world->time), sizeof(unsigned long long), 1, file);
@@ -64,13 +65,22 @@ void save_room(room_t* room, FILE* file){
     }
 }
 
+void save_enemies(enemies_t* enemies, FILE* file){
+    fwrite(&(enemies->count), sizeof(int), 1, file);
+    fwrite(enemies->array, sizeof(enemy_t), enemies->count, file);
+}
+
 world_t* load_world(){
     FILE* file = fopen("save", "r");
+    if (!file){
+        fail_gracefully("Looks like there is no save file");
+    }
 
     world_t* world = init_world();
 
     world->player = load_player(file, world->items);
     world->level = load_level(file, world->room_pool);
+    world->enemies = load_enemies(file);
 
     fread(&(world->current_level), sizeof(int), 1, file);
     fread(&(world->time), sizeof(unsigned long long), 1, file);
@@ -152,13 +162,24 @@ room_t* load_saved_room(FILE* file, room_pool_t* room_pool){
     }
 }
 
-statistics_t* load_statistics(){
-    statistics_t* stats = init_statistics();
 
-    FILE* file = fopen("statistics", "r");
-    if (file){
+statistics_t* load_statistics() {
+    statistics_t * stats = init_statistics();
+
+    FILE *file = fopen("statistics", "r");
+    if (file) {
         fread(stats, sizeof(statistics_t), 1, file);
     }
 
     return stats;
+}
+
+enemies_t* load_enemies(FILE* file){
+    enemies_t* enemies = enemies_init();
+    int count;
+    fread(&count, sizeof(int), 1, file);
+    enemies_resize(enemies, count);
+    fread(enemies->array, sizeof(enemy_t), count, file);
+
+    return enemies;
 }
