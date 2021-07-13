@@ -8,10 +8,7 @@ void ability0(world_t* world){
 }
 
 void ability1(world_t* world){
-    int count = world->enemies->count;
-    for (int i = 0; i < count; i++){
-        enemies_remove(world->enemies, 0);
-    }
+    world->player->weapon_type = 1;
 }
 
 static void (*callbacks[2])(world_t* world) = { ability0, ability1 };
@@ -21,6 +18,7 @@ inventory_t* init_inventory(int size){
     inventory->size = size;
     inventory->items = calloc(sizeof(item_t*), inventory->size);
     inventory->item_count = 0;
+    inventory->weapon_index = -1;
 
     return inventory;
 }
@@ -64,8 +62,25 @@ void destroy_inventory(inventory_t* inventory, int destroy_items){
     free(inventory);
 }
 
-int use_item(player_t* player, item_t* item, struct world_t* world){
-    if (item->callback_index != CALLBACK_NONE){
+int use_item(player_t* player, int index, struct world_t* world){
+    if (!is_valid_index(index, player->inventory->item_count)){
+        return 0;
+    }
+
+    item_t* item = player->inventory->items[index];
+    if (item->equipment_type == EQUIPMENT_WEAPON){
+        if (is_valid_index(player->inventory->weapon_index, player->inventory->item_count)){
+            deapply_item_to_player(player, player->inventory->items[player->inventory->weapon_index]);
+            player->weapon_type = 0;
+        }
+        if (item->callback_index != CALLBACK_NONE) {
+            callbacks[item->callback_index](world);
+        }
+        player->inventory->weapon_index = index;
+        apply_item_to_player(player, item);
+        return 1;
+    }
+    else if (item->callback_index != CALLBACK_NONE){
         callbacks[item->callback_index](world);
         deapply_item_to_player(player, item);
         delete_item_from_inventory(player->inventory, item);

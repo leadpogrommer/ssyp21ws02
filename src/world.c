@@ -72,7 +72,7 @@ void generate_new_level(world_t* world, int room_count){
 }
 
 void load_items(world_t* world){
-    world->items = init_inventory(2);
+    world->items = init_inventory(3);
     item_t* power_up = calloc(sizeof(item_t), 1);
     power_up->hp_buff = 10;
     power_up->name = "Apple of Edem";
@@ -82,9 +82,19 @@ void load_items(world_t* world){
     item2->damage_buff = 15;
     item2->name = "Sword of the Storm";
     item2->id = 1;
-    item2->callback_index = CALLBACK_ANNIHILATION;
+    item2->callback_index = CALLBACK_NONE;
+    item2->equippable = 1;
+    item2->equipment_type = EQUIPMENT_WEAPON;
+    item_t* item3 = calloc(sizeof(item_t), 1);
+    item3->damage_buff = -3;
+    item3->name = "Shotgun";
+    item3->id = 2;
+    item3->callback_index = CALLBACK_SHOTGUN;
+    item3->equippable = 1;
+    item3->equipment_type = EQUIPMENT_WEAPON;
     add_item_to_inventory(world->items, power_up);
     add_item_to_inventory(world->items, item2);
+    add_item_to_inventory(world->items, item3);
 }
 
 void destroy_world(world_t* world){

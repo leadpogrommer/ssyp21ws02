@@ -2,6 +2,8 @@
 
 #include "utility.h"
 #include "statistics.h"
+#include "enemies.h"
+#include "level.h"
 
 #define BULLET_SPEED 10
 
@@ -10,7 +12,7 @@ typedef struct {
     vector2_t vel;
 } bullet_t;
 
-typedef struct {
+typedef struct bullets_t {
     bullet_t* array;
     int count, capacity;
 } bullets_t;

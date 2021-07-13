@@ -1,3 +1,4 @@
+#include "bullet.h"
 #include "player.h"
 #include <stdlib.h>
 
@@ -39,7 +40,21 @@ void heal_player(player_t* player, int amount){
 }
 
 void pick_up_item(player_t* player, item_t* item){
-    if (add_item_to_inventory(player->inventory, item)){
+    if (add_item_to_inventory(player->inventory, item) && !item->equippable){
         apply_item_to_player(player, item);
     } // TODO if not - window or something with info that there is not enough space in inventory
+}
+
+void shoot(player_t* player, bullets_t* bullets, vector2_t direction){
+
+    if (player->weapon_type == 0){
+        fire(bullets, player, direction);
+    }else if (player->weapon_type == 1){
+        fire(bullets, player, direction);
+        vector2_t sideways = { direction.y, direction.x };
+        fire(bullets, player, sum(direction, sideways));
+        sideways = scale(sideways, -1);
+        fire(bullets, player, sum(direction, sideways));
+    }
+
 }

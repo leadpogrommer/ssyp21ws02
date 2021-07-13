@@ -107,31 +107,31 @@ int handle_input(game_state_t* game_state){
             if (game_state->state == STATE_INVENTORY){
                 game_state->inventory_display->current_item++;
             } else if(game_state->state == STATE_GAME) {
-                fire(game_state->world->bullets, game_state->world->player, VEC2_DOWN);
+                shoot(game_state->world->player, game_state->world->bullets, VEC2_DOWN);
             }
             break;
         case KEY_UP:
             if (game_state->state == STATE_INVENTORY){
                 game_state->inventory_display->current_item--;
             } else if(game_state->state == STATE_GAME) {
-                fire(game_state->world->bullets, game_state->world->player, VEC2_UP);
+                shoot(game_state->world->player, game_state->world->bullets, VEC2_UP);
             }
             break;
         case KEY_RIGHT:
             if(game_state->state == STATE_GAME) {
-                fire(game_state->world->bullets, game_state->world->player, VEC2_RIGHT);
+                shoot(game_state->world->player, game_state->world->bullets, VEC2_RIGHT);
             }
             break;
         case KEY_LEFT:
             if(game_state->state == STATE_GAME) {
-                fire(game_state->world->bullets, game_state->world->player, VEC2_LEFT);
+                shoot(game_state->world->player, game_state->world->bullets, VEC2_LEFT);
             }
             break;
         case ' ':
             if (game_state->state == STATE_INVENTORY && game_state->world->player->inventory->item_count > 0){
-                item_t* current_item = game_state->world->player->inventory->items[game_state->inventory_display->current_item];
+                int current_item = game_state->inventory_display->current_item;
                 if (use_item(game_state->world->player, current_item, game_state->world)){
-                    print_message(game_state->world->hud, "You have just used %s", current_item->name);
+                    print_message(game_state->world->hud, "You have just used %s", game_state->world->player->inventory->items[current_item]->name);
                 }else{
                     print_message(game_state->world->hud, "This item can't be used");
                 }

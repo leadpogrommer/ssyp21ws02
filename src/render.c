@@ -201,11 +201,16 @@ void draw_inventory(inventory_display_t* display){
 
     mvwprintw(display->window, 1, half.x - 4, "INVENTORY");
     for (int i = 0; i < display->inventory->item_count; i++){
+        if (display->inventory->weapon_index == i){
+            wattron(display->window, A_BOLD);
+        }
+
         if (display->current_item == i){
             mvwprintw(display->window, 3 + i, 2, "%s <", display->inventory->items[i]->name);
         }else{
             mvwprintw(display->window, 3 + i, 2, "%s", display->inventory->items[i]->name);
         }
+        wattroff(display->window, A_BOLD);
     }
 
     wnoutrefresh(display->window);
