@@ -277,14 +277,14 @@ int room_placer(int rooms_left, int* branches_left, room_pool_t* room_pool, int 
             if (room_placer(3, 0, room_pool, room_count, rooms, directions[i], next_cell, connected_rooms)){
                 (*branches_left)--;
             }else{
-                delete_last_vector2_pair(connected_rooms);
+                delete_vector2_pair_from_array(connected_rooms, connected_rooms->size - 1);
             }
         }else if (!successful){
             // Let's go find out if this variant viable This is the main path
             push_back_vector2_pair(connected_rooms, (vector2_pair_t) { pos, next_cell });
             successful = room_placer(rooms_left - 1, branches_left, room_pool, room_count, rooms, directions[i], next_cell, connected_rooms);
             if (!successful){
-                delete_last_vector2_pair(connected_rooms);
+                delete_vector2_pair_from_array(connected_rooms, connected_rooms->size - 1);
             }
         }
     }

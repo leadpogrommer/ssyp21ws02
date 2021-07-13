@@ -11,6 +11,22 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) > (b) ? (b) : (a))
 
+#define ONLYDEFINE
+#define TYPE int
+#define NAME int
+#include "generic_array.h"
+
+#define ONLYDEFINE
+#define TYPE vector2_t
+#define NAME vector2
+#include "generic_array.h"
+
+#define ONLYDEFINE
+#define TYPE vector2_pair_t
+#define NAME vector2_pair
+#include "generic_array.h"
+
+
 void fail_gracefully(const char* format_string, ...);
 
 typedef struct vector2_t{
@@ -32,35 +48,6 @@ void get_full_eight_directions(vector2_t directions[8]);
 int is_valid_index(int index, int size);
 int is_valid_rect_index(vector2_t index, vector2_t size);
 
-typedef struct vector2_array_t{
-    vector2_t* data;
-    int size, capacity;
-}vector2_array_t;
-
-vector2_array_t* init_vector2_array();
-void push_back_vector2(vector2_array_t* array, vector2_t element);
-void destroy_vector2_array(vector2_array_t* array);
-
 typedef struct vector2_pair_t{
     vector2_t first, second;
 }vector2_pair_t;
-
-typedef struct vector2_pair_array_t{
-    vector2_pair_t* data;
-    int size, capacity;
-}vector2_pair_array_t;
-
-vector2_pair_array_t* init_vector2_pair_array();
-void push_back_vector2_pair(vector2_pair_array_t* array, vector2_pair_t element);
-void destroy_vector2_pair_array(vector2_pair_array_t* array);
-void delete_last_vector2_pair(vector2_pair_array_t* array);
-
-typedef struct int_array_t{
-    int* data;
-    int size, capacity;
-}int_array_t;
-
-int_array_t* init_int_array();
-void push_back_int(int_array_t* array, int element);
-void delete_element(int_array_t* array, int index);
-void destroy_int_array(int_array_t* array);

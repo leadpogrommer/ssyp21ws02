@@ -47,54 +47,6 @@ vector2_t scale_accordingly(vector2_t a, vector2_t b){
     return (vector2_t) {.x = a.x * b.x, .y = a.y * b.y};
 }
 
-vector2_array_t* init_vector2_array(){
-    vector2_array_t* array = malloc(sizeof(vector2_array_t));
-    array->size = 0;
-    array->capacity = 1;
-    array->data = malloc(sizeof(vector2_t) * array->capacity);
-    return array;
-}
-
-void push_back_vector2(vector2_array_t* array, vector2_t vector){
-    if (array->size == array->capacity){
-        array->capacity *= 2;
-        array->data = realloc(array->data, sizeof(vector2_t) * array->capacity);
-    }
-
-    array->data[array->size++] = vector;
-}
-
-void destroy_vector2_array(vector2_array_t* array){
-    free(array->data);
-    free(array);
-}
-
-vector2_pair_array_t* init_vector2_pair_array(){
-    vector2_pair_array_t* array = malloc(sizeof(vector2_pair_array_t));
-    array->size = 0;
-    array->capacity = 1;
-    array->data = malloc(sizeof(vector2_pair_t) * array->capacity);
-    return array;
-}
-
-void push_back_vector2_pair(vector2_pair_array_t* array, vector2_pair_t vector){
-    if (array->size == array->capacity){
-        array->capacity *= 2;
-        array->data = realloc(array->data, sizeof(vector2_pair_t) * array->capacity);
-    }
-
-    array->data[array->size++] = vector;
-}
-
-void delete_last_vector2_pair(vector2_pair_array_t* array){
-    array->size--;
-}
-
-void destroy_vector2_pair_array(vector2_pair_array_t* array){
-    free(array->data);
-    free(array);
-}
-
 void get_shuffled_directions(vector2_t directions[4]){
     get_straight_directions(directions);
 
@@ -133,31 +85,14 @@ int is_valid_rect_index(vector2_t index, vector2_t size){
     return is_valid_index(index.x, size.x) && is_valid_index(index.y, size.y);
 }
 
-int_array_t* init_int_array(){
-    int_array_t* array = malloc(sizeof(int_array_t));
-    array->size = 0;
-    array->capacity = 1;
-    array->data = malloc(sizeof(int) * array->capacity);
-    return array;
-}
+#define TYPE int
+#define NAME int
+#include "generic_array.h"
 
-void push_back_int(int_array_t* array, int vector){
-    if (array->size == array->capacity){
-        array->capacity *= 2;
-        array->data = realloc(array->data, sizeof(int) * array->capacity);
-    }
+#define TYPE vector2_t
+#define NAME vector2
+#include "generic_array.h"
 
-    array->data[array->size++] = vector;
-}
-
-void delete_element(int_array_t* array, int index){
-    for (int i = index; i < array->size - 1; i++){
-        array->data[i] = array->data[i+1];
-    }
-    array->size--;
-}
-
-void destroy_int_array(int_array_t* array){
-    free(array->data);
-    free(array);
-}
+#define TYPE vector2_pair_t
+#define NAME vector2_pair
+#include "generic_array.h"

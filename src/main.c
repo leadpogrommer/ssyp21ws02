@@ -163,7 +163,7 @@ int process(game_state_t* game_state){
         char* achievement_title = game_state->achievements->data[game_state->achievement_queue->data[0]].title;
         game_state->achievement_popup = init_popup(game_state->game_window, 7, POPUP_URCORNER,
                                                    "Achievement unlocked!\n%s", achievement_title);
-        delete_element(game_state->achievement_queue, 0);
+        delete_int_from_array(game_state->achievement_queue, 0);
     }
 
     if (game_state->achievement_popup){

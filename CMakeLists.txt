@@ -19,8 +19,8 @@ add_executable(game
                 includes/room.h
                 src/utility.c
                 includes/utility.h
-        src/palette.c
-        includes/palette.h
+                src/palette.c
+                includes/palette.h
                 src/world.c
                 includes/world.h
                 src/player.c
@@ -29,7 +29,31 @@ add_executable(game
                 includes/title_screen.h
                 src/rich_presence.c
                 src/level.c
-                includes/level.h src/heap.c includes/heap.h src/pathfinder.c includes/pathfinder.h src/hud.c includes/hud.h src/inventory.c includes/inventory.h src/render.c includes/render.h includes/main.h src/saver.c includes/saver.h src/enemies.c includes/enemies.h src/bullet.c includes/bullet.h src/achivements.c includes/achivements.h src/statistics.c includes/statistics.h src/popup.c includes/popup.h)
+                includes/level.h
+                src/heap.c
+                includes/heap.h
+                src/pathfinder.c
+                includes/pathfinder.h
+                src/hud.c
+                includes/hud.h
+                src/inventory.c
+                includes/inventory.h
+                src/render.c
+                includes/render.h
+                includes/main.h
+                src/saver.c
+                includes/saver.h
+                src/enemies.c
+                includes/enemies.h
+                src/bullet.c
+                includes/bullet.h
+                src/achivements.c
+                includes/achivements.h
+                src/statistics.c
+                includes/statistics.h
+                src/popup.c
+                includes/popup.h
+                includes/generic_array.h)
 target_include_directories(game PRIVATE includes)
 
 
