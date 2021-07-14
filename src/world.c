@@ -79,7 +79,7 @@ void load_items(world_t* world){
     power_up->id = 0;
     power_up->callback_index = CALLBACK_HEAL_SMALL;
     item_t* item2 = calloc(sizeof(item_t), 1);
-    item2->damage_buff = 15;
+    item2->damage_buff = 10;
     item2->name = "Sword of the Storm";
     item2->id = 1;
     item2->callback_index = CALLBACK_NONE;

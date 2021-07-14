@@ -111,24 +111,24 @@ int handle_input(game_state_t* game_state){
             if (game_state->state == STATE_INVENTORY){
                 game_state->inventory_display->current_item++;
             } else if(game_state->state == STATE_GAME) {
-                shoot(game_state->world->player, game_state->world->bullets, VEC2_DOWN);
+                shoot(game_state->world->player, game_state->world->bullets, VEC2_DOWN, game_state->world->time);
             }
             break;
         case KEY_UP:
             if (game_state->state == STATE_INVENTORY){
                 game_state->inventory_display->current_item--;
             } else if(game_state->state == STATE_GAME) {
-                shoot(game_state->world->player, game_state->world->bullets, VEC2_UP);
+                shoot(game_state->world->player, game_state->world->bullets, VEC2_UP, game_state->world->time);
             }
             break;
         case KEY_RIGHT:
             if(game_state->state == STATE_GAME) {
-                shoot(game_state->world->player, game_state->world->bullets, VEC2_RIGHT);
+                shoot(game_state->world->player, game_state->world->bullets, VEC2_RIGHT, game_state->world->time);
             }
             break;
         case KEY_LEFT:
             if(game_state->state == STATE_GAME) {
-                shoot(game_state->world->player, game_state->world->bullets, VEC2_LEFT);
+                shoot(game_state->world->player, game_state->world->bullets, VEC2_LEFT, game_state->world->timeaasa);
             }
             break;
         case ' ':

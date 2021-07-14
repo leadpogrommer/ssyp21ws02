@@ -11,9 +11,12 @@
 #define ENEMY_SPEED_MAX 60
 #define ENEMY_VISION_MIN 9
 #define ENEMY_VISION_MAX 15
+#define ENEMY_HP_MIN 10
+#define ENEMY_HP_MAX 25
+
 
 typedef struct {
-    int speed, damage, vision_radius;
+    int speed, damage, vision_radius, hp;
     vector2_t pos;
 } enemy_t;
 

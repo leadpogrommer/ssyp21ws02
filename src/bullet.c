@@ -12,12 +12,12 @@ bullets_t* bullets_init() {
     return bullets;
 }
 
-void bullets_add(bullets_t* bullets, vector2_t pos, vector2_t vel) {
+void bullets_add(bullets_t* bullets, vector2_t pos, vector2_t vel, int damage) {
     if(bullets->count + 1 > bullets->capacity) {
         bullets->array = realloc(bullets->array, sizeof(bullet_t) * bullets->capacity * 2);
         bullets->capacity *= 2;
     }
-    bullet_t bullet = { .pos = pos, .vel = vel };
+    bullet_t bullet = { .pos = pos, .vel = vel, .damage = damage };
     bullets->array[bullets->count] = bullet;
     bullets->count++;
 }
@@ -39,7 +39,7 @@ void bullets_destroy(bullets_t* bullets) {
 }
 
 void fire(bullets_t* bullets, player_t* player, vector2_t vel) {
-    bullets_add(bullets, player->pos, vel);
+    bullets_add(bullets, player->pos, vel, player->damage);
 }
 
 void process_bullets(bullets_t* bullets, enemies_t* enemies, level_t* level, player_t* player, statistics_t* stats, unsigned long long time) {
@@ -51,13 +51,18 @@ void process_bullets(bullets_t* bullets, enemies_t* enemies, level_t* level, pla
             if(i > 0) i--;
         } else for(int j = 0; j < enemies->count; j++) {
             if(equal(bullets->array[i].pos, enemies->array[j].pos)) {
-                enemies_remove(enemies, j);
-                if(j > 0) j--;
+
+                enemies->array[j].hp -= bullets->array[i].damage;
                 bullets_remove(bullets, i);
                 if(i > 0) i--;
+                if (enemies->array[j].hp < 0){
+                    enemies_remove(enemies, j);
+                    if(j > 0) j--;
 
-                player->gold++;
-                stats->enemies_killed++;
+                    player->gold++;
+                    stats->enemies_killed++;
+                }
+
 
                 break;
             }

@@ -9,6 +9,9 @@ player_t* init_player(int max_health){
     player->health = max_health;
     player->inventory = init_inventory(10);
     player->vision_radius = 30;
+    player->damage = 10;
+    player->cooldowns[0] = 30;
+    player->cooldowns[1] = 40;
     return player;
 }
 
@@ -45,16 +48,21 @@ void pick_up_item(player_t* player, item_t* item){
     } // TODO if not - window or something with info that there is not enough space in inventory
 }
 
-void shoot(player_t* player, bullets_t* bullets, vector2_t direction){
-
+void shoot(player_t* player, bullets_t* bullets, vector2_t direction, unsigned long long time){
     if (player->weapon_type == 0){
-        fire(bullets, player, direction);
+        if (time - player->last_shot >= (unsigned long long)player->cooldowns[0]){
+            fire(bullets, player, direction);
+            player->last_shot = time;
+        }
     }else if (player->weapon_type == 1){
-        fire(bullets, player, direction);
-        vector2_t sideways = { direction.y, direction.x };
-        fire(bullets, player, sum(direction, sideways));
-        sideways = scale(sideways, -1);
-        fire(bullets, player, sum(direction, sideways));
+        if (time - player->last_shot >= (unsigned long long)player->cooldowns[1]) {
+            fire(bullets, player, direction);
+            vector2_t sideways = {direction.y, direction.x};
+            fire(bullets, player, sum(direction, sideways));
+            sideways = scale(sideways, -1);
+            fire(bullets, player, sum(direction, sideways));
+            player->last_shot = time;
+        }
     }
 
 }

@@ -10,6 +10,7 @@
 typedef struct {
     vector2_t pos;
     vector2_t vel;
+    int damage;
 } bullet_t;
 
 typedef struct bullets_t {
@@ -18,7 +19,7 @@ typedef struct bullets_t {
 } bullets_t;
 
 bullets_t* bullets_init();
-void bullets_add(bullets_t* bullets, vector2_t pos, vector2_t vel);
+void bullets_add(bullets_t* bullets, vector2_t pos, vector2_t vel, int damage);
 void bullets_remove(bullets_t* bullets, int pos);
 void bullets_destroy(bullets_t* bullets);
 void bullets_clear(bullets_t* bullets);
