@@ -31,5 +31,5 @@ void enemies_add(enemies_t* enemies, enemy_t enemy);
 void enemies_remove(enemies_t* enemies, int pos);
 void enemies_destroy(enemies_t* enemies);
 
-void spawn_enemies(level_t* level, enemies_t* enemies);
+void spawn_enemies(level_t* level, enemies_t* enemies, int enemies_in_room);
 void process_enemies(pathfinder_t* pathfinder, enemies_t* enemies, player_t* player, unsigned long long time);

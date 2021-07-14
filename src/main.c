@@ -128,7 +128,7 @@ int handle_input(game_state_t* game_state){
             break;
         case KEY_LEFT:
             if(game_state->state == STATE_GAME) {
-                shoot(game_state->world->player, game_state->world->bullets, VEC2_LEFT, game_state->world->timeaasa);
+                shoot(game_state->world->player, game_state->world->bullets, VEC2_LEFT, game_state->world->time);
             }
             break;
         case ' ':

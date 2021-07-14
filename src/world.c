@@ -58,7 +58,7 @@ void generate_new_level(world_t* world, int room_count){
 
     world->level = generate_level(room_count, world->room_pool);
     world->pathfinder = init_pathfinder(world->level);
-    spawn_enemies(world->level, world->enemies);
+    spawn_enemies(world->level, world->enemies, 2);
     bullets_clear(world->bullets);
 
     world->stats->max_level = MAX(world->stats->max_level, world->current_level);

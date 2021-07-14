@@ -43,28 +43,33 @@ void enemies_clear(enemies_t* enemies) {
     enemies->count = 0;
 }
 
-void spawn_enemies(level_t* level, enemies_t* enemies) {
+void spawn_enemies(level_t* level, enemies_t* enemies, int enemies_in_room) {
     enemies_clear(enemies);
     for(int i = 0; i < level->room_grid_size.x; i++) {
         for(int j = 0; j < level->room_grid_size.y; j++) {
             if(level->room_grid[j][i] == NULL || (level->start_room_grid_position.x == i && level->start_room_grid_position.y == j)) continue;
-            int ex = ((double)rand() / RAND_MAX) * (level->room_grid[j][i]->size.x - 2) + 1;
-            int ey = ((double)rand() / RAND_MAX) * (level->room_grid[j][i]->size.y - 2) + 1;
-            int espeed = ((double)rand() / RAND_MAX) * (ENEMY_SPEED_MAX - ENEMY_SPEED_MIN + 1) + ENEMY_SPEED_MIN;
-            int edamage = ((double)rand() / RAND_MAX) * (ENEMY_DAMAGE_MAX - ENEMY_DAMAGE_MIN + 1) + ENEMY_DAMAGE_MIN;
-            int evision = ((double)rand() / RAND_MAX) * (ENEMY_VISION_MAX - ENEMY_VISION_MIN + 1) + ENEMY_VISION_MIN;
-            int ehp = rand() % (ENEMY_HP_MAX - ENEMY_DAMAGE_MIN) + ENEMY_HP_MIN;
-            if(level->room_grid[j][i]->data[ey][ex] == '.') {
-                vector2_t outer = { .x = i, .y = j };
-                vector2_t inner = { .x = ex, .y = ey };
-                enemy_t enemy = {
-                    .pos = get_level_position(level, outer, inner),
-                    .speed = espeed,
-                    .damage = edamage,
-                    .vision_radius = evision,
-                    .hp = ehp
-                };
-                enemies_add(enemies, enemy);
+            int countdown = enemies_in_room;
+            while (countdown--) {
+                int ex = ((double) rand() / RAND_MAX) * (level->room_grid[j][i]->size.x - 2) + 1;
+                int ey = ((double) rand() / RAND_MAX) * (level->room_grid[j][i]->size.y - 2) + 1;
+                int espeed = ((double) rand() / RAND_MAX) * (ENEMY_SPEED_MAX - ENEMY_SPEED_MIN + 1) + ENEMY_SPEED_MIN;
+                int edamage =
+                        ((double) rand() / RAND_MAX) * (ENEMY_DAMAGE_MAX - ENEMY_DAMAGE_MIN + 1) + ENEMY_DAMAGE_MIN;
+                int evision =
+                        ((double) rand() / RAND_MAX) * (ENEMY_VISION_MAX - ENEMY_VISION_MIN + 1) + ENEMY_VISION_MIN;
+                int ehp = rand() % (ENEMY_HP_MAX - ENEMY_DAMAGE_MIN) + ENEMY_HP_MIN;
+                if (level->room_grid[j][i]->data[ey][ex] == '.') {
+                    vector2_t outer = {.x = i, .y = j};
+                    vector2_t inner = {.x = ex, .y = ey};
+                    enemy_t enemy = {
+                            .pos = get_level_position(level, outer, inner),
+                            .speed = espeed,
+                            .damage = edamage,
+                            .vision_radius = evision,
+                            .hp = ehp
+                    };
+                    enemies_add(enemies, enemy);
+                }
             }
         }
     }
