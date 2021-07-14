@@ -70,7 +70,7 @@ void process_popup(popup_t** popup_ref){
     popup_t* popup = *popup_ref;
     popup->progress += popup->speed;
     if (popup->progress >= popup->live_time){
-        destroy_popup(popup);
+        destroy_popup(*popup_ref);
         *popup_ref = NULL;
         return;
     }

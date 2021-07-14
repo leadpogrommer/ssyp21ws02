@@ -69,6 +69,10 @@ void end_game(game_state_t* game_state){
     save_statistics(game_state->world->stats);
     destroy_world(game_state->world);
     destroy_inventory_display(game_state->inventory_display);
+    if (game_state->achievements){
+        destroy_achievements(game_state->achievements);
+        destroy_int_array(game_state->achievement_queue);
+    }
 }
 
 int handle_input(game_state_t* game_state){
@@ -271,6 +275,7 @@ int main() {
     title_screen_destroy(&menu_gameover);
     destroy_palette(game_state.palette);
     destroy_palette(game_state.light_palette);
+    destroy_palette(game_state.level_popup_palette);
     if (game_state.world){
         end_game(&game_state);
     }
