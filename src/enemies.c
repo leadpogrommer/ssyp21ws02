@@ -43,8 +43,6 @@ void enemies_clear(enemies_t* enemies) {
     enemies->count = 0;
 }
 
-
-
 void spawn_enemies(level_t* level, enemies_t* enemies) {
     enemies_clear(enemies);
     for(int i = 0; i < level->room_grid_size.x; i++) {
@@ -54,13 +52,15 @@ void spawn_enemies(level_t* level, enemies_t* enemies) {
             int ey = ((double)rand() / RAND_MAX) * (level->room_grid[j][i]->size.y - 2) + 1;
             int espeed = ((double)rand() / RAND_MAX) * (ENEMY_SPEED_MAX - ENEMY_SPEED_MIN + 1) + ENEMY_SPEED_MIN;
             int edamage = ((double)rand() / RAND_MAX) * (ENEMY_DAMAGE_MAX - ENEMY_DAMAGE_MIN + 1) + ENEMY_DAMAGE_MIN;
+            int evision = ((double)rand() / RAND_MAX) * (ENEMY_VISION_MAX - ENEMY_VISION_MIN + 1) + ENEMY_VISION_MIN;
             if(level->room_grid[j][i]->data[ey][ex] == '.') {
                 vector2_t outer = { .x = i, .y = j };
                 vector2_t inner = { .x = ex, .y = ey };
                 enemy_t enemy = {
                     .pos = get_level_position(level, outer, inner),
                     .speed = espeed,
-                    .damage = edamage
+                    .damage = edamage,
+                    .vision_radius = evision
                 };
                 enemies_add(enemies, enemy);
             }
@@ -71,9 +71,13 @@ void spawn_enemies(level_t* level, enemies_t* enemies) {
 void process_enemies(pathfinder_t* pathfinder, enemies_t* enemies, player_t* player, unsigned long long time) {
     for(int i = 0; i < enemies->count; i++) {
         if(time % enemies->array[i].speed == 0) {
-            vector2_array_t* path = find_path(pathfinder, enemies->array[i].pos, player->pos, 1);
-            enemies->array[i].pos = path->data[path->size - 1];
-            destroy_vector2_array(path);
+            if (vector2_distance(enemies->array[i].pos, player->pos) < enemies->array[i].vision_radius * 10){
+                vector2_array_t* path = find_path(pathfinder, enemies->array[i].pos, player->pos, 1);
+                if (path->size < enemies->array[i].vision_radius){
+                    enemies->array[i].pos = path->data[path->size - 1];
+                    destroy_vector2_array(path);
+                }
+            }
         }
         if(equal(enemies->array[i].pos, player->pos)) {
             player->health -= enemies->array[i].damage;
