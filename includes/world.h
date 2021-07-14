@@ -22,6 +22,7 @@ typedef struct world_t{
     bullets_t* bullets;
     popup_t* level_popup;
     statistics_t* stats;
+    unsigned long long last_prompt;
 }world_t;
 
 world_t* start_new_world();
@@ -37,3 +38,5 @@ void process_world(world_t* world);
 vector2_t get_origin_on_screen(world_t* world);
 
 void move_player_in_world(world_t* world, vector2_t move);
+
+void use_shrine(world_t* world);

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "rich_presence.h"
 #include "saver.h"
+#include "string.h"
 
 world_t* start_new_world(){
     world_t* world = init_world();
@@ -30,16 +31,16 @@ void process_world(world_t* world){
             generate_new_level(world, world->level->room_count + 1);
             break;
         case 'h':
-            world->player->max_health += 10;
-            world->level->data[world->player->pos.y][world->player->pos.x] = '.';
-            print_message(world->hud, "You used a shrine of prosperity");
-            world->stats->shrines_used++;
+            if (world->time - world->last_prompt >= 300){
+                print_message(world->hud, "Press e to buy max hp");
+                world->last_prompt = world->time;
+            }
             break;
         case '?':
-            pick_up_item(world->player, get_random_item(world->items));
-            world->level->data[world->player->pos.y][world->player->pos.x] = '.';
-            print_message(world->hud, "Picked up an item: %s", world->player->inventory->items[world->player->inventory->item_count - 1]->name);
-            world->stats->items_picked_up++;
+            if (world->time - world->last_prompt >= 300){
+                print_message(world->hud, "Press e to buy an item");
+                world->last_prompt = world->time;
+            }
             break;
     }
     process_bullets(world->bullets, world->enemies, world->level, world->player, world->stats, world->time);
@@ -48,6 +49,38 @@ void process_world(world_t* world){
         process_popup(&world->level_popup);
     }
     world->stats->max_gold = MAX(world->stats->max_gold, world->player->gold);
+}
+
+void use_shrine(world_t* world){
+    switch (world->level->data[world->player->pos.y][world->player->pos.x]){
+        case 'h':
+            if (world->player->gold < 10){
+                print_message(world->hud, "You have not enough gold, 10 is needed");
+                break;
+            }
+
+            world->player->gold -= 10;
+            world->player->max_health += 10;
+            world->level->data[world->player->pos.y][world->player->pos.x] = '.';
+            print_message(world->hud, "You used a shrine of em");
+            world->stats->shrines_used++;
+            break;
+        case '?':
+            if (world->player->gold < 10){
+                print_message(world->hud, "You have not enough gold, 10 is needed");
+                break;
+            }
+
+            world->player->gold -= 10;
+            pick_up_item(world->player, get_random_item(world->items));
+            world->level->data[world->player->pos.y][world->player->pos.x] = '.';
+            print_message(world->hud, "Picked up an item: %s", world->player->inventory->items[world->player->inventory->item_count - 1]->name);
+            world->stats->items_picked_up++;
+            break;
+        default:
+            print_message(world->hud, "There is nothing to use");
+            break;
+    }
 }
 
 void generate_new_level(world_t* world, int room_count){

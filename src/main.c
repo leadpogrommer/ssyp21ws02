@@ -98,6 +98,9 @@ int handle_input(game_state_t* game_state){
                 move_player_in_world(game_state->world, VEC2_DOWN);
             }
             break;
+        case 'e':
+            use_shrine(game_state->world);
+            break;
         case 'q':
             game_state->state = STATE_EXIT;
             break;
