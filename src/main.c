@@ -210,6 +210,9 @@ int main() {
                     set_up_world(&game_state);
                 }
                 process(&game_state);
+                handle_input(&game_state);
+                draw(&game_state);
+                break;
             case STATE_INVENTORY:
                 handle_input(&game_state);
                 draw(&game_state);

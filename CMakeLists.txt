@@ -13,6 +13,10 @@ add_link_options(-L${CMAKE_SOURCE_DIR} -Wl,-rpath,.)
 #set_target_properties(discord PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/libs/discord_game_sdk.so)
 #set(CMAKE_INSTALL_RPATH ".")
 
+include_directories(SYSTEM includes/thirdparty)
+
+add_compile_options(-Wall -Werror -pedantic-errors -Wextra -Wpedantic)
+
 add_executable(game
                 src/main.c
                 src/room.c

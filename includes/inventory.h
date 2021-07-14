@@ -5,6 +5,7 @@
 #define CALLBACK_SHOTGUN (1)
 
 #define EQUIPMENT_WEAPON 1
+#define EQUIPMENT_USABLE 0
 
 typedef struct world_t world_t;
 typedef struct player_t player_t;

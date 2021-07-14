@@ -1,7 +1,7 @@
 #pragma once
 #include "world.h"
 #include "main.h"
-#include "thirdparty/discord_game_sdk.h"
+#include "discord_game_sdk.h"
 
 struct Application {
     struct IDiscordCore* core;

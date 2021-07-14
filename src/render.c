@@ -122,7 +122,7 @@ void draw_level_with_lighting(WINDOW* window, palette_t* palette, palette_t* lig
 
     for (int i = 0; i < level->size.y; i++){
         for (int j = 0; j < level->size.x; j++){
-            char character = level->data[i][j] ? level->data[i][j] : '*';
+            unsigned char character = level->data[i][j] ? level->data[i][j] : '*';
             if (is_visible[i][j]){
                 mvwaddch(window, i + offset.y, j + offset.x, light_palette->symbol[character]);
             }else{
@@ -138,7 +138,7 @@ void draw_enemies_with_lighting(WINDOW* window, palette_t* palette, palette_t* l
     for(int i = 0; i < enemies->count; i++) {
         int x = enemies->array[i].pos.x;
         int y = enemies->array[i].pos.y;
-        char ch = is_visible[y][x] ? (enemies->array[i].damage == 1 ? 'W' : 'T') : ' ';
+        unsigned char ch = is_visible[y][x] ? (enemies->array[i].damage == 1 ? 'W' : 'T') : ' ';
         mvwaddch(window, y + offset.y, x + offset.x,(is_visible[y][x] ? light_palette : palette)->symbol[ch]);
     }
 }
@@ -149,7 +149,7 @@ void draw_bullets_with_lighting(WINDOW* window, palette_t* palette, palette_t* l
     for(int i = 0; i < bullets->count; i++) {
         int x = bullets->array[i].pos.x;
         int y = bullets->array[i].pos.y;
-        char ch = is_visible[y][x] ? '-' : ' ';
+        unsigned char ch = is_visible[y][x] ? '-' : ' ';
         mvwaddch(window, y + offset.y, x + offset.x, (is_visible[y][x] ? light_palette : palette)->symbol[ch]);
     }
 }

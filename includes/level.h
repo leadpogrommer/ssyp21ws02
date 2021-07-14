@@ -4,7 +4,7 @@
 #include "player.h"
 
 typedef struct level_t{
-    char** data;
+    unsigned char** data;
     vector2_t size;
     int room_count;
     room_t*** room_grid;

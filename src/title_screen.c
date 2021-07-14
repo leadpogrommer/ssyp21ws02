@@ -40,7 +40,7 @@ int title_screen_handle_input(title_screen_data* data) {
 void title_screen_draw(WINDOW* window, title_screen_data* data, int frame, char* title) {
     if(!frame) werase(window);
     else {
-        int maxw = strlen(data->items[0]);
+        size_t maxw = strlen(data->items[0]);
         for(int i = 1; i < data->count; i++)
             if(strlen(data->items[i]) > maxw)
                 maxw = strlen(data->items[i]);
