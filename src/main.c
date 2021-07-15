@@ -67,7 +67,7 @@ void set_up_world(game_state_t* game_state){
     WINDOW* win = game_state->game_window;
     game_state->world->max_fade_radius = (getmaxx(win) * getmaxx(win) + getmaxy(win) * getmaxy(win) ) / 2;
     // half of the diagonal so it just around the corner
-    game_state->world->fade_speed = game_state->world->max_fade_radius / 40;
+    game_state->world->fade_speed = game_state->world->max_fade_radius / 1600;
 }
 
 void end_game(game_state_t* game_state){

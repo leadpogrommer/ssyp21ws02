@@ -3,6 +3,7 @@
 #include "rich_presence.h"
 #include "saver.h"
 #include "string.h"
+#include <math.h>
 
 world_t* start_new_world(){
     world_t* world = init_world();
@@ -26,7 +27,11 @@ world_t* init_world(){
 
 void process_world(world_t* world){
     if (world->fade_radius != world->max_fade_radius){
-        world->fade_radius += world->fade_speed;
+        if (world->fade_speed > 0){
+            world->fade_radius += 2 * sqrt(world->fade_radius) * sqrt(world->fade_speed) + world->fade_speed;
+        }else{
+            world->fade_radius -= 2 * sqrt(world->fade_radius) * sqrt(-world->fade_speed) + world->fade_speed;
+        }
     }else {
         world->time++;
         switch (world->level->data[world->player->pos.y][world->player->pos.x]) {
@@ -55,9 +60,9 @@ void process_world(world_t* world){
         process_popup(&world->level_popup);
     }
 
-    if (world->fade_radius < 0 || world->fade_radius > world->max_fade_radius){
+    if (world->fade_radius <= 0 || world->fade_radius > world->max_fade_radius){
         world->fade_speed *= -1;
-        world->fade_radius = world->fade_radius < 0 ? 0 : world->max_fade_radius;
+        world->fade_radius = world->fade_radius <= 0 ? 0 : world->max_fade_radius;
         if (!world->fade_radius){
             generate_new_level(world, world->level->room_count + 1);
         }
@@ -111,7 +116,7 @@ void generate_new_level(world_t* world, int room_count){
     world->current_level++;
     world->level = generate_level(room_count, world->room_pool);
     world->pathfinder = init_pathfinder(world->level);
-    spawn_enemies(world->level, world->enemies, 2);
+    spawn_enemies(world->level, world->enemies, 0);
     spawn_items_on_level(world->level, world->items);
     bullets_clear(world->bullets);
 

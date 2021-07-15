@@ -60,7 +60,7 @@ void draw_level_changing_animation(game_state_t* game_state){
         game_state->world->max_fade_radius = new_radius;
         game_state->world->fade_radius = new_radius;
         // half of the diagonal so it just around the corner
-        game_state->world->fade_speed = game_state->world->fade_speed > 0 ? game_state->world->max_fade_radius / 50 : -game_state->world->max_fade_radius / 50;
+        game_state->world->fade_speed = game_state->world->fade_speed > 0 ? game_state->world->max_fade_radius / 1600 : -game_state->world->max_fade_radius / 50;
     }
 
     init_color(100, 0, 0, 0);
