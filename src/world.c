@@ -25,34 +25,36 @@ world_t* init_world(){
 }
 
 void process_world(world_t* world){
-    world->time++;
-    switch (world->level->data[world->player->pos.y][world->player->pos.x]){
-        case 'e':
-            change_level(world);
-            break;
-        case 'h':
-            if (world->time - world->last_prompt >= 300){
-                print_message(world->hud, "Press e to buy max hp");
-                world->last_prompt = world->time;
-            }
-            break;
-        case '?':
-            if (world->time - world->last_prompt >= 300){
-                item_t* item = get_item_on_position(world->level, world->player->pos);
-                print_message(world->hud, "Press e to buy %s", item->name);
-                world->last_prompt = world->time;
-            }
-            break;
+    if (world->fade_radius != world->max_fade_radius){
+        world->fade_radius += world->fade_speed;
+    }else {
+        world->time++;
+        switch (world->level->data[world->player->pos.y][world->player->pos.x]) {
+            case 'e':
+                change_level(world);
+                break;
+            case 'h':
+                if (world->time - world->last_prompt >= 300) {
+                    print_message(world->hud, "Press e to buy max hp");
+                    world->last_prompt = world->time;
+                }
+                break;
+            case '?':
+                if (world->time - world->last_prompt >= 300) {
+                    item_t *item = get_item_on_position(world->level, world->player->pos);
+                    print_message(world->hud, "Press e to buy %s", item->name);
+                    world->last_prompt = world->time;
+                }
+                break;
+        }
+        process_bullets(world->bullets, world->enemies, world->level, world->player, world->stats, world->time);
+        process_enemies(world->pathfinder, world->enemies, world->player, world->time);
+        world->stats->max_gold = MAX(world->stats->max_gold, world->player->gold);
     }
-    process_bullets(world->bullets, world->enemies, world->level, world->player, world->stats, world->time);
-    process_enemies(world->pathfinder, world->enemies, world->player, world->time);
     if (world->level_popup){
         process_popup(&world->level_popup);
     }
 
-    if (world->fade_radius != world->max_fade_radius){
-        world->fade_radius += world->fade_speed;
-    }
     if (world->fade_radius < 0 || world->fade_radius > world->max_fade_radius){
         world->fade_speed *= -1;
         world->fade_radius = world->fade_radius < 0 ? 0 : world->max_fade_radius;
@@ -61,7 +63,6 @@ void process_world(world_t* world){
         }
     }
 
-    world->stats->max_gold = MAX(world->stats->max_gold, world->player->gold);
 }
 
 void use_shrine(world_t* world){
@@ -74,6 +75,7 @@ void use_shrine(world_t* world){
 
             world->player->gold -= 10;
             world->player->max_health += 10;
+            heal_player(world->player, 10);
             world->level->data[world->player->pos.y][world->player->pos.x] = '.';
             print_message(world->hud, "You used a health shrine");
             world->stats->shrines_used++;
@@ -180,9 +182,11 @@ vector2_t get_origin_on_screen(world_t* world){
 }
 
 void move_player_in_world(world_t* world, vector2_t move){
-    vector2_t end_position = sum(world->player->pos, move);
-    if (world->level->data[end_position.y][end_position.x] != '*' &&
-        world->level->data[end_position.y][end_position.x] != 0){
-        move_player(world->player, move);
+    if (world->fade_radius == world->max_fade_radius) {
+        vector2_t end_position = sum(world->player->pos, move);
+        if (world->level->data[end_position.y][end_position.x] != '*' &&
+            world->level->data[end_position.y][end_position.x] != 0) {
+            move_player(world->player, move);
+        }
     }
 }
