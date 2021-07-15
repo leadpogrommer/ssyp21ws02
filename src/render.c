@@ -55,9 +55,13 @@ void draw_game_window(game_state_t* game_state){
 
 void draw_level_changing_animation(game_state_t* game_state){
     WINDOW* win = game_state->game_window;
-    game_state->world->max_fade_radius = (getmaxx(win) * getmaxx(win) + getmaxy(win) * getmaxy(win) ) / 2;
-    // half of the diagonal so it just around the corner
-    game_state->world->fade_speed = game_state->world->fade_speed > 0 ? game_state->world->max_fade_radius / 50 : -game_state->world->max_fade_radius / 50;
+    int new_radius = (getmaxx(win) * getmaxx(win) + getmaxy(win) * getmaxy(win) ) / 2;
+    if (new_radius != game_state->world->max_fade_radius){
+        game_state->world->max_fade_radius = new_radius;
+        game_state->world->fade_radius = new_radius;
+        // half of the diagonal so it just around the corner
+        game_state->world->fade_speed = game_state->world->fade_speed > 0 ? game_state->world->max_fade_radius / 50 : -game_state->world->max_fade_radius / 50;
+    }
 
     init_color(100, 0, 0, 0);
     init_pair(120, 100, 100);
