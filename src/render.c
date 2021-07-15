@@ -1,5 +1,6 @@
 #include "render.h"
 #include <stdlib.h>
+#include <math.h>
 
 void render(game_state_t* game_state){
 
@@ -8,6 +9,7 @@ void render(game_state_t* game_state){
     if (game_state->state == STATE_INVENTORY){
         draw_inventory(game_state->inventory_display);
     }
+
 
     draw_hud(game_state->world->hud);
 
@@ -18,6 +20,7 @@ void render(game_state_t* game_state){
     if (game_state->achievement_popup){
         draw_popup(game_state->achievement_popup, game_state->level_popup_palette, game_state->palette);
     }
+    draw_level_changing_animation(game_state);
     doupdate();
 }
 
@@ -47,6 +50,29 @@ void draw_game_window(game_state_t* game_state){
     }
     free(is_visible);
 
+    wnoutrefresh(game_state->game_window);
+}
+
+void draw_level_changing_animation(game_state_t* game_state){
+    WINDOW* win = game_state->game_window;
+    game_state->world->max_radius = ( getmaxx(win) * getmaxx(win) + getmaxy(win) * getmaxy(win) ) / 2;
+    // half of the diagonal so it just around the corner
+    game_state->world->speed = game_state->world->speed > 0 ? game_state->world->max_radius / 50 : -game_state->world->max_radius / 50;
+
+    init_color(100, 0, 0, 0);
+    init_pair(120, 100, 100);
+    vector2_t center = game_state->world->player->screen_pos;
+    for (int i = 0; i < getmaxy(game_state->game_window); i++){
+        for (int j = 0; j < getmaxx(game_state->game_window); j++){
+
+            float y = (i - center.y) * (i - center.y) / (float)game_state->world->radius;
+            y *= 4.5f;
+            float x = (j - center.x) * (j - center.x) / (float)game_state->world->radius;
+            if ((int)(y + x) >= 1){
+                mvwaddch(game_state->game_window, i, j, ' ' | COLOR_PAIR(120));
+            }
+        }
+    }
     wnoutrefresh(game_state->game_window);
 }
 

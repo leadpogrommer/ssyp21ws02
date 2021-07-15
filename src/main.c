@@ -26,7 +26,7 @@ void init_window() {
 void set_up_palettes(game_state_t* game_state){
 
     init_color(23, 750, 750, 750);
-    init_color(18, 0, 0, 0); // Nice Black
+    init_color(18, 100, 100, 100); // Nice Black
     init_color(21, 900, 450, 0); // Nice Orange
     init_color(19, 500, 500, 500); // Nice White
     init_color(20, 0, 700, 0); // Nice Green
@@ -64,6 +64,10 @@ void set_up_world(game_state_t* game_state){
     }
     game_state->achievements = init_achievements(game_state->world->stats);
     game_state->achievement_queue = init_int_array();
+    WINDOW* win = game_state->game_window;
+    game_state->world->max_radius = ( getmaxx(win) * getmaxx(win) + getmaxy(win) * getmaxy(win) ) / 2;
+    // half of the diagonal so it just around the corner
+    game_state->world->speed = game_state->world->max_radius / 40;
 }
 
 void end_game(game_state_t* game_state){

@@ -26,3 +26,4 @@ void draw_player(WINDOW* window, player_t* player, palette_t* palette);
 void draw_inventory(inventory_display_t* inventory_display);
 
 void draw_popup(popup_t* popup, palette_t* popup_palette, palette_t* main_palette);
+void draw_level_changing_animation(game_state_t* game_state);

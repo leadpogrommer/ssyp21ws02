@@ -7,6 +7,7 @@
 world_t* start_new_world(){
     world_t* world = init_world();
     world->player = init_player(10);
+    world->speed = 10;
     generate_new_level(world, 2);
 
     return world;
@@ -27,8 +28,7 @@ void process_world(world_t* world){
     world->time++;
     switch (world->level->data[world->player->pos.y][world->player->pos.x]){
         case 'e':
-            world->current_level++;
-            generate_new_level(world, world->level->room_count + 1);
+            change_level(world);
             break;
         case 'h':
             if (world->time - world->last_prompt >= 300){
@@ -48,6 +48,18 @@ void process_world(world_t* world){
     if (world->level_popup){
         process_popup(&world->level_popup);
     }
+
+    if (world->radius != world->max_radius){
+        world->radius += world->speed;
+    }
+    if (world->radius < 0 || world->radius > world->max_radius){
+        world->speed *= -1;
+        world->radius = world->radius < 0 ? 0 : world->max_radius;
+        if (!world->radius){
+            generate_new_level(world, world->level->room_count + 1);
+        }
+    }
+
     world->stats->max_gold = MAX(world->stats->max_gold, world->player->gold);
 }
 
@@ -83,12 +95,20 @@ void use_shrine(world_t* world){
     }
 }
 
+void change_level(world_t* world){
+    world->radius--;
+    //if (world->speed > 0){
+    //    world->speed *= -1;
+    //}
+}
+
 void generate_new_level(world_t* world, int room_count){
     if (world->level){
         destroy_pathfinder(world->pathfinder);
         destroy_level(world->level);
     }
 
+    world->current_level++;
     world->level = generate_level(room_count, world->room_pool);
     world->pathfinder = init_pathfinder(world->level);
     spawn_enemies(world->level, world->enemies, 2);

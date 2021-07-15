@@ -23,6 +23,7 @@ typedef struct world_t{
     popup_t* level_popup;
     statistics_t* stats;
     unsigned long long last_prompt;
+    int radius, speed, max_radius;
 }world_t;
 
 world_t* start_new_world();
@@ -30,6 +31,7 @@ world_t* start_new_world();
 world_t* init_world();
 void destroy_world(world_t* world);
 
+void change_level(world_t* world);
 void generate_new_level(world_t* world, int room_count);
 void load_items(world_t* world);
 
