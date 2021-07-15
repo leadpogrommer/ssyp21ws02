@@ -11,6 +11,7 @@
 #include "achivements.h"
 #include "main.h"
 #include "saver.h"
+#include <locale.h>
 
 void init_window() {
     initscr();
@@ -29,7 +30,7 @@ void set_up_palettes(game_state_t* game_state){
     init_color(21, 900, 450, 0); // Nice Orange
     init_color(19, 500, 500, 500); // Nice White
     init_color(20, 0, 700, 0); // Nice Green
-    init_color(22, 600, 0, 0); // Nice Red
+    init_color(22, 400, 0, 0); // Nice Red
     init_color(33, 400, 700, 400); // Bullet; Lgreen
 
     game_state->palette = init_palette(18, 19, 20, 21, 22, 23, 33);
@@ -40,7 +41,7 @@ void set_up_palettes(game_state_t* game_state){
     init_color(30, 0, 700, 0); // Nice Green
     init_color(32, 700, 0, 0); // Nice Red
 
-    game_state->light_palette = init_palette(18, 29, 30, 31, 32, 29, 33);
+    game_state->light_palette = init_palette(18, 29, 30, 31, 700, 29, 33);
 
     init_color(41, 0, 0, 800);
 
@@ -186,6 +187,7 @@ int draw(game_state_t* game_state){
 }
 
 int main() {
+    setlocale(LC_ALL, "");
     srand(time(NULL));
 
     init_window();
@@ -238,7 +240,7 @@ int main() {
                         game_state.state = STATE_EXIT;
                         break;
                 }
-                title_screen_draw(stdscr, &menu_main, FALSE, "");
+                title_screen_draw(stdscr, &menu_main, FALSE, "Logo");
                 break;
             case STATE_PAUSE_MENU:
                 switch (title_screen_handle_input(&menu_pause)) {

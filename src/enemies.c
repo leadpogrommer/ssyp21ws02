@@ -66,7 +66,8 @@ void spawn_enemies(level_t* level, enemies_t* enemies, int enemies_in_room) {
                             .speed = espeed,
                             .damage = edamage,
                             .vision_radius = evision,
-                            .hp = ehp
+                            .hp = ehp,
+                            .maxhp = ehp
                     };
                     enemies_add(enemies, enemy);
                 }

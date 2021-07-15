@@ -135,11 +135,20 @@ void draw_level_with_lighting(WINDOW* window, palette_t* palette, palette_t* lig
 void draw_enemies_with_lighting(WINDOW* window, palette_t* palette, palette_t* light_palette, enemies_t* enemies, vector2_t offset,
                                 short** is_visible){
 
+    if (!palette) return;
+
+    short next_pair = get_pair_count();
+    short next_color = 70;
     for(int i = 0; i < enemies->count; i++) {
         int x = enemies->array[i].pos.x;
         int y = enemies->array[i].pos.y;
-        unsigned char ch = is_visible[y][x] ? (enemies->array[i].damage == 1 ? 'W' : 'T') : ' ';
-        mvwaddch(window, y + offset.y, x + offset.x,(is_visible[y][x] ? light_palette : palette)->symbol[ch]);
+        if (is_visible[y][x]){
+            unsigned char ch = enemies->array[i].damage == 1 ? 'W' : 'T';
+            float enemy_health = (float)enemies->array[i].hp / enemies->array[i].maxhp;
+            init_color(next_color++, (short)(enemy_health * light_palette->enemy_brightest_red), 0, 0);
+            init_pair(next_pair++, next_color - 1, light_palette->floor_color);
+            mvwaddch(window, y + offset.y, x + offset.x,ch | COLOR_PAIR(next_pair - 1));
+        }
     }
 }
 

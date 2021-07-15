@@ -2,6 +2,7 @@
 #include <malloc.h>
 #include <string.h>
 #include "title_screen.h"
+#include "utility.h"
 
 void title_screen_init(title_screen_data* data, int count, ...) {
     va_list arg;
