@@ -23,7 +23,7 @@ typedef struct world_t{
     popup_t* level_popup;
     statistics_t* stats;
     unsigned long long last_prompt;
-    int radius, speed, max_radius;
+    int fade_radius, fade_speed, max_fade_radius;
 }world_t;
 
 world_t* start_new_world();

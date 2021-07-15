@@ -7,7 +7,7 @@
 world_t* start_new_world(){
     world_t* world = init_world();
     world->player = init_player(10);
-    world->speed = 10;
+    world->fade_speed = 10;
     generate_new_level(world, 2);
 
     return world;
@@ -50,13 +50,13 @@ void process_world(world_t* world){
         process_popup(&world->level_popup);
     }
 
-    if (world->radius != world->max_radius){
-        world->radius += world->speed;
+    if (world->fade_radius != world->max_fade_radius){
+        world->fade_radius += world->fade_speed;
     }
-    if (world->radius < 0 || world->radius > world->max_radius){
-        world->speed *= -1;
-        world->radius = world->radius < 0 ? 0 : world->max_radius;
-        if (!world->radius){
+    if (world->fade_radius < 0 || world->fade_radius > world->max_fade_radius){
+        world->fade_speed *= -1;
+        world->fade_radius = world->fade_radius < 0 ? 0 : world->max_fade_radius;
+        if (!world->fade_radius){
             generate_new_level(world, world->level->room_count + 1);
         }
     }
@@ -97,7 +97,7 @@ void use_shrine(world_t* world){
 }
 
 void change_level(world_t* world){
-    world->radius--;
+    world->fade_radius--;
 }
 
 void generate_new_level(world_t* world, int room_count){
@@ -109,7 +109,7 @@ void generate_new_level(world_t* world, int room_count){
     world->current_level++;
     world->level = generate_level(room_count, world->room_pool);
     world->pathfinder = init_pathfinder(world->level);
-    spawn_enemies(world->level, world->enemies, 0);
+    spawn_enemies(world->level, world->enemies, 2);
     spawn_items_on_level(world->level, world->items);
     bullets_clear(world->bullets);
 

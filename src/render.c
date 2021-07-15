@@ -55,9 +55,9 @@ void draw_game_window(game_state_t* game_state){
 
 void draw_level_changing_animation(game_state_t* game_state){
     WINDOW* win = game_state->game_window;
-    game_state->world->max_radius = ( getmaxx(win) * getmaxx(win) + getmaxy(win) * getmaxy(win) ) / 2;
+    game_state->world->max_fade_radius = (getmaxx(win) * getmaxx(win) + getmaxy(win) * getmaxy(win) ) / 2;
     // half of the diagonal so it just around the corner
-    game_state->world->speed = game_state->world->speed > 0 ? game_state->world->max_radius / 50 : -game_state->world->max_radius / 50;
+    game_state->world->fade_speed = game_state->world->fade_speed > 0 ? game_state->world->max_fade_radius / 50 : -game_state->world->max_fade_radius / 50;
 
     init_color(100, 0, 0, 0);
     init_pair(120, 100, 100);
@@ -65,9 +65,9 @@ void draw_level_changing_animation(game_state_t* game_state){
     for (int i = 0; i < getmaxy(game_state->game_window); i++){
         for (int j = 0; j < getmaxx(game_state->game_window); j++){
 
-            float y = (i - center.y) * (i - center.y) / (float)game_state->world->radius;
+            float y = (i - center.y) * (i - center.y) / (float)game_state->world->fade_radius;
             y *= 4.5f;
-            float x = (j - center.x) * (j - center.x) / (float)game_state->world->radius;
+            float x = (j - center.x) * (j - center.x) / (float)game_state->world->fade_radius;
             if ((int)(y + x) >= 1){
                 mvwaddch(game_state->game_window, i, j, ' ' | COLOR_PAIR(120));
             }
