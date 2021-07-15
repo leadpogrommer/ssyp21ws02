@@ -38,7 +38,8 @@ void process_world(world_t* world){
             break;
         case '?':
             if (world->time - world->last_prompt >= 300){
-                print_message(world->hud, "Press e to buy an item");
+                item_t* item = get_item_on_position(world->level, world->player->pos);
+                print_message(world->hud, "Press e to buy %s", item->name);
                 world->last_prompt = world->time;
             }
             break;
@@ -74,17 +75,17 @@ void use_shrine(world_t* world){
             world->player->gold -= 10;
             world->player->max_health += 10;
             world->level->data[world->player->pos.y][world->player->pos.x] = '.';
-            print_message(world->hud, "You used a shrine of em");
+            print_message(world->hud, "You used a health shrine");
             world->stats->shrines_used++;
             break;
         case '?':
-            if (world->player->gold < 10){
-                print_message(world->hud, "You have not enough gold, 10 is needed");
+            if (world->player->gold < 20){
+                print_message(world->hud, "You have not enough gold, 20 is needed");
                 break;
             }
 
-            world->player->gold -= 10;
-            pick_up_item(world->player, get_random_item(world->items));
+            world->player->gold -= 20;
+            pick_up_item(world->player, get_item_on_position(world->level, world->player->pos));
             world->level->data[world->player->pos.y][world->player->pos.x] = '.';
             print_message(world->hud, "Picked up an item: %s", world->player->inventory->items[world->player->inventory->item_count - 1]->name);
             world->stats->items_picked_up++;
@@ -97,9 +98,6 @@ void use_shrine(world_t* world){
 
 void change_level(world_t* world){
     world->radius--;
-    //if (world->speed > 0){
-    //    world->speed *= -1;
-    //}
 }
 
 void generate_new_level(world_t* world, int room_count){
@@ -111,7 +109,8 @@ void generate_new_level(world_t* world, int room_count){
     world->current_level++;
     world->level = generate_level(room_count, world->room_pool);
     world->pathfinder = init_pathfinder(world->level);
-    spawn_enemies(world->level, world->enemies, 2);
+    spawn_enemies(world->level, world->enemies, 0);
+    spawn_items_on_level(world->level, world->items);
     bullets_clear(world->bullets);
 
     world->stats->max_level = MAX(world->stats->max_level, world->current_level);
@@ -122,6 +121,19 @@ void generate_new_level(world_t* world, int room_count){
 
     update_rich_presence_level(world->current_level);
     world->level_popup = init_popup(NULL, 7, POPUP_ULCORNER, "Level %d", world->current_level);
+}
+
+void spawn_items_on_level(level_t* level, inventory_t* inventory){
+    level->item_array = init_item_array();
+    level->shrines_array = init_vector2_array();
+    for (int i = 0; i < level->size.y; i++){
+        for (int j = 0; j < level->size.x; j++){
+            if (level->data[i][j] == '?'){
+                push_back_item(level->item_array, *get_random_item(inventory));
+                push_back_vector2(level->shrines_array, (vector2_t) {.x = j, .y = i});
+            }
+        }
+    }
 }
 
 void load_items(world_t* world){

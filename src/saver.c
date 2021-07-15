@@ -4,7 +4,7 @@
 void save_world(world_t* world){
     FILE* file = fopen("save", "w");
 
-    setvbuf(file, NULL, _IOFBF, 0);
+    //setvbuf(file, NULL, _IOFBF, 0);
 
     save_player(world->player, file);
     save_level(world->level, file);
@@ -44,6 +44,11 @@ void save_level(level_t* level, FILE* file){
 
     fwrite(&(level->start_room_grid_position), sizeof(vector2_t), 1, file);
 
+    fwrite(&(level->shrines_array->size), sizeof(int), 1, file);
+    fwrite(level->shrines_array->data, sizeof(vector2_t), level->shrines_array->size, file);
+    for (int i = 0; i < level->item_array->size; i++){
+        fwrite(&(level->item_array->data[i].id), sizeof(int), 1, file);
+    }
 }
 
 void save_statistics(statistics_t* statistics){
@@ -79,7 +84,7 @@ world_t* load_world(){
     world_t* world = init_world();
 
     world->player = load_player(file, world->items);
-    world->level = load_level(file, world->room_pool);
+    world->level = load_level(file, world->room_pool, world->items);
     world->enemies = load_enemies(file);
 
     fread(&(world->current_level), sizeof(int), 1, file);
@@ -120,7 +125,7 @@ inventory_t* load_inventory(FILE* file, inventory_t* parent_inventory){
     return inventory;
 }
 
-level_t* load_level(FILE* file, room_pool_t* room_pool){
+level_t* load_level(FILE* file, room_pool_t* room_pool, inventory_t* parent_inventory){
     vector2_t room_grid_size;
     int room_count;
     fread(&room_count, sizeof(int), 1, file);
@@ -142,6 +147,25 @@ level_t* load_level(FILE* file, room_pool_t* room_pool){
     }
 
     fread(&(level->start_room_grid_position), sizeof(vector2_t), 1, file);
+
+    int count;
+    fread(&count, sizeof(int), 1, file);
+    level->item_array = init_item_array();
+    level->shrines_array = init_vector2_array();
+
+    for (int i = 0; i < count; i++){
+        vector2_t tmp;
+        fread(&tmp, sizeof(vector2_t), 1, file);
+        push_back_vector2(level->shrines_array, tmp);
+    }
+
+    for (int i = 0; i < count; i++){
+        int id;
+        fread(&id, sizeof(int), 1, file);
+        if (is_valid_index(id, parent_inventory->item_count)){
+            push_back_item(level->item_array, *parent_inventory->items[id]);
+        }
+    }
 
     return level;
 }

@@ -209,6 +209,11 @@ void destroy_level(level_t* level){
         destroy_vector2_pair_array(level->connected_rooms);
     }
 
+    if (level->shrines_array){
+        destroy_vector2_array(level->shrines_array);
+        destroy_item_array(level->item_array);
+    }
+
     for (int i = 0; i < level->room_grid_size.y; i++){
         free(level->room_grid[i]);
     }
@@ -386,4 +391,13 @@ vector2_t get_level_position(level_t* level, vector2_t room_grid_pos, vector2_t 
     }
 
     return result;
+}
+
+item_t* get_item_on_position(level_t* level, vector2_t position){
+    for (int i = 0; i < level->item_array->size; i++){
+        if (equal(position, level->shrines_array->data[i])){
+            return &(level->item_array->data[i]);
+        }
+    }
+    return NULL;
 }

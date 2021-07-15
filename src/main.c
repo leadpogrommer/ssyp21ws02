@@ -210,7 +210,8 @@ int main() {
 
     game_state_t game_state = {
             .game_window = stdscr,
-            .state = 2
+            .state = 2,
+            .achievements = NULL
     };
     set_up_palettes(&game_state);
     wbkgd(stdscr, COLOR_PAIR(game_state.palette->text_pair));

@@ -33,6 +33,7 @@ void destroy_world(world_t* world);
 
 void change_level(world_t* world);
 void generate_new_level(world_t* world, int room_count);
+void spawn_items_on_level(level_t* level, inventory_t* inventory);
 void load_items(world_t* world);
 
 void process_world(world_t* world);
