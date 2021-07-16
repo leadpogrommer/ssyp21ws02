@@ -114,7 +114,6 @@ void generate_new_level(world_t* world, int room_count){
     if (world->level){
         destroy_pathfinder(world->pathfinder);
         destroy_level(world->level);
-        enemies_destroy(world->enemies);
     }
 
     world->current_level++;
