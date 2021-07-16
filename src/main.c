@@ -84,76 +84,80 @@ void end_game(game_state_t* game_state){
 }
 
 int handle_input(game_state_t* game_state){
-    int input = getch();
-    switch (input){
-        case 'a':
-            if(game_state->state == STATE_GAME) {
-                move_player_in_world(game_state->world, VEC2_LEFT);
-            }
-            break;
-        case 'd':
-            if(game_state->state == STATE_GAME) {
-                move_player_in_world(game_state->world, VEC2_RIGHT);
-            }
-            break;
-        case 'w':
-            if(game_state->state == STATE_GAME) {
-                move_player_in_world(game_state->world, VEC2_UP);
-            }
-            break;
-        case 's':
-            if(game_state->state == STATE_GAME) {
-                move_player_in_world(game_state->world, VEC2_DOWN);
-            }
-            break;
-        case 'e':
-            use_shrine(game_state->world);
-            break;
-        case 'q':
-            game_state->state = STATE_EXIT;
-            break;
-        case 'p':
-            game_state->state = STATE_PAUSE_MENU;
-            break;
-        case 'i':
-            game_state->state = (game_state->state == STATE_GAME ? STATE_INVENTORY : STATE_GAME);
-            break;
-        case KEY_DOWN:
-            if (game_state->state == STATE_INVENTORY){
-                game_state->inventory_display->current_item++;
-            } else if(game_state->state == STATE_GAME) {
-                shoot(game_state->world->player, game_state->world->bullets, VEC2_DOWN, game_state->world->time);
-            }
-            break;
-        case KEY_UP:
-            if (game_state->state == STATE_INVENTORY){
-                game_state->inventory_display->current_item--;
-            } else if(game_state->state == STATE_GAME) {
-                shoot(game_state->world->player, game_state->world->bullets, VEC2_UP, game_state->world->time);
-            }
-            break;
-        case KEY_RIGHT:
-            if(game_state->state == STATE_GAME) {
-                shoot(game_state->world->player, game_state->world->bullets, VEC2_RIGHT, game_state->world->time);
-            }
-            break;
-        case KEY_LEFT:
-            if(game_state->state == STATE_GAME) {
-                shoot(game_state->world->player, game_state->world->bullets, VEC2_LEFT, game_state->world->time);
-            }
-            break;
-        case ' ':
-            if (game_state->state == STATE_INVENTORY && game_state->world->player->inventory->item_count > 0){
-                int current_item = game_state->inventory_display->current_item;
-                if (use_item(game_state->world->player, current_item, game_state->world)){
-                    print_message(game_state->world->hud, "You have just used %s", game_state->world->player->inventory->items[current_item]->name);
-                }else{
-                    print_message(game_state->world->hud, "This item can't be used");
+    int input;
+
+    while ( (input = getch()) != ERR ) {
+        switch (input) {
+            case 'a':
+                if (game_state->state == STATE_GAME) {
+                    move_player_in_world(game_state->world, VEC2_LEFT);
                 }
-            }
-            break;
-        default:
-            break;
+                break;
+            case 'd':
+                if (game_state->state == STATE_GAME) {
+                    move_player_in_world(game_state->world, VEC2_RIGHT);
+                }
+                break;
+            case 'w':
+                if (game_state->state == STATE_GAME) {
+                    move_player_in_world(game_state->world, VEC2_UP);
+                }
+                break;
+            case 's':
+                if (game_state->state == STATE_GAME) {
+                    move_player_in_world(game_state->world, VEC2_DOWN);
+                }
+                break;
+            case 'e':
+                use_shrine(game_state->world);
+                break;
+            case 'q':
+                game_state->state = STATE_EXIT;
+                break;
+            case 'p':
+                game_state->state = STATE_PAUSE_MENU;
+                break;
+            case 'i':
+                game_state->state = (game_state->state == STATE_GAME ? STATE_INVENTORY : STATE_GAME);
+                break;
+            case KEY_DOWN:
+                if (game_state->state == STATE_INVENTORY) {
+                    game_state->inventory_display->current_item++;
+                } else if (game_state->state == STATE_GAME) {
+                    shoot(game_state->world->player, game_state->world->bullets, VEC2_DOWN, game_state->world->time);
+                }
+                break;
+            case KEY_UP:
+                if (game_state->state == STATE_INVENTORY) {
+                    game_state->inventory_display->current_item--;
+                } else if (game_state->state == STATE_GAME) {
+                    shoot(game_state->world->player, game_state->world->bullets, VEC2_UP, game_state->world->time);
+                }
+                break;
+            case KEY_RIGHT:
+                if (game_state->state == STATE_GAME) {
+                    shoot(game_state->world->player, game_state->world->bullets, VEC2_RIGHT, game_state->world->time);
+                }
+                break;
+            case KEY_LEFT:
+                if (game_state->state == STATE_GAME) {
+                    shoot(game_state->world->player, game_state->world->bullets, VEC2_LEFT, game_state->world->time);
+                }
+                break;
+            case ' ':
+                if (game_state->state == STATE_INVENTORY && game_state->world->player->inventory->item_count > 0) {
+                    int current_item = game_state->inventory_display->current_item;
+                    if (use_item(game_state->world->player, current_item, game_state->world)) {
+                        print_message(game_state->world->hud, "You have just used %s",
+                                      game_state->world->player->inventory->items[current_item]->name);
+                    } else {
+                        print_message(game_state->world->hud, "This item can't be used");
+                    }
+                }
+                break;
+            default:
+                break;
+        }
     }
     return 0;
 }
