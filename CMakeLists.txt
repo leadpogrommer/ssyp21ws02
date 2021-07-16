@@ -7,7 +7,7 @@ set(CURSES_NEED_NCURSES TRUE)
 set(CURSES_NEED_WIDE TRUE)
 find_package(Curses REQUIRED)
 
-set(bson-1.0_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mongo-c-driver/cmake-build/src/libbson/bson)
+
 find_package(bson-1.0 REQUIRED)
 
 add_link_options(-L${CMAKE_SOURCE_DIR} -Wl,-rpath,.)
@@ -62,7 +62,7 @@ add_executable(game
                 includes/popup.h
                 includes/generic_array.h)
 target_include_directories(game PRIVATE includes)
-target_link_libraries(game mongo::bson_static)
+target_link_libraries(game mongo::bson_shared)
 
 
 target_link_libraries(game ${CURSES_LIBRARIES}  m discord_game_sdk)
