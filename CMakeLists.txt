@@ -57,7 +57,9 @@ add_executable(game
                 includes/statistics.h
                 src/popup.c
                 includes/popup.h
-                includes/generic_array.h)
+                includes/generic_array.h
+                src/minimap.c
+                includes/minimap.h)
 target_include_directories(game PRIVATE includes)
 
 

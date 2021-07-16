@@ -8,6 +8,7 @@
 #include "statistics.h"
 #include "bullet.h"
 #include "popup.h"
+#include "minimap.h"
 
 typedef struct world_t{
     unsigned long long time;
@@ -22,6 +23,7 @@ typedef struct world_t{
     bullets_t* bullets;
     popup_t* level_popup;
     statistics_t* stats;
+    minimap_data_t* minimap_data;
 }world_t;
 
 world_t* start_new_world();

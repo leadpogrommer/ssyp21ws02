@@ -107,6 +107,7 @@ void destroy_world(world_t* world){
     enemies_destroy(world->enemies);
     bullets_destroy(world->bullets);
     destroy_statistics(world->stats);
+    minimap_destroy(world->minimap_data);
     free(world);
 }
 

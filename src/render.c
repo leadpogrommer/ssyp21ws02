@@ -1,5 +1,6 @@
 #include "render.h"
 #include <stdlib.h>
+#include <minimap.h>
 
 void render(game_state_t* game_state){
 
@@ -10,6 +11,7 @@ void render(game_state_t* game_state){
     }
 
     draw_hud(game_state->world->hud);
+    minimap_draw(game_state->world->minimap_data, game_state->game_window, game_state->world->level, game_state->world->player);
 
     if (game_state->world->level_popup){
         draw_popup(game_state->world->level_popup, game_state->level_popup_palette, game_state->palette);
