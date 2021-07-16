@@ -1,4 +1,5 @@
 #include "utility.h"
+#include "inventory.h"
 #include <ncurses.h>
 #include <stdlib.h>
 
@@ -95,4 +96,8 @@ int is_valid_rect_index(vector2_t index, vector2_t size){
 
 #define TYPE vector2_pair_t
 #define NAME vector2_pair
+#include "generic_array.h"
+
+#define TYPE item_t
+#define NAME item
 #include "generic_array.h"

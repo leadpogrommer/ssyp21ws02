@@ -1,6 +1,7 @@
 #include "render.h"
 #include <stdlib.h>
 #include <minimap.h>
+#include <math.h>
 
 void render(game_state_t* game_state){
 
@@ -9,6 +10,7 @@ void render(game_state_t* game_state){
     if (game_state->state == STATE_INVENTORY){
         draw_inventory(game_state->inventory_display);
     }
+
 
     draw_hud(game_state->world->hud);
     minimap_draw(game_state->world->minimap_data, game_state->game_window, game_state->world->level, game_state->world->player);
@@ -20,6 +22,7 @@ void render(game_state_t* game_state){
     if (game_state->achievement_popup){
         draw_popup(game_state->achievement_popup, game_state->level_popup_palette, game_state->palette);
     }
+    draw_level_changing_animation(game_state);
     doupdate();
 }
 
@@ -49,6 +52,33 @@ void draw_game_window(game_state_t* game_state){
     }
     free(is_visible);
 
+    wnoutrefresh(game_state->game_window);
+}
+
+void draw_level_changing_animation(game_state_t* game_state){
+    WINDOW* win = game_state->game_window;
+    int new_radius = (getmaxx(win) * getmaxx(win) + getmaxy(win) * getmaxy(win) ) / 2;
+    if (new_radius != game_state->world->max_fade_radius){
+        game_state->world->max_fade_radius = new_radius;
+        game_state->world->fade_radius = new_radius;
+        // half of the diagonal so it just around the corner
+        game_state->world->fade_speed = game_state->world->fade_speed > 0 ? game_state->world->max_fade_radius / 1600 : -game_state->world->max_fade_radius / 50;
+    }
+
+    init_color(100, 0, 0, 0);
+    init_pair(120, 100, 100);
+    vector2_t center = game_state->world->player->screen_pos;
+    for (int i = 0; i < getmaxy(game_state->game_window); i++){
+        for (int j = 0; j < getmaxx(game_state->game_window); j++){
+
+            float y = (i - center.y) * (i - center.y) / (float)game_state->world->fade_radius;
+            y *= 4.5f;
+            float x = (j - center.x) * (j - center.x) / (float)game_state->world->fade_radius;
+            if ((int)(y + x) >= 1){
+                mvwaddch(game_state->game_window, i, j, ' ' | COLOR_PAIR(120));
+            }
+        }
+    }
     wnoutrefresh(game_state->game_window);
 }
 
@@ -137,11 +167,20 @@ void draw_level_with_lighting(WINDOW* window, palette_t* palette, palette_t* lig
 void draw_enemies_with_lighting(WINDOW* window, palette_t* palette, palette_t* light_palette, enemies_t* enemies, vector2_t offset,
                                 short** is_visible){
 
+    if (!palette) return;
+
+    short next_pair = get_pair_count();
+    short next_color = 70;
     for(int i = 0; i < enemies->count; i++) {
         int x = enemies->array[i].pos.x;
         int y = enemies->array[i].pos.y;
-        unsigned char ch = is_visible[y][x] ? (enemies->array[i].damage == 1 ? 'W' : 'T') : ' ';
-        mvwaddch(window, y + offset.y, x + offset.x,(is_visible[y][x] ? light_palette : palette)->symbol[ch]);
+        if (is_visible[y][x]){
+            unsigned char ch = enemies->array[i].damage == 1 ? 'W' : 'T';
+            float enemy_health = (float)enemies->array[i].hp / enemies->array[i].maxhp;
+            init_color(next_color++, (short)(enemy_health * light_palette->enemy_brightest_red), 0, 0);
+            init_pair(next_pair++, next_color - 1, light_palette->floor_color);
+            mvwaddch(window, y + offset.y, x + offset.x,ch | COLOR_PAIR(next_pair - 1));
+        }
     }
 }
 

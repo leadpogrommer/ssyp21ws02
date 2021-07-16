@@ -50,3 +50,10 @@ typedef struct vector2_pair_t{
 #define TYPE vector2_pair_t
 #define NAME vector2_pair
 #include "generic_array.h"
+
+typedef struct item_t item_t;
+
+#define ONLYDEFINE
+#define TYPE item_t
+#define NAME item
+#include "generic_array.h"

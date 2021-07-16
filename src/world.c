@@ -2,10 +2,13 @@
 #include <stdlib.h>
 #include "rich_presence.h"
 #include "saver.h"
+#include "string.h"
+#include <math.h>
 
 world_t* start_new_world(){
     world_t* world = init_world();
     world->player = init_player(10);
+    world->fade_speed = 10;
     generate_new_level(world, 2);
 
     return world;
@@ -23,31 +26,85 @@ world_t* init_world(){
 }
 
 void process_world(world_t* world){
-    world->time++;
-    switch (world->level->data[world->player->pos.y][world->player->pos.x]){
-        case 'e':
-            world->current_level++;
+    if (world->fade_radius != world->max_fade_radius){
+        if (world->fade_speed > 0){
+            world->fade_radius += 2 * sqrt(world->fade_radius) * sqrt(world->fade_speed) + world->fade_speed;
+        }else{
+            world->fade_radius -= 2 * sqrt(world->fade_radius) * sqrt(-world->fade_speed) + world->fade_speed;
+        }
+    }else {
+        world->time++;
+        switch (world->level->data[world->player->pos.y][world->player->pos.x]) {
+            case 'e':
+                change_level(world);
+                break;
+            case 'h':
+                if (world->time - world->last_prompt >= 300) {
+                    print_message(world->hud, "Press e to buy max hp");
+                    world->last_prompt = world->time;
+                }
+                break;
+            case '?':
+                if (world->time - world->last_prompt >= 300) {
+                    item_t *item = get_item_on_position(world->level, world->player->pos);
+                    print_message(world->hud, "Press e to buy %s", item->name);
+                    world->last_prompt = world->time;
+                }
+                break;
+        }
+        process_bullets(world->bullets, world->enemies, world->level, world->player, world->stats, world->time);
+        process_enemies(world->pathfinder, world->enemies, world->player, world->time);
+        world->stats->max_gold = MAX(world->stats->max_gold, world->player->gold);
+    }
+    if (world->level_popup){
+        process_popup(&world->level_popup);
+    }
+
+    if (world->fade_radius <= 0 || world->fade_radius > world->max_fade_radius){
+        world->fade_speed *= -1;
+        world->fade_radius = world->fade_radius <= 0 ? 0 : world->max_fade_radius;
+        if (!world->fade_radius){
             generate_new_level(world, world->level->room_count + 1);
-            break;
+        }
+    }
+
+}
+
+void use_shrine(world_t* world){
+    switch (world->level->data[world->player->pos.y][world->player->pos.x]){
         case 'h':
+            if (world->player->gold < 10){
+                print_message(world->hud, "You have not enough gold, 10 is needed");
+                break;
+            }
+
+            world->player->gold -= 10;
             world->player->max_health += 10;
+            heal_player(world->player, 10);
             world->level->data[world->player->pos.y][world->player->pos.x] = '.';
-            print_message(world->hud, "You used a shrine of prosperity");
+            print_message(world->hud, "You used a health shrine");
             world->stats->shrines_used++;
             break;
         case '?':
-            pick_up_item(world->player, get_random_item(world->items));
+            if (world->player->gold < 20){
+                print_message(world->hud, "You have not enough gold, 20 is needed");
+                break;
+            }
+
+            world->player->gold -= 20;
+            pick_up_item(world->player, get_item_on_position(world->level, world->player->pos));
             world->level->data[world->player->pos.y][world->player->pos.x] = '.';
             print_message(world->hud, "Picked up an item: %s", world->player->inventory->items[world->player->inventory->item_count - 1]->name);
             world->stats->items_picked_up++;
             break;
+        default:
+            print_message(world->hud, "There is nothing to use");
+            break;
     }
-    process_bullets(world->bullets, world->enemies, world->level, world->player, world->stats, world->time);
-    process_enemies(world->pathfinder, world->enemies, world->player, world->time);
-    if (world->level_popup){
-        process_popup(&world->level_popup);
-    }
-    world->stats->max_gold = MAX(world->stats->max_gold, world->player->gold);
+}
+
+void change_level(world_t* world){
+    world->fade_radius--;
 }
 
 void generate_new_level(world_t* world, int room_count){
@@ -56,9 +113,11 @@ void generate_new_level(world_t* world, int room_count){
         destroy_level(world->level);
     }
 
+    world->current_level++;
     world->level = generate_level(room_count, world->room_pool);
     world->pathfinder = init_pathfinder(world->level);
-    spawn_enemies(world->level, world->enemies);
+    spawn_enemies(world->level, world->enemies, 0);
+    spawn_items_on_level(world->level, world->items);
     bullets_clear(world->bullets);
 
     world->stats->max_level = MAX(world->stats->max_level, world->current_level);
@@ -71,6 +130,19 @@ void generate_new_level(world_t* world, int room_count){
     world->level_popup = init_popup(NULL, 7, POPUP_ULCORNER, "Level %d", world->current_level);
 }
 
+void spawn_items_on_level(level_t* level, inventory_t* inventory){
+    level->item_array = init_item_array();
+    level->shrines_array = init_vector2_array();
+    for (int i = 0; i < level->size.y; i++){
+        for (int j = 0; j < level->size.x; j++){
+            if (level->data[i][j] == '?'){
+                push_back_item(level->item_array, *get_random_item(inventory));
+                push_back_vector2(level->shrines_array, (vector2_t) {.x = j, .y = i});
+            }
+        }
+    }
+}
+
 void load_items(world_t* world){
     world->items = init_inventory(3);
     item_t* power_up = calloc(sizeof(item_t), 1);
@@ -79,7 +151,7 @@ void load_items(world_t* world){
     power_up->id = 0;
     power_up->callback_index = CALLBACK_HEAL_SMALL;
     item_t* item2 = calloc(sizeof(item_t), 1);
-    item2->damage_buff = 15;
+    item2->damage_buff = 10;
     item2->name = "Sword of the Storm";
     item2->id = 1;
     item2->callback_index = CALLBACK_NONE;
@@ -116,9 +188,11 @@ vector2_t get_origin_on_screen(world_t* world){
 }
 
 void move_player_in_world(world_t* world, vector2_t move){
-    vector2_t end_position = sum(world->player->pos, move);
-    if (world->level->data[end_position.y][end_position.x] != '*' &&
-        world->level->data[end_position.y][end_position.x] != 0){
-        move_player(world->player, move);
+    if (world->fade_radius == world->max_fade_radius) {
+        vector2_t end_position = sum(world->player->pos, move);
+        if (world->level->data[end_position.y][end_position.x] != '*' &&
+            world->level->data[end_position.y][end_position.x] != 0) {
+            move_player(world->player, move);
+        }
     }
 }

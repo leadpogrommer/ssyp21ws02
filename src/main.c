@@ -12,6 +12,7 @@
 #include "achivements.h"
 #include "main.h"
 #include "saver.h"
+#include <locale.h>
 
 void init_window() {
     initscr();
@@ -26,11 +27,11 @@ void init_window() {
 void set_up_palettes(game_state_t* game_state){
 
     init_color(23, 750, 750, 750);
-    init_color(18, 0, 0, 0); // Nice Black
+    init_color(18, 100, 100, 100); // Nice Black
     init_color(21, 900, 450, 0); // Nice Orange
     init_color(19, 500, 500, 500); // Nice White
     init_color(20, 0, 700, 0); // Nice Green
-    init_color(22, 600, 0, 0); // Nice Red
+    init_color(22, 400, 0, 0); // Nice Red
     init_color(33, 400, 700, 400); // Bullet; Lgreen
 
     game_state->palette = init_palette(18, 19, 20, 21, 22, 23, 33);
@@ -41,7 +42,7 @@ void set_up_palettes(game_state_t* game_state){
     init_color(30, 0, 700, 0); // Nice Green
     init_color(32, 700, 0, 0); // Nice Red
 
-    game_state->light_palette = init_palette(18, 29, 30, 31, 32, 29, 33);
+    game_state->light_palette = init_palette(18, 29, 30, 31, 700, 29, 33);
 
     init_color(41, 0, 0, 800);
 
@@ -66,6 +67,10 @@ void set_up_world(game_state_t* game_state){
     }
     game_state->achievements = init_achievements(game_state->world->stats);
     game_state->achievement_queue = init_int_array();
+    WINDOW* win = game_state->game_window;
+    game_state->world->max_fade_radius = (getmaxx(win) * getmaxx(win) + getmaxy(win) * getmaxy(win) ) / 2;
+    // half of the diagonal so it just around the corner
+    game_state->world->fade_speed = game_state->world->max_fade_radius / 1600;
 }
 
 void end_game(game_state_t* game_state){
@@ -101,6 +106,9 @@ int handle_input(game_state_t* game_state){
                 move_player_in_world(game_state->world, VEC2_DOWN);
             }
             break;
+        case 'e':
+            use_shrine(game_state->world);
+            break;
         case 'q':
             game_state->state = STATE_EXIT;
             break;
@@ -114,24 +122,24 @@ int handle_input(game_state_t* game_state){
             if (game_state->state == STATE_INVENTORY){
                 game_state->inventory_display->current_item++;
             } else if(game_state->state == STATE_GAME) {
-                shoot(game_state->world->player, game_state->world->bullets, VEC2_DOWN);
+                shoot(game_state->world->player, game_state->world->bullets, VEC2_DOWN, game_state->world->time);
             }
             break;
         case KEY_UP:
             if (game_state->state == STATE_INVENTORY){
                 game_state->inventory_display->current_item--;
             } else if(game_state->state == STATE_GAME) {
-                shoot(game_state->world->player, game_state->world->bullets, VEC2_UP);
+                shoot(game_state->world->player, game_state->world->bullets, VEC2_UP, game_state->world->time);
             }
             break;
         case KEY_RIGHT:
             if(game_state->state == STATE_GAME) {
-                shoot(game_state->world->player, game_state->world->bullets, VEC2_RIGHT);
+                shoot(game_state->world->player, game_state->world->bullets, VEC2_RIGHT, game_state->world->time);
             }
             break;
         case KEY_LEFT:
             if(game_state->state == STATE_GAME) {
-                shoot(game_state->world->player, game_state->world->bullets, VEC2_LEFT);
+                shoot(game_state->world->player, game_state->world->bullets, VEC2_LEFT, game_state->world->time);
             }
             break;
         case ' ':
@@ -186,6 +194,7 @@ int draw(game_state_t* game_state){
 }
 
 int main() {
+    setlocale(LC_ALL, "");
     srand(time(NULL));
 
     init_window();
@@ -204,7 +213,8 @@ int main() {
 
     game_state_t game_state = {
             .game_window = stdscr,
-            .state = 2
+            .state = 2,
+            .achievements = NULL
     };
     set_up_palettes(&game_state);
     wbkgd(stdscr, COLOR_PAIR(game_state.palette->text_pair));
@@ -238,7 +248,7 @@ int main() {
                         game_state.state = STATE_EXIT;
                         break;
                 }
-                title_screen_draw(stdscr, &menu_main, FALSE, "");
+                title_screen_draw(stdscr, &menu_main, FALSE, "Logo");
                 break;
             case STATE_PAUSE_MENU:
                 switch (title_screen_handle_input(&menu_pause)) {
