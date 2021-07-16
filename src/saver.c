@@ -45,6 +45,13 @@ void save_level(level_t* level, FILE* file){
 
     fwrite(&(level->start_room_grid_position), sizeof(vector2_t), 1, file);
 
+    // Saving connected rooms
+    fwrite(&(level->connected_rooms->size), sizeof(int), 1, file);
+    for (int i = 0; i < level->connected_rooms->size; i++){
+        fwrite(&(level->connected_rooms->data[i]), sizeof(vector2_pair_t), 1, file);
+    }
+
+    // Saving items in shops aka shrines
     fwrite(&(level->shrines_array->size), sizeof(int), 1, file);
     fwrite(level->shrines_array->data, sizeof(vector2_t), level->shrines_array->size, file);
     for (int i = 0; i < level->item_array->size; i++){
@@ -61,12 +68,9 @@ void save_statistics(statistics_t* statistics){
     bson_writer_t *writer = bson_writer_new(&buf, &buflen, 0, bson_realloc_ctx, NULL);
 
     bson_writer_begin(writer, &b);
-    BSON_APPEND_INT32(b, "enemies_killed", statistics->enemies_killed);
-    BSON_APPEND_INT32(b, "max_gold", statistics->max_gold);
-    BSON_APPEND_INT32(b, "deaths", statistics->deaths);
-    BSON_APPEND_INT32(b, "max_level", statistics->max_level);
-    BSON_APPEND_INT32(b, "items_picked_up", statistics->items_picked_up);
-    BSON_APPEND_INT32(b, "shrines_used", statistics->shrines_used);
+    #define X(a) BSON_APPEND_INT32(b, #a, statistics->a);
+    STATISTICS
+    #undef X
     bson_writer_end(writer);
 
 
@@ -166,7 +170,18 @@ level_t* load_level(FILE* file, room_pool_t* room_pool, inventory_t* parent_inve
 
     fread(&(level->start_room_grid_position), sizeof(vector2_t), 1, file);
 
+    // Loading connected rooms
     int count;
+    fread(&(count), sizeof(int), 1, file);
+    level->connected_rooms = init_vector2_pair_array();
+    for (int i = 0; i < count; i++){
+        vector2_pair_t pair;
+        fread(&(pair), sizeof(vector2_pair_t), 1, file);
+        push_back_vector2_pair(level->connected_rooms, pair);
+    }
+
+
+    // Loading items in shops aka shrines
     fread(&count, sizeof(int), 1, file);
     level->item_array = init_item_array();
     level->shrines_array = init_vector2_array();
@@ -219,22 +234,13 @@ statistics_t* load_statistics() {
         doc = bson_reader_read(reader, &eof);
 
         bson_iter_t iter;
-        bson_iter_init(&iter, doc);
-        while (bson_iter_next(&iter)){ // TODO - We need to do a hash table search for these keys
-            if (!strcmp(bson_iter_key(&iter), "enemies_killed")){
-                stats->enemies_killed = bson_iter_value(&iter)->value.v_int32;
-            }else if(!strcmp(bson_iter_key(&iter), "deaths")){
-                stats->deaths = bson_iter_value(&iter)->value.v_int32;
-            }else if(!strcmp(bson_iter_key(&iter), "items_picked_up")){
-                stats->items_picked_up = bson_iter_value(&iter)->value.v_int32;
-            }else if(!strcmp(bson_iter_key(&iter), "max_gold")){
-                stats->max_gold = bson_iter_value(&iter)->value.v_int32;
-            }else if(!strcmp(bson_iter_key(&iter), "shrines_used")){
-                stats->shrines_used = bson_iter_value(&iter)->value.v_int32;
-            }else if(!strcmp(bson_iter_key(&iter), "max_level")) {
-                stats->max_level = bson_iter_value(&iter)->value.v_int32;
-            }
-        }
+
+        #define X(a) bson_iter_init_find(&iter, doc, #a); \
+                     stats->a = bson_iter_value(&iter)->value.v_int32;
+        STATISTICS
+        #undef X
+
+
         bson_reader_destroy(reader);
     }
 
