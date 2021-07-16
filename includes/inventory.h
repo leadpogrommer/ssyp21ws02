@@ -3,6 +3,7 @@
 #define CALLBACK_NONE (-1)
 #define CALLBACK_HEAL_SMALL (0)
 #define CALLBACK_SHOTGUN (1)
+#define CALLBACK_GOD_VISION (2)
 
 #define EQUIPMENT_WEAPON 1
 #define EQUIPMENT_USABLE 0
@@ -10,6 +11,8 @@
 typedef struct world_t world_t;
 typedef struct player_t player_t;
 
+
+// TODO Idea of equipment_type should be rethought to be more generic
 typedef struct item_t{
     const char* name;
     int id;
@@ -17,6 +20,7 @@ typedef struct item_t{
     int callback_index;
     char equippable;
     int equipment_type;
+    int cost;
 }item_t;
 
 typedef struct inventory_t{

@@ -1,5 +1,6 @@
 #pragma once
 
+// TODO we need to use a hash table for stats here
 typedef struct statistics_t{
     int enemies_killed, shrines_used, max_level, deaths, items_picked_up, max_gold;
 }statistics_t;

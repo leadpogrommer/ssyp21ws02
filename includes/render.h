@@ -14,7 +14,7 @@ void bake_lighting(world_t* world, short** is_visible);
 void draw_level_with_lighting(WINDOW* window, palette_t* palette, palette_t* light_palette, level_t* level, vector2_t offset,
                               short** is_visible);
 void draw_enemies_with_lighting(WINDOW* window, palette_t* palette, palette_t* light_palette, enemies_t* enemies, vector2_t offset,
-                                short** is_visible);
+                                short** is_visible, char draw_invisible);
 void draw_bullets_with_lighting(WINDOW* window, palette_t* palette, palette_t* light_palette, bullets_t* bullets, vector2_t offset,
                                 short** is_visible);
 

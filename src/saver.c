@@ -70,7 +70,7 @@ void save_statistics(statistics_t* statistics){
     bson_writer_end(writer);
 
 
-    fwrite(buf, buflen, 1, file);
+    fwrite(buf, buflen * sizeof(uint8_t), 1, file);
     bson_free (buf);
     bson_writer_destroy(writer);
 
@@ -220,7 +220,7 @@ statistics_t* load_statistics() {
 
         bson_iter_t iter;
         bson_iter_init(&iter, doc);
-        while (bson_iter_next(&iter)){
+        while (bson_iter_next(&iter)){ // TODO - We need to do a hash table search for these keys
             if (!strcmp(bson_iter_key(&iter), "enemies_killed")){
                 stats->enemies_killed = bson_iter_value(&iter)->value.v_int32;
             }else if(!strcmp(bson_iter_key(&iter), "deaths")){

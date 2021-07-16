@@ -1,5 +1,6 @@
 #include "popup.h"
 #include <stdlib.h>
+#include <string.h>
 
 popup_t* init_popup(WINDOW* main_window, int speed, char position, const char* format_string, ...){
     popup_t* popup = calloc(sizeof(popup_t), 1);
@@ -14,20 +15,19 @@ popup_t* init_popup(WINDOW* main_window, int speed, char position, const char* f
     int height, width, current_width, i;
     width = current_width = i = 0;
     height = 1;
-    while (message[i]){
+    while (message[i++]){
         current_width++;
         width = current_width > width ? current_width : width;
         if (message[i] == '\n'){
             height++;
             current_width = 0;
         }
-        i++;
     }
 
     char* corrected_message = calloc(sizeof(char), width * height);
     current_width = 0;
     int current_offset = 0;
-    for (i = 0; i < width * height; i++){
+    for (i = 0; i < (int)strlen(message); i++){
         if (message[i] == '\n'){
             for (int j = 0; j < width - current_width; j++){
                 corrected_message[i + j + current_offset] = ' ';

@@ -11,6 +11,7 @@ typedef struct room_t{
     vector2_t doors[3][3]; // Created so indices are vector2_t direction coords like so: [y+1][x+1]
 }room_t;                   // Contains position of a door and VEC2_UP if it
 
+// TODO we need to use a hash table here for get_room_by_name func to be O(1)
 typedef struct room_pool_t{
     room_t** rooms;
     room_t** shrine_rooms;
