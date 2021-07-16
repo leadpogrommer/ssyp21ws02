@@ -81,10 +81,12 @@ void process_enemies(pathfinder_t* pathfinder, enemies_t* enemies, player_t* pla
         if(time % enemies->array[i].speed == 0) {
             if (vector2_distance(enemies->array[i].pos, player->pos) < enemies->array[i].vision_radius * 10){
                 vector2_array_t* path = find_path(pathfinder, enemies->array[i].pos, player->pos, 1);
+
                 if (path->size < enemies->array[i].vision_radius){
                     enemies->array[i].pos = path->data[path->size - 1];
-                    destroy_vector2_array(path);
                 }
+
+                destroy_vector2_array(path);
             }
         }
         if(equal(enemies->array[i].pos, player->pos)) {

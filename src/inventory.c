@@ -11,7 +11,11 @@ void ability1(world_t* world){
     world->player->weapon_type = 1;
 }
 
-static void (*callbacks[2])(world_t* world) = { ability0, ability1 };
+void ability2(world_t* world){
+    world->player->god_vision = 1;
+}
+
+static void (*callbacks[3])(world_t* world) = { ability0, ability1, ability2 };
 
 inventory_t* init_inventory(int size){
     inventory_t* inventory = calloc(sizeof(inventory_t), 1);

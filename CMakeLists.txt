@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.16)
 project(ncurses_roguelike C)
 
 set(CMAKE_C_STANDARD 11)
@@ -6,6 +6,9 @@ set(CMAKE_C_STANDARD 11)
 set(CURSES_NEED_NCURSES TRUE)
 set(CURSES_NEED_WIDE TRUE)
 find_package(Curses REQUIRED)
+
+
+find_package(bson-1.0 REQUIRED)
 
 add_link_options(-L${CMAKE_SOURCE_DIR} -Wl,-rpath,.)
 
@@ -61,6 +64,7 @@ add_executable(game
                 src/minimap.c
                 includes/minimap.h)
 target_include_directories(game PRIVATE includes)
+target_link_libraries(game mongo::bson_shared)
 
 
 target_link_libraries(game ${CURSES_LIBRARIES}  m discord_game_sdk)

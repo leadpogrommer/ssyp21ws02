@@ -1,5 +1,6 @@
 #include "saver.h"
 #include "string.h"
+#include <bson/bson.h>
 
 void save_world(world_t* world){
     FILE* file = fopen("save", "w");
@@ -52,9 +53,26 @@ void save_level(level_t* level, FILE* file){
 }
 
 void save_statistics(statistics_t* statistics){
-    FILE* file = fopen("statistics", "w");
+    FILE* file = fopen("statistics.bson", "w");
 
-    fwrite(statistics, sizeof(statistics_t), 1, file);
+    bson_t *b;
+    uint8_t *buf = NULL;
+    size_t buflen = 0;
+    bson_writer_t *writer = bson_writer_new(&buf, &buflen, 0, bson_realloc_ctx, NULL);
+
+    bson_writer_begin(writer, &b);
+    BSON_APPEND_INT32(b, "enemies_killed", statistics->enemies_killed);
+    BSON_APPEND_INT32(b, "max_gold", statistics->max_gold);
+    BSON_APPEND_INT32(b, "deaths", statistics->deaths);
+    BSON_APPEND_INT32(b, "max_level", statistics->max_level);
+    BSON_APPEND_INT32(b, "items_picked_up", statistics->items_picked_up);
+    BSON_APPEND_INT32(b, "shrines_used", statistics->shrines_used);
+    bson_writer_end(writer);
+
+
+    fwrite(buf, buflen * sizeof(uint8_t), 1, file);
+    bson_free (buf);
+    bson_writer_destroy(writer);
 
     fclose(file);
 }
@@ -190,9 +208,34 @@ room_t* load_saved_room(FILE* file, room_pool_t* room_pool){
 statistics_t* load_statistics() {
     statistics_t * stats = init_statistics();
 
-    FILE *file = fopen("statistics", "r");
-    if (file) {
-        fread(stats, sizeof(statistics_t), 1, file);
+    bson_reader_t *reader;
+    bson_error_t error;
+    const bson_t *doc;
+    bool eof;
+
+    reader = bson_reader_new_from_file("statistics.bson", &error);
+
+    if (reader) {
+        doc = bson_reader_read(reader, &eof);
+
+        bson_iter_t iter;
+        bson_iter_init(&iter, doc);
+        while (bson_iter_next(&iter)){ // TODO - We need to do a hash table search for these keys
+            if (!strcmp(bson_iter_key(&iter), "enemies_killed")){
+                stats->enemies_killed = bson_iter_value(&iter)->value.v_int32;
+            }else if(!strcmp(bson_iter_key(&iter), "deaths")){
+                stats->deaths = bson_iter_value(&iter)->value.v_int32;
+            }else if(!strcmp(bson_iter_key(&iter), "items_picked_up")){
+                stats->items_picked_up = bson_iter_value(&iter)->value.v_int32;
+            }else if(!strcmp(bson_iter_key(&iter), "max_gold")){
+                stats->max_gold = bson_iter_value(&iter)->value.v_int32;
+            }else if(!strcmp(bson_iter_key(&iter), "shrines_used")){
+                stats->shrines_used = bson_iter_value(&iter)->value.v_int32;
+            }else if(!strcmp(bson_iter_key(&iter), "max_level")) {
+                stats->max_level = bson_iter_value(&iter)->value.v_int32;
+            }
+        }
+        bson_reader_destroy(reader);
     }
 
     return stats;

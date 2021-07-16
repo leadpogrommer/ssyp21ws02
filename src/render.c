@@ -22,6 +22,7 @@ void render(game_state_t* game_state){
     if (game_state->achievement_popup){
         draw_popup(game_state->achievement_popup, game_state->level_popup_palette, game_state->palette);
     }
+
     draw_level_changing_animation(game_state);
     doupdate();
 }
@@ -40,7 +41,7 @@ void draw_game_window(game_state_t* game_state){
                              get_origin_on_screen(game_state->world), is_visible);
 
     draw_enemies_with_lighting(game_state->game_window, game_state->palette, game_state->light_palette, game_state->world->enemies,
-                               get_origin_on_screen(game_state->world), is_visible);
+                               get_origin_on_screen(game_state->world), is_visible, game_state->world->player->god_vision);
 
     draw_bullets_with_lighting(game_state->game_window, game_state->palette, game_state->light_palette, game_state->world->bullets,
                                get_origin_on_screen(game_state->world), is_visible);
@@ -70,11 +71,14 @@ void draw_level_changing_animation(game_state_t* game_state){
     vector2_t center = game_state->world->player->screen_pos;
     for (int i = 0; i < getmaxy(game_state->game_window); i++){
         for (int j = 0; j < getmaxx(game_state->game_window); j++){
-
-            float y = (i - center.y) * (i - center.y) / (float)game_state->world->fade_radius;
-            y *= 4.5f;
-            float x = (j - center.x) * (j - center.x) / (float)game_state->world->fade_radius;
-            if ((int)(y + x) >= 1){
+            if (game_state->world->fade_radius) {
+                float y = (i - center.y) * (i - center.y) / (float) game_state->world->fade_radius;
+                y *= 4.5f;
+                float x = (j - center.x) * (j - center.x) / (float) game_state->world->fade_radius;
+                if ((int) (y + x) >= 1) {
+                    mvwaddch(game_state->game_window, i, j, ' ' | COLOR_PAIR(120));
+                }
+            }else{
                 mvwaddch(game_state->game_window, i, j, ' ' | COLOR_PAIR(120));
             }
         }
@@ -165,22 +169,19 @@ void draw_level_with_lighting(WINDOW* window, palette_t* palette, palette_t* lig
 }
 
 void draw_enemies_with_lighting(WINDOW* window, palette_t* palette, palette_t* light_palette, enemies_t* enemies, vector2_t offset,
-                                short** is_visible){
-
-    if (!palette) return;
+                                short** is_visible, char draw_invisible){
 
     short next_pair = get_pair_count();
     short next_color = 70;
     for(int i = 0; i < enemies->count; i++) {
         int x = enemies->array[i].pos.x;
         int y = enemies->array[i].pos.y;
-        if (is_visible[y][x]){
-            unsigned char ch = enemies->array[i].damage == 1 ? 'W' : 'T';
-            float enemy_health = (float)enemies->array[i].hp / enemies->array[i].maxhp;
-            init_color(next_color++, (short)(enemy_health * light_palette->enemy_brightest_red), 0, 0);
-            init_pair(next_pair++, next_color - 1, light_palette->floor_color);
-            mvwaddch(window, y + offset.y, x + offset.x,ch | COLOR_PAIR(next_pair - 1));
-        }
+        palette_t *needed_palette = is_visible[y][x] ? light_palette : palette;
+        unsigned char ch = is_visible[y][x] || draw_invisible ? (enemies->array[i].damage == 1 ? 'W' : 'T') : ' ';
+        float enemy_health = (float)enemies->array[i].hp / enemies->array[i].maxhp;
+        init_color(next_color++, (short)(enemy_health * needed_palette->enemy_brightest_red), 0, 0);
+        init_pair(next_pair++, next_color - 1, needed_palette->floor_color);
+        mvwaddch(window, y + offset.y, x + offset.x,ch | COLOR_PAIR(next_pair - 1));
     }
 }
 

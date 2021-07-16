@@ -71,14 +71,16 @@ void process_world(world_t* world){
 }
 
 void use_shrine(world_t* world){
+    int cost = 10;
     switch (world->level->data[world->player->pos.y][world->player->pos.x]){
         case 'h':
-            if (world->player->gold < 10){
-                print_message(world->hud, "You have not enough gold, 10 is needed");
+            cost = 10;
+            if (world->player->gold < cost){
+                print_message(world->hud, "You have not enough gold, %d is needed", cost);
                 break;
             }
 
-            world->player->gold -= 10;
+            world->player->gold -= cost;
             world->player->max_health += 10;
             heal_player(world->player, 10);
             world->level->data[world->player->pos.y][world->player->pos.x] = '.';
@@ -86,12 +88,13 @@ void use_shrine(world_t* world){
             world->stats->shrines_used++;
             break;
         case '?':
-            if (world->player->gold < 20){
-                print_message(world->hud, "You have not enough gold, 20 is needed");
+            cost = get_item_on_position(world->level, world->player->pos)->cost;
+            if (world->player->gold < cost){
+                print_message(world->hud, "You have not enough gold, %d is needed", cost);
                 break;
             }
 
-            world->player->gold -= 20;
+            world->player->gold -= cost;
             pick_up_item(world->player, get_item_on_position(world->level, world->player->pos));
             world->level->data[world->player->pos.y][world->player->pos.x] = '.';
             print_message(world->hud, "Picked up an item: %s", world->player->inventory->items[world->player->inventory->item_count - 1]->name);
@@ -111,12 +114,13 @@ void generate_new_level(world_t* world, int room_count){
     if (world->level){
         destroy_pathfinder(world->pathfinder);
         destroy_level(world->level);
+        enemies_destroy(world->enemies);
     }
 
     world->current_level++;
     world->level = generate_level(room_count, world->room_pool);
     world->pathfinder = init_pathfinder(world->level);
-    spawn_enemies(world->level, world->enemies, 0);
+    spawn_enemies(world->level, world->enemies, 1);
     spawn_items_on_level(world->level, world->items);
     bullets_clear(world->bullets);
 
@@ -144,12 +148,13 @@ void spawn_items_on_level(level_t* level, inventory_t* inventory){
 }
 
 void load_items(world_t* world){
-    world->items = init_inventory(3);
+    world->items = init_inventory(4);
     item_t* power_up = calloc(sizeof(item_t), 1);
     power_up->hp_buff = 10;
     power_up->name = "Apple of Edem";
     power_up->id = 0;
     power_up->callback_index = CALLBACK_HEAL_SMALL;
+    power_up->cost = 10;
     item_t* item2 = calloc(sizeof(item_t), 1);
     item2->damage_buff = 10;
     item2->name = "Sword of the Storm";
@@ -157,6 +162,7 @@ void load_items(world_t* world){
     item2->callback_index = CALLBACK_NONE;
     item2->equippable = 1;
     item2->equipment_type = EQUIPMENT_WEAPON;
+    item2->cost = 25;
     item_t* item3 = calloc(sizeof(item_t), 1);
     item3->damage_buff = -3;
     item3->name = "Shotgun";
@@ -164,9 +170,16 @@ void load_items(world_t* world){
     item3->callback_index = CALLBACK_SHOTGUN;
     item3->equippable = 1;
     item3->equipment_type = EQUIPMENT_WEAPON;
+    item3->cost = 15;
+    item_t* item4 = calloc(sizeof(item_t), 1);
+    item4->id = 3;
+    item4->callback_index = CALLBACK_GOD_VISION;
+    item4->name = "Eye Of The God";
+    item4->cost = 35;
     add_item_to_inventory(world->items, power_up);
     add_item_to_inventory(world->items, item2);
     add_item_to_inventory(world->items, item3);
+    add_item_to_inventory(world->items, item4);
 }
 
 void destroy_world(world_t* world){

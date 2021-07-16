@@ -8,6 +8,7 @@ typedef struct bullets_t bullets_t;
 typedef struct player_t{
     vector2_t pos, screen_pos;
     int max_health, health, gold, damage, vision_radius, weapon_type;
+    char god_vision;
     unsigned long long last_shot;
     int cooldowns[2];
     inventory_t* inventory;

@@ -1,5 +1,7 @@
 #pragma once
 
+#define TO_STRING(a) #a
+
 #define VEC2_ONE ((vector2_t) {.x = 1, .y = 1})
 #define VEC2_ZERO ((vector2_t) {.x = 0, .y = 0})
 #define VEC2_LEFT ((vector2_t) { .x = -1, .y = 0})
