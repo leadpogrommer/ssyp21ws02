@@ -9,6 +9,7 @@
 #define VEC2_UP ((vector2_t) { .x = 0, .y = -1})
 #define VEC2_DOWN ((vector2_t) { .x = 0, .y = 1})
 #define VEC2_SQUARE(a) (scale(VEC2_ONE, (a)))
+#define VEC2(_x, _y) ((vector2_t) { .x = _x, .y = _y})
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) > (b) ? (b) : (a))
@@ -37,6 +38,11 @@ int is_valid_rect_index(vector2_t index, vector2_t size);
 typedef struct vector2_pair_t{
     vector2_t first, second;
 }vector2_pair_t;
+
+typedef struct level_t level_t;
+
+void make_action_along_the_line(vector2_t start, vector2_t end, int max_depth, level_t *level, void *argument2,
+                                char (*action)(vector2_t, level_t *, void *));
 
 #define ONLYDEFINE
 #define TYPE int

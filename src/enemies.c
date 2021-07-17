@@ -1,6 +1,8 @@
 #include <unistd.h>
 #include <stdlib.h>
-#include "../includes/enemies.h"
+#include "enemies.h"
+#include "bullet.h"
+#include "world.h"
 
 enemies_t* enemies_init() {
     enemies_t* enemies = malloc(sizeof(enemies_t));
@@ -78,19 +80,76 @@ void spawn_enemies(level_t* level, enemies_t* enemies, int enemies_in_room) {
     }
 }
 
-void process_enemies(pathfinder_t* pathfinder, enemies_t* enemies, player_t* player, unsigned long long time) {
+char is_target(vector2_t current, level_t *level, void *argument2){
+    if (!level) return 1;
+    if (equal(current, ((vector2_pair_t*)argument2)->first)){
+        ((vector2_pair_t*)argument2)->second = VEC2_ONE;
+        return 0;
+    }
+    return 1;
+}
+
+char can_see(vector2_t start, vector2_t end, int vision_radius, level_t *level){
+
+    vector2_pair_t data = { end, VEC2_ZERO };
+
+    make_action_along_the_line(start, end, vision_radius, level, &data, is_target);
+
+    return (char)!equal(data.second, VEC2_ZERO);
+}
+
+void process_enemies(world_t *world) {
+
+    enemies_t *enemies = world->enemies;
+    player_t *player = world->player;
+    level_t *level = world->level;
+    pathfinder_t *pathfinder = world->pathfinder;
+    bullets_t *bullets = world->bullets;
+    unsigned long time = world->time;
+
+
     for(int i = 0; i < enemies->count; i++) {
-        if(time % enemies->array[i].speed == 0) {
-            if (vector2_distance(enemies->array[i].pos, player->pos) < enemies->array[i].vision_radius * 10){
-                vector2_array_t* path = find_path(pathfinder, enemies->array[i].pos, player->pos, 1);
+        enemy_t *enemy = &(enemies->array[i]);
+        if(time % enemy->speed == 0) {
+            if (can_see(enemy->pos, player->pos, enemy->vision_radius, level)){
+                switch (enemy->type){
+                    case ENEMY_TYPE_MELEE: {
+                        vector2_array_t *path = find_path(pathfinder, enemy->pos, player->pos, 1);
+                        enemy->pos = path->data[path->size - 1];
+                        destroy_vector2_array(path);
+                        break;
+                    }
+                    case ENEMY_TYPE_RANGER:{
+                        // Let's first check if we can fire at player
+                        vector2_t direction = VEC2_ZERO;
+                        if (enemy->pos.y == player->pos.y){
+                            direction = enemy->pos.x > player->pos.x ? VEC2_LEFT : VEC2_RIGHT;
+                        }else if (enemy->pos.x == player->pos.x){
+                            direction = enemy->pos.y > player->pos.y ? VEC2_UP : VEC2_DOWN;
+                        }
+                        // If not - let's move
+                        if (equal(direction, VEC2_ZERO)){
 
-                if (path->size < enemies->array[i].vision_radius){
-                    enemies->array[i].pos = path->data[path->size - 1];
+                            vector2_array_t *path1 = find_path(pathfinder, enemy->pos, VEC2(enemy->pos.x, player->pos.y), 1);
+                            vector2_array_t *path2 = find_path(pathfinder, enemy->pos, VEC2(player->pos.x, enemy->pos.y), 1);
+
+                            if (path1 || path2) {
+                                vector2_array_t *right_path = path1 ? (path2 ? (path1->size > path2->size ? path2 : path1) : path1) : path2;
+                                enemy->pos = right_path->data[right_path->size - 1];
+                                if (path1){
+                                    destroy_vector2_array(path1);
+                                }
+                                if (path2){
+                                    destroy_vector2_array(path2);
+                                }
+                            }
+                        }else{
+                            // If do - let's shoot!
+                            fire(bullets, enemy->pos, direction, enemy->damage, 1);
+                        }
+                    }
                 }
-
-                destroy_vector2_array(path);
             }
-
 
 
         }

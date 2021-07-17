@@ -51,16 +51,16 @@ void pick_up_item(player_t* player, item_t* item){
 void shoot(player_t* player, bullets_t* bullets, vector2_t direction, unsigned long long time){
     if (player->weapon_type == 0){
         if (time - player->last_shot >= (unsigned long long)player->cooldowns[0]){
-            fire(bullets, player, direction);
+            fire(bullets, player->pos, direction, player->damage, 0);
             player->last_shot = time;
         }
     }else if (player->weapon_type == 1){
         if (time - player->last_shot >= (unsigned long long)player->cooldowns[1]) {
-            fire(bullets, player, direction);
+            fire(bullets, player->pos, direction, player->damage, 0);
             vector2_t sideways = {direction.y, direction.x};
-            fire(bullets, player, sum(direction, sideways));
+            fire(bullets, player->pos, sum(direction, sideways), player->damage, 0);
             sideways = scale(sideways, -1);
-            fire(bullets, player, sum(direction, sideways));
+            fire(bullets, player->pos, sum(direction, sideways), player->damage, 0);
             player->last_shot = time;
         }
     }

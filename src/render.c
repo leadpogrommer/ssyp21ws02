@@ -98,34 +98,6 @@ void draw_level(WINDOW* window, palette_t* palette, level_t* level, vector2_t of
     }
 }
 
-void make_action_along_the_line(vector2_t start, vector2_t end, int max_depth, level_t *level, void *argument2,
-                                char (*action)(vector2_t, level_t *, void *)){
-    vector2_t diff = sub(end, start);
-    vector2_t abs_diff = { .y = diff.y > 0 ? diff.y : -diff.y,  .x = diff.x > 0 ? diff.x : -diff.x};
-    int y_step = diff.y > 0 ? 1 : diff.y == 0 ? 0 : -1;
-    int x_step = diff.x > 0 ? 1 : diff.x == 0 ? 0 : -1;
-
-    vector2_t current = start;
-    int* bigger = abs_diff.y > abs_diff.x ? &(current.y) : &(current.x);
-    int* smaller = abs_diff.y > abs_diff.x ? &(current.x) : &(current.y);;
-    int bigger_step = abs_diff.y > abs_diff.x ? y_step : x_step;
-    int smaller_step = abs_diff.y > abs_diff.x ? x_step : y_step;
-    abs_diff = (vector2_t) { .x = MAX(abs_diff.y, abs_diff.x), .y = MIN(abs_diff.y, abs_diff.x) };
-
-    int error = 0;
-    char go_on = 1;
-    for (int i = 0; i < max_depth && go_on; i++){
-        *bigger += bigger_step;
-        error += (abs_diff.y);
-        if (error >= abs_diff.x){
-            error -= abs_diff.x;
-            *smaller += smaller_step;
-        }
-
-        go_on = action(current, level, argument2);
-    }
-}
-
 // You really should give it a is_visible aka short ** as argument2
 char mark_visible_go_on(vector2_t current, level_t *level, void *argument2){
     ((short **)argument2)[current.y][current.x] = 1;

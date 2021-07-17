@@ -49,7 +49,7 @@ void process_world(world_t* world){
         }
 
         process_bullets(world->bullets, world->enemies, world->level, world->player, world->stats, world->time);
-        process_enemies(world->pathfinder, world->enemies, world->player, world->time);
+        process_enemies(world);
         world->stats->max_gold = MAX(world->stats->max_gold, world->player->gold);
 
         if (world->level_popup){
