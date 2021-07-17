@@ -14,10 +14,13 @@
 #define ENEMY_HP_MIN 10
 #define ENEMY_HP_MAX 25
 
+#define ENEMY_TYPE_MELEE 0
+#define ENEMY_TYPE_RANGER 1
 
 typedef struct {
     int speed, damage, vision_radius, hp, maxhp;
     vector2_t pos;
+    char type;
 } enemy_t;
 
 typedef struct {

@@ -18,13 +18,15 @@ void rp_init() {
 }
 
 void rp_update(struct DiscordActivity *activity) {
-    //if (app.core){
+    if (app.core){
         app.core->get_activity_manager(app.core)->update_activity(app.core->get_activity_manager(app.core), activity, 0, 0);
-    //}
+    }
 }
 
 void rp_tick() {
-    app.core->run_callbacks(app.core);
+    if (app.core){
+        app.core->run_callbacks(app.core);
+    }
 }
 
 void update_rich_presence_level(int level) {

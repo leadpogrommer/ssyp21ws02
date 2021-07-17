@@ -235,9 +235,11 @@ statistics_t* load_statistics() {
 
         bson_iter_t iter;
 
-        #define X(a) bson_iter_init_find(&iter, doc, #a); \
-                     stats->a = bson_iter_value(&iter)->value.v_int32;
+        #define X(a) if (bson_iter_init_find(&iter, doc, #a) ){ \
+                        stats->a = bson_iter_value(&iter)->value.v_int32; \
+                     }
         STATISTICS
+
         #undef X
 
 

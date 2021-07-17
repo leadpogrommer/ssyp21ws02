@@ -39,25 +39,24 @@ void process_world(world_t* world){
                 change_level(world);
                 break;
             case 'h':
-                if (world->time - world->last_prompt >= 300) {
-                    print_message(world->hud, "Press e to buy max hp");
-                    world->last_prompt = world->time;
-                }
+                print_message(world->hud, world->time, 0, 60, "Press e to buy max hp");
                 break;
-            case '?':
-                if (world->time - world->last_prompt >= 300) {
-                    item_t *item = get_item_on_position(world->level, world->player->pos);
-                    print_message(world->hud, "Press e to buy %s", item->name);
-                    world->last_prompt = world->time;
-                }
+            case '?': {
+                item_t *item = get_item_on_position(world->level, world->player->pos);
+                print_message(world->hud, world->time, 0, 60, "Press e to buy %s", item->name);
                 break;
+            }
         }
+
         process_bullets(world->bullets, world->enemies, world->level, world->player, world->stats, world->time);
         process_enemies(world->pathfinder, world->enemies, world->player, world->time);
         world->stats->max_gold = MAX(world->stats->max_gold, world->player->gold);
-    }
-    if (world->level_popup){
-        process_popup(&world->level_popup);
+
+        if (world->level_popup){
+            process_popup(&world->level_popup);
+        }
+
+        process_hud(world->hud, world->time);
     }
 
     if (world->fade_radius <= 0 || world->fade_radius > world->max_fade_radius){
@@ -71,12 +70,12 @@ void process_world(world_t* world){
 }
 
 void use_shrine(world_t* world){
-    int cost = 10;
+    int cost;
     switch (world->level->data[world->player->pos.y][world->player->pos.x]){
         case 'h':
             cost = 10;
             if (world->player->gold < cost){
-                print_message(world->hud, "You have not enough gold, %d is needed", cost);
+                print_message(world->hud, world->time, 1, 120,"You have not enough gold, %d is needed", cost);
                 break;
             }
 
@@ -84,24 +83,24 @@ void use_shrine(world_t* world){
             world->player->max_health += 10;
             heal_player(world->player, 10);
             world->level->data[world->player->pos.y][world->player->pos.x] = '.';
-            print_message(world->hud, "You used a health shrine");
+            print_message(world->hud, world->time, 1, 120, "You used a health shrine");
             world->stats->shrines_used++;
             break;
         case '?':
             cost = get_item_on_position(world->level, world->player->pos)->cost;
             if (world->player->gold < cost){
-                print_message(world->hud, "You have not enough gold, %d is needed", cost);
+                print_message(world->hud, world->time, 1, 120, "You have not enough gold, %d is needed", cost);
                 break;
             }
 
             world->player->gold -= cost;
             pick_up_item(world->player, get_item_on_position(world->level, world->player->pos));
             world->level->data[world->player->pos.y][world->player->pos.x] = '.';
-            print_message(world->hud, "Picked up an item: %s", world->player->inventory->items[world->player->inventory->item_count - 1]->name);
+            print_message(world->hud, world->time, 1, 120, "Picked up an item: %s", world->player->inventory->items[world->player->inventory->item_count - 1]->name);
             world->stats->items_picked_up++;
             break;
         default:
-            print_message(world->hud, "There is nothing to use");
+            print_message(world->hud, world->time, 1, 30, "There is nothing to use");
             break;
     }
 }

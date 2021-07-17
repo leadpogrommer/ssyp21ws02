@@ -58,6 +58,7 @@ void spawn_enemies(level_t* level, enemies_t* enemies, int enemies_in_room) {
                 int evision =
                         ((double) rand() / RAND_MAX) * (ENEMY_VISION_MAX - ENEMY_VISION_MIN + 1) + ENEMY_VISION_MIN;
                 int ehp = rand() % (ENEMY_HP_MAX - ENEMY_DAMAGE_MIN) + ENEMY_HP_MIN;
+                char etype = rand() % 2;
                 if (level->room_grid[j][i]->data[ey][ex] == '.') {
                     vector2_t outer = {.x = i, .y = j};
                     vector2_t inner = {.x = ex, .y = ey};
@@ -67,7 +68,8 @@ void spawn_enemies(level_t* level, enemies_t* enemies, int enemies_in_room) {
                             .damage = edamage,
                             .vision_radius = evision,
                             .hp = ehp,
-                            .maxhp = ehp
+                            .maxhp = ehp,
+                            .type = etype
                     };
                     enemies_add(enemies, enemy);
                 }
@@ -88,7 +90,11 @@ void process_enemies(pathfinder_t* pathfinder, enemies_t* enemies, player_t* pla
 
                 destroy_vector2_array(path);
             }
+
+
+
         }
+
         if(equal(enemies->array[i].pos, player->pos)) {
             player->health -= enemies->array[i].damage;
             enemies_remove(enemies, i);

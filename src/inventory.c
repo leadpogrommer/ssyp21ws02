@@ -3,19 +3,19 @@
 #include "player.h"
 #include "world.h"
 
-void ability0(world_t* world){
+void small_heal(world_t* world){
     heal_player(world->player, 10);
 }
 
-void ability1(world_t* world){
+void use_shotgun(world_t* world){
     world->player->weapon_type = 1;
 }
 
-void ability2(world_t* world){
+void god_vision(world_t* world){
     world->player->god_vision = 1;
 }
 
-static void (*callbacks[3])(world_t* world) = { ability0, ability1, ability2 };
+static void (*callbacks[3])(world_t* world) = {small_heal, use_shotgun, god_vision };
 
 inventory_t* init_inventory(int size){
     inventory_t* inventory = calloc(sizeof(inventory_t), 1);

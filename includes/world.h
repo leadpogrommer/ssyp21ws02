@@ -24,7 +24,6 @@ typedef struct world_t{
     popup_t* level_popup;
     statistics_t* stats;
     minimap_data_t* minimap_data;
-    unsigned long long last_prompt;
     int fade_radius, fade_speed, max_fade_radius;
 }world_t;
 

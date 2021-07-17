@@ -148,10 +148,10 @@ int handle_input(game_state_t* game_state){
                 if (game_state->state == STATE_INVENTORY && game_state->world->player->inventory->item_count > 0) {
                     int current_item = game_state->inventory_display->current_item;
                     if (use_item(game_state->world->player, current_item, game_state->world)) {
-                        print_message(game_state->world->hud, "You have just used %s",
+                        print_message(game_state->world->hud, 0, 1, 120, "You have just used %s",
                                       game_state->world->player->inventory->items[current_item]->name);
                     } else {
-                        print_message(game_state->world->hud, "This item can't be used");
+                        print_message(game_state->world->hud, 0, 1, 30, "This item can't be used");
                     }
                 }
                 break;
@@ -180,7 +180,7 @@ int process(game_state_t* game_state){
 
     if (!game_state->achievement_popup && game_state->achievement_queue->size){
         char* achievement_title = game_state->achievements->data[game_state->achievement_queue->data[0]].title;
-        game_state->achievement_popup = init_popup(game_state->game_window, 7, POPUP_URCORNER,
+        game_state->achievement_popup = init_popup(game_state->game_window, 7, POPUP_ULCORNER,
                                                    "Achievement unlocked!\n%s", achievement_title);
         delete_int_from_array(game_state->achievement_queue, 0);
     }

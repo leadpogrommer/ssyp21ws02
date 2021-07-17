@@ -105,24 +105,17 @@ void mark_visible_symbols_on_line(world_t* world, vector2_t end, short** is_visi
     int x_step = diff.x > 0 ? 1 : diff.x == 0 ? 0 : -1;
 
     vector2_t current = world->player->pos;
-    int* bigger = &(current.x);
-    int* smaller = &(current.y);
-    int bigger_step = x_step;
-    int smaller_step = y_step;
-    if (abs_diff.y > abs_diff.x){
-        bigger_step = y_step;
-        smaller_step = x_step;
-        abs_diff = (vector2_t) { .x = abs_diff.y, .y = abs_diff.x };
-        bigger = &(current.y);
-        smaller = &(current.x);
-    }
+    int* bigger = abs_diff.y > abs_diff.x ? &(current.y) : &(current.x);
+    int* smaller = abs_diff.y > abs_diff.x ? &(current.x) : &(current.y);;
+    int bigger_step = abs_diff.y > abs_diff.x ? y_step : x_step;
+    int smaller_step = abs_diff.y > abs_diff.x ? x_step : y_step;
+    abs_diff = (vector2_t) { .x = MAX(abs_diff.y, abs_diff.x), .y = MIN(abs_diff.y, abs_diff.x) };
 
     int error = 0;
     short visible = 1;
-    int derror = (abs_diff.y);
     for (int i = 0; i < world->player->vision_radius && visible; i++){
         *bigger += bigger_step;
-        error += derror;
+        error += (abs_diff.y);
         if (error >= abs_diff.x){
             error -= abs_diff.x;
             *smaller += smaller_step;
