@@ -162,7 +162,7 @@ void draw_bullets_with_lighting(WINDOW* window, palette_t* palette, palette_t* l
     for(int i = 0; i < bullets->count; i++) {
         int x = bullets->array[i].pos.x;
         int y = bullets->array[i].pos.y;
-        unsigned char ch = is_visible[y][x] ? '-' : ' ';
+        unsigned char ch = is_visible[y][x] ? (bullets->array[i].is_enemy ? '_' : '-' ) : ' ';
         mvwaddch(window, y + offset.y, x + offset.x, (is_visible[y][x] ? light_palette : palette)->symbol[ch]);
     }
 }

@@ -11,6 +11,7 @@ typedef struct palette_t{
     int bullet_pair;
     short enemy_brightest_red;
     short floor_color;
+    int brightest_enemy_pair;
 } palette_t;
 
 palette_t* init_palette(short background_color, short floor_color, short player_color, short symbols_color,

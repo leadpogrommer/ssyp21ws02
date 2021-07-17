@@ -33,8 +33,9 @@ void set_up_palettes(game_state_t* game_state){
     init_color(20, 0, 700, 0); // Nice Green
     init_color(22, 400, 0, 0); // Nice Red
     init_color(33, 400, 700, 400); // Bullet; Lgreen
+    init_color(24, 400, 0, 0); // Enemy red
 
-    game_state->palette = init_palette(18, 19, 20, 21, 400, 23, 33);
+    game_state->palette = init_palette(18, 19, 20, 21, 24, 23, 33);
 
     init_color(28, 180, 180, 180); // Nice Black
     init_color(31, 1000, 550, 0); // Nice Orange
@@ -42,7 +43,7 @@ void set_up_palettes(game_state_t* game_state){
     init_color(30, 0, 700, 0); // Nice Green
     init_color(32, 700, 0, 0); // Nice Red
 
-    game_state->light_palette = init_palette(18, 29, 30, 31, 700, 29, 33);
+    game_state->light_palette = init_palette(18, 29, 30, 31, 32, 29, 33);
 
     init_color(41, 0, 0, 800);
 

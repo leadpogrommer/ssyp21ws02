@@ -69,9 +69,9 @@ void process_bullets(bullets_t* bullets, enemies_t* enemies, level_t* level, pla
                 }
             }
         }else if (equal(player->pos, bullets->array[i].pos)){
+            player->health -= bullets->array[i].damage;
             bullets_remove(bullets, i);
             if (i > 0) i--;
-            player->health -= bullets->array[i].damage;
         }
     }
 }
