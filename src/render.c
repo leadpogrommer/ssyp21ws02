@@ -98,13 +98,14 @@ void draw_level(WINDOW* window, palette_t* palette, level_t* level, vector2_t of
     }
 }
 
-void mark_visible_symbols_on_line(world_t* world, vector2_t end, short** is_visible){
-    vector2_t diff = sub(end, world->player->pos);
+void make_action_along_the_line(vector2_t start, vector2_t end, int max_depth, level_t *level, void *argument2,
+                                char (*action)(vector2_t, level_t *, void *)){
+    vector2_t diff = sub(end, start);
     vector2_t abs_diff = { .y = diff.y > 0 ? diff.y : -diff.y,  .x = diff.x > 0 ? diff.x : -diff.x};
     int y_step = diff.y > 0 ? 1 : diff.y == 0 ? 0 : -1;
     int x_step = diff.x > 0 ? 1 : diff.x == 0 ? 0 : -1;
 
-    vector2_t current = world->player->pos;
+    vector2_t current = start;
     int* bigger = abs_diff.y > abs_diff.x ? &(current.y) : &(current.x);
     int* smaller = abs_diff.y > abs_diff.x ? &(current.x) : &(current.y);;
     int bigger_step = abs_diff.y > abs_diff.x ? y_step : x_step;
@@ -112,8 +113,8 @@ void mark_visible_symbols_on_line(world_t* world, vector2_t end, short** is_visi
     abs_diff = (vector2_t) { .x = MAX(abs_diff.y, abs_diff.x), .y = MIN(abs_diff.y, abs_diff.x) };
 
     int error = 0;
-    short visible = 1;
-    for (int i = 0; i < world->player->vision_radius && visible; i++){
+    char go_on = 1;
+    for (int i = 0; i < max_depth && go_on; i++){
         *bigger += bigger_step;
         error += (abs_diff.y);
         if (error >= abs_diff.x){
@@ -121,28 +122,33 @@ void mark_visible_symbols_on_line(world_t* world, vector2_t end, short** is_visi
             *smaller += smaller_step;
         }
 
-        if (world->level->data[current.y][current.x] == 0 ||
-            world->level->data[current.y][current.x] == '*'){
-            visible = 0;
-        }
-        is_visible[current.y][current.x] = 1;
-
+        go_on = action(current, level, argument2);
     }
+}
+
+// You really should give it a is_visible aka short ** as argument2
+char mark_visible_go_on(vector2_t current, level_t *level, void *argument2){
+    ((short **)argument2)[current.y][current.x] = 1;
+    if (level->data[current.y][current.x] == 0 ||
+        level->data[current.y][current.x] == '*'){
+        return 0;
+    }
+    return 1;
 }
 
 void bake_lighting(world_t* world, short** is_visible){
     for (int i = 0; i < world->level->size.y; i++){
         vector2_t level_left = { .x = 0, .y = i };
         vector2_t level_right = { .x = world->level->size.x - 1, .y = i };
-        mark_visible_symbols_on_line(world, level_left, is_visible);
-        mark_visible_symbols_on_line(world, level_right, is_visible);
+        make_action_along_the_line(world->player->pos, level_left, world->player->vision_radius, world->level, is_visible, mark_visible_go_on);
+        make_action_along_the_line(world->player->pos, level_right, world->player->vision_radius, world->level, is_visible, mark_visible_go_on);
     }
 
     for (int i = 0; i < world->level->size.x; i++){
         vector2_t level_left = { .x = i, .y = 0 };
         vector2_t level_right = { .x = i, .y = world->level->size.y - 1 };
-        mark_visible_symbols_on_line(world, level_left, is_visible);
-        mark_visible_symbols_on_line(world, level_right, is_visible);
+        make_action_along_the_line(world->player->pos, level_left, world->player->vision_radius, world->level, is_visible, mark_visible_go_on);
+        make_action_along_the_line(world->player->pos, level_right, world->player->vision_radius, world->level, is_visible, mark_visible_go_on);
     }
 }
 
