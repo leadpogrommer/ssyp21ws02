@@ -212,7 +212,7 @@ int main() {
     title_screen_init(&menu_main, 3, "New game", "Load", "Exit");
 
     title_screen_data menu_pause;
-    title_screen_init(&menu_pause, 3, "Continue", "Save", "Exit");
+    title_screen_init(&menu_pause, 4, "Continue", "Save", "Main Menu", "Exit");
 
     title_screen_data menu_gameover;
     title_screen_init(&menu_gameover, 2, "Main menu", "Exit");
@@ -266,6 +266,11 @@ int main() {
                         game_state.state = STATE_GAME;
                         break;
                     case 2:
+                        end_game(&game_state);
+                        game_state.world = NULL;
+                        game_state.state = STATE_MAIN_MENU;
+                        break;
+                    case 3:
                         game_state.state = STATE_EXIT;
                         break;
                 }
