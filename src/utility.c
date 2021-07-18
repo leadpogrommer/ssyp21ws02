@@ -40,7 +40,7 @@ int cross(vector2_t a, vector2_t b){
     return a.x * b.y - a.y * b.x;
 }
 
-int equal(vector2_t a, vector2_t b){
+char equal(vector2_t a, vector2_t b){
     if (a.x == b.x && a.y == b.y) return 1;
     return 0;
 }

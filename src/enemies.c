@@ -98,6 +98,16 @@ char can_see(vector2_t start, vector2_t end, int vision_radius, level_t *level){
     return (char)!equal(data.second, VEC2_ZERO);
 }
 
+// Funcs for advanced pathfinding for the Ranger
+char is_on_line(vector2_t a, vector2_t b){
+    return (char)(a.x == b.x || a.y == b.y);
+}
+
+int distance_to_be_on_line(vector2_t a, vector2_t b){
+    vector2_t diff = sub(b, a);
+    return MIN(abs(diff.x), abs(diff.y));
+}
+
 void process_enemies(world_t *world) {
 
     enemies_t *enemies = world->enemies;
@@ -120,30 +130,24 @@ void process_enemies(world_t *world) {
                         break;
                     }
                     case ENEMY_TYPE_RANGER:{
-                        // Let's first check if we can fire at player
-                        vector2_t direction = VEC2_ZERO;
-                        if (enemy->pos.y == player->pos.y){
-                            direction = enemy->pos.x > player->pos.x ? VEC2_LEFT : VEC2_RIGHT;
-                        }else if (enemy->pos.x == player->pos.x){
-                            direction = enemy->pos.y > player->pos.y ? VEC2_UP : VEC2_DOWN;
-                        }
                         // If not - let's move
-                        if (equal(direction, VEC2_ZERO)){
+                        if (!is_on_line(enemy->pos, player->pos)){
 
-                            vector2_array_t *path1 = find_path(pathfinder, enemy->pos, VEC2(enemy->pos.x, player->pos.y), 1);
-                            vector2_array_t *path2 = find_path(pathfinder, enemy->pos, VEC2(player->pos.x, enemy->pos.y), 1);
+                            vector2_array_t *path = find_path_advanced(pathfinder, enemy->pos, player->pos, 1, is_on_line, distance_to_be_on_line);
 
-                            if (path1 || path2) {
-                                vector2_array_t *right_path = path1 ? (path2 ? (path1->size > path2->size ? path2 : path1) : path1) : path2;
-                                enemy->pos = right_path->data[right_path->size - 1];
-                                if (path1){
-                                    destroy_vector2_array(path1);
-                                }
-                                if (path2){
-                                    destroy_vector2_array(path2);
-                                }
+                            if (path) {
+                                enemy->pos = path->data[path->size - 1];
+                                destroy_vector2_array(path);
                             }
                         }else{
+                            // Let's first check if we can fire at player
+                            vector2_t direction = VEC2_ZERO;
+                            if (enemy->pos.y == player->pos.y){
+                                direction = enemy->pos.x > player->pos.x ? VEC2_LEFT : VEC2_RIGHT;
+                            }else if (enemy->pos.x == player->pos.x){
+                                direction = enemy->pos.y > player->pos.y ? VEC2_UP : VEC2_DOWN;
+                            }
+
                             // If do - let's shoot!
                             fire(bullets, enemy->pos, direction, enemy->damage, 1);
                         }

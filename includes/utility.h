@@ -26,7 +26,7 @@ vector2_t scale(vector2_t a, int magnitude);
 vector2_t scaledown(vector2_t a, int magnitude);
 vector2_t scale_accordingly(vector2_t a, vector2_t b);
 int cross(vector2_t a, vector2_t b);
-int equal(vector2_t a, vector2_t b);
+char equal(vector2_t a, vector2_t b);
 
 void get_straight_directions(vector2_t directions[4]);
 void get_shuffled_directions(vector2_t directions[4]);
