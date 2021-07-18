@@ -19,7 +19,7 @@
 
 typedef struct {
     int speed, damage, vision_radius, hp, maxhp;
-    vector2_t pos;
+    vector2_t pos, last_known_player_pos;
     char type;
 } enemy_t;
 

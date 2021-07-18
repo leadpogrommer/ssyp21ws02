@@ -71,7 +71,8 @@ void spawn_enemies(level_t* level, enemies_t* enemies, int enemies_in_room) {
                             .vision_radius = evision,
                             .hp = ehp,
                             .maxhp = ehp,
-                            .type = etype
+                            .type = etype,
+                            .last_known_player_pos = VEC2_SQUARE(-1)
                     };
                     enemies_add(enemies, enemy);
                 }
@@ -81,7 +82,11 @@ void spawn_enemies(level_t* level, enemies_t* enemies, int enemies_in_room) {
 }
 
 char is_target(vector2_t current, level_t *level, void *argument2){
-    if (!level) return 1;
+
+    if (level->data[current.y][current.x] == 0 || level->data[current.y][current.x] == '*'){
+        return 0;
+    }
+
     if (equal(current, ((vector2_pair_t*)argument2)->first)){
         ((vector2_pair_t*)argument2)->second = VEC2_ONE;
         return 0;
@@ -99,8 +104,8 @@ char can_see(vector2_t start, vector2_t end, int vision_radius, level_t *level){
 }
 
 // Funcs for advanced pathfinding for the Ranger
-char is_on_line(vector2_t a, vector2_t b){
-    return (char)(a.x == b.x || a.y == b.y);
+char is_on_line(vector2_t a, vector2_t b, level_t *level){
+    return (char)((a.x == b.x || a.y == b.y) && can_see(a, b, 100, level));
 }
 
 int distance_to_be_on_line(vector2_t a, vector2_t b){
@@ -122,6 +127,7 @@ void process_enemies(world_t *world) {
         enemy_t *enemy = &(enemies->array[i]);
         if(time % enemy->speed == 0) {
             if (can_see(enemy->pos, player->pos, enemy->vision_radius, level)){
+                enemy->last_known_player_pos = player->pos;
                 switch (enemy->type){
                     case ENEMY_TYPE_MELEE: {
                         vector2_array_t *path = find_path(pathfinder, enemy->pos, player->pos, 1);
@@ -131,11 +137,11 @@ void process_enemies(world_t *world) {
                     }
                     case ENEMY_TYPE_RANGER:{
                         // If not - let's move
-                        if (!is_on_line(enemy->pos, player->pos)){
+                        if (!is_on_line(enemy->pos, player->pos, level)){
 
                             vector2_array_t *path = find_path_advanced(pathfinder, enemy->pos, player->pos, 1, is_on_line, distance_to_be_on_line);
 
-                            if (path) {
+                            if (path && can_see(path->data[0], player->pos, enemy->vision_radius, level)) {
                                 enemy->pos = path->data[path->size - 1];
                                 destroy_vector2_array(path);
                             }
@@ -153,9 +159,15 @@ void process_enemies(world_t *world) {
                         }
                     }
                 }
+            }else if (!equal(enemy->last_known_player_pos, VEC2_SQUARE(-1))){
+                vector2_array_t *path = find_path(pathfinder, enemy->pos, player->pos, 1);
+                enemy->pos = path->data[path->size - 1];
+                destroy_vector2_array(path);
+
+                if (equal(enemy->pos, enemy->last_known_player_pos)){
+                    enemy->last_known_player_pos = VEC2_SQUARE(-1);
+                }
             }
-
-
         }
 
         if(equal(enemies->array[i].pos, player->pos)) {

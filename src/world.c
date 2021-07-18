@@ -58,9 +58,9 @@ void process_world(world_t* world){
         process_hud(world->hud, world->time);
     }
 
-    if (world->fade_radius <= 0 || world->fade_radius > world->max_fade_radius){
+    if (world->fade_radius < abs(world->fade_speed) || world->fade_radius > world->max_fade_radius - abs(world->fade_speed)){
         world->fade_speed *= -1;
-        world->fade_radius = world->fade_radius <= 0 ? 0 : world->max_fade_radius;
+        world->fade_radius = world->fade_radius < abs(world->fade_speed) ? 0 : world->max_fade_radius;
         if (!world->fade_radius){
             generate_new_level(world, world->level->room_count + 1);
         }
@@ -105,7 +105,7 @@ void use_shrine(world_t* world){
 }
 
 void change_level(world_t* world){
-    world->fade_radius--;
+    world->fade_radius += world->fade_speed;
 }
 
 void generate_new_level(world_t* world, int room_count){
