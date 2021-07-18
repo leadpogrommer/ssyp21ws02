@@ -6,8 +6,8 @@
         X(max_level)\
         X(deaths)  \
         X(items_picked_up)\
-        X(max_gold)\
-
+        X(max_gold_picked_up)\
+        X(gold_picked_up_this_run)
 
 // TODO we need to use a hash table for stats here
 #define X(a) int a;

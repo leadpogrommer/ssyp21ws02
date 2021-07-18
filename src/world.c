@@ -50,7 +50,6 @@ void process_world(world_t* world){
 
         process_bullets(world->bullets, world->enemies, world->level, world->player, world->stats, world->time);
         process_enemies(world);
-        world->stats->max_gold = MAX(world->stats->max_gold, world->player->gold);
 
         if (world->level_popup){
             process_popup(&world->level_popup);
@@ -148,7 +147,6 @@ void spawn_items_on_level(level_t* level, inventory_t* inventory){
 void load_items(world_t* world){
     world->items = init_inventory(4);
     item_t* power_up = calloc(sizeof(item_t), 1);
-    power_up->hp_buff = 10;
     power_up->name = "Apple of Edem";
     power_up->id = 0;
     power_up->callback_index = CALLBACK_HEAL_SMALL;

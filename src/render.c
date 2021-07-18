@@ -148,7 +148,7 @@ void draw_enemies_with_lighting(WINDOW* window, palette_t* palette, palette_t* l
         int x = enemies->array[i].pos.x;
         int y = enemies->array[i].pos.y;
         palette_t *needed_palette = is_visible[y][x] ? light_palette : palette;
-        unsigned char ch = is_visible[y][x] || draw_invisible ? (enemies->array[i].damage == 1 ? 'W' : 'T') : ' ';
+        unsigned char ch = is_visible[y][x] || draw_invisible ? (enemies->array[i].type == ENEMY_TYPE_RANGER ? 'R' : 'M') : ' ';
         float enemy_health = (float)enemies->array[i].hp / enemies->array[i].maxhp;
         init_color(next_color++, (short)(enemy_health * needed_palette->enemy_brightest_red), 0, 0);
         init_pair(next_pair++, next_color - 1, needed_palette->floor_color);
