@@ -26,28 +26,24 @@ void init_window() {
 
 void set_up_palettes(game_state_t* game_state){
 
-    init_color(23, 750, 750, 750);
-    init_color(18, 100, 100, 100); // Nice Black
-    init_color(21, 900, 450, 0); // Nice Orange
-    init_color(19, 500, 500, 500); // Nice White
-    init_color(20, 0, 700, 0); // Nice Green
-    init_color(22, 400, 0, 0); // Nice Red
-    init_color(33, 400, 700, 400); // Bullet; Lgreen
-    init_color(24, 400, 0, 0); // Enemy red
+    init_color(COLOR_BACKGROUND_DARK, 100, 100, 100); // Nice Black
+    init_color(COLOR_ACTIVITY_DARK, 900, 450, 0); // Nice Orange
+    init_color(COLOR_FOREGROUND_DARK, 500, 500, 500); // Nice White
+    init_color(COLOR_PLAYER_LIGHT, 0, 700, 0); // Nice Green
+    init_color(COLOR_PLAYER_BULLET, 400, 700, 400); // Bullet; Lgreen
+    init_color(COLOR_ENEMY_DARK, 400, 0, 0); // Enemy red
 
-    game_state->palette = init_palette(18, 19, 20, 21, 24, 23, 33);
+    game_state->palette = init_palette(COLOR_BACKGROUND_DARK, COLOR_FOREGROUND_DARK, COLOR_PLAYER_LIGHT, COLOR_ACTIVITY_DARK, COLOR_ENEMY_DARK, COLOR_FOREGROUND_LIGHT, COLOR_PLAYER_BULLET);
 
-    init_color(28, 180, 180, 180); // Nice Black
-    init_color(31, 1000, 550, 0); // Nice Orange
-    init_color(29, 850, 850, 850); // Nice White
-    init_color(30, 0, 700, 0); // Nice Green
-    init_color(32, 700, 0, 0); // Nice Red
+    init_color(COLOR_ACTIVITY_LIGHT, 1000, 550, 0); // Nice Orange
+    init_color(COLOR_FOREGROUND_LIGHT, 850, 850, 850); // Nice White
+    init_color(COLOR_ENEMY_LIGHT, 700, 0, 0); // Nice Red
 
-    game_state->light_palette = init_palette(18, 29, 30, 31, 32, 29, 33);
+    game_state->light_palette = init_palette(COLOR_BACKGROUND_DARK, COLOR_FOREGROUND_LIGHT, COLOR_PLAYER_LIGHT, COLOR_ACTIVITY_LIGHT, COLOR_ENEMY_LIGHT, COLOR_FOREGROUND_LIGHT, COLOR_PLAYER_BULLET);
 
-    init_color(41, 0, 0, 800);
+    init_color(COLOR_BACKGROUND_POPUP, 0, 0, 800);
 
-    game_state->level_popup_palette = init_palette(41, 0, 0, 0, 0, 29, 0);
+    game_state->level_popup_palette = init_palette(COLOR_BACKGROUND_POPUP, 0, 0, 0, 0, COLOR_FOREGROUND_LIGHT, 0);
 }
 
 void set_up_world(game_state_t* game_state){
@@ -209,13 +205,13 @@ int main() {
     update_rich_presence_menu();
 
     title_screen_data menu_main;
-    title_screen_init(&menu_main, 3, "New game", "Load", "Exit");
+    title_screen_init(&menu_main, main_menu_draw, 3, "New game", "Load", "Exit");
 
     title_screen_data menu_pause;
-    title_screen_init(&menu_pause, 3, "Continue", "Main Menu", "Exit");
+    title_screen_init(&menu_pause, NULL, 3, "Continue", "Main Menu", "Exit");
 
     title_screen_data menu_gameover;
-    title_screen_init(&menu_gameover, 2, "Main menu", "Exit");
+    title_screen_init(&menu_gameover, game_over_draw, 2, "Main menu", "Exit");
 
     game_state_t game_state = {
             .game_window = stdscr,
@@ -254,7 +250,7 @@ int main() {
                         game_state.state = STATE_EXIT;
                         break;
                 }
-                title_screen_draw(stdscr, &menu_main, FALSE, "Logo");
+                title_screen_draw(stdscr, &menu_main, FALSE);
                 break;
             case STATE_PAUSE_MENU:
                 switch (title_screen_handle_input(&menu_pause)) {
@@ -270,7 +266,7 @@ int main() {
                         game_state.state = STATE_EXIT;
                         break;
                 }
-                title_screen_draw(stdscr, &menu_pause, TRUE, "");
+                title_screen_draw(stdscr, &menu_pause, TRUE);
                 break;
             case STATE_GAMEOVER:
                 switch (title_screen_handle_input(&menu_gameover)) {
@@ -283,7 +279,7 @@ int main() {
                         game_state.state = STATE_EXIT;
                         break;
                 }
-                title_screen_draw(stdscr, &menu_gameover, FALSE, "Game over");
+                title_screen_draw(stdscr, &menu_gameover, FALSE);
                 break;
         }
         rp_tick();
