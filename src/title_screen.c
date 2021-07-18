@@ -2,8 +2,31 @@
 #include <malloc.h>
 #include <string.h>
 #include "title_screen.h"
+#include "utility.h"
+#include "palette.h"
 
-void title_screen_init(title_screen_data* data, int count, ...) {
+void main_menu_draw(WINDOW* window, int y_offset){
+    int x_offset = (getmaxx(window) - 36) / 2;
+    mvwprintw(window, y_offset    , x_offset, "┏┓╻┏━╸╻ ╻┏━┓┏━┓┏━╸┏━┓   ┏━╸┏━┓┏┳┓┏━╸");
+    mvwprintw(window, y_offset + 1, x_offset, "┃┗┫┃  ┃ ┃┣┳┛┗━┓┣╸ ┗━┓╺━╸┃╺┓┣━┫┃┃┃┣╸ ");
+    mvwprintw(window, y_offset + 2, x_offset, "╹ ╹┗━╸┗━┛╹┗╸┗━┛┗━╸┗━┛   ┗━┛╹ ╹╹ ╹┗━╸");
+}
+
+void game_over_draw(WINDOW *window, int y_offset){
+
+    int x_offset = (getmaxx(window) - 24) / 2;
+
+    init_pair(200, COLOR_ENEMY_LIGHT, COLOR_BACKGROUND_DARK);
+
+    wattron(window, COLOR_PAIR(200));
+    mvwprintw(window, y_offset    , x_offset, "╻ ╻┏━┓╻ ╻   ╺┳┓╻┏━╸╺┳┓");
+    mvwprintw(window, y_offset + 1, x_offset, "┗┳┛┃ ┃┃ ┃    ┃┃┃┣╸  ┃┃");
+    mvwprintw(window, y_offset + 2, x_offset, " ╹ ┗━┛┗━┛   ╺┻┛╹┗━╸╺┻┛");
+    wattroff(window, COLOR_PAIR(200));
+}
+
+void title_screen_init(title_screen_data* data, void (*title_draw)(WINDOW*, int), int count, ...) {
+    data->title_draw = title_draw;
     va_list arg;
     va_start(arg, count);
 
@@ -37,10 +60,10 @@ int title_screen_handle_input(title_screen_data* data) {
     return -1;
 }
 
-void title_screen_draw(WINDOW* window, title_screen_data* data, int frame, char* title) {
+void title_screen_draw(WINDOW* window, title_screen_data* data, int frame) {
     if(!frame) werase(window);
     else {
-        int maxw = strlen(data->items[0]);
+        size_t maxw = strlen(data->items[0]);
         for(int i = 1; i < data->count; i++)
             if(strlen(data->items[i]) > maxw)
                 maxw = strlen(data->items[i]);
@@ -54,16 +77,15 @@ void title_screen_draw(WINDOW* window, title_screen_data* data, int frame, char*
     }
 
     int offset_y = (getmaxy(window) - data->count * 2) / 2;
-    if(strlen(title) > 0) {
-        int offset_x = (getmaxx(window) - strlen(title) - 4) / 2;
-        mvwprintw(window, 3, offset_x, "[ %s ]", title);
+    if(data->title_draw) {
+        data->title_draw(window, 3);
     }
     for(int i = 0; i < data->count; i++) {
         int offset_x = (getmaxx(window) - strlen(data->items[i]) - 4) / 2;
         mvwprintw(window, offset_y + i * 2, offset_x, data->pos == i ? "> %s <" : "  %s  ", data->items[i]);
     }
 
-    wrefresh(window);
+    wnoutrefresh(window);
 }
 
 void title_screen_destroy(title_screen_data* data){

@@ -1,4 +1,6 @@
 #include "utility.h"
+#include "inventory.h"
+#include "level.h"
 #include <ncurses.h>
 #include <stdlib.h>
 
@@ -38,61 +40,13 @@ int cross(vector2_t a, vector2_t b){
     return a.x * b.y - a.y * b.x;
 }
 
-int equal(vector2_t a, vector2_t b){
+char equal(vector2_t a, vector2_t b){
     if (a.x == b.x && a.y == b.y) return 1;
     return 0;
 }
 
 vector2_t scale_accordingly(vector2_t a, vector2_t b){
     return (vector2_t) {.x = a.x * b.x, .y = a.y * b.y};
-}
-
-vector2_array_t* init_vector2_array(){
-    vector2_array_t* array = malloc(sizeof(vector2_array_t));
-    array->size = 0;
-    array->capacity = 1;
-    array->data = malloc(sizeof(vector2_t) * array->capacity);
-    return array;
-}
-
-void push_back_vector2(vector2_array_t* array, vector2_t vector){
-    if (array->size == array->capacity){
-        array->capacity *= 2;
-        array->data = realloc(array->data, sizeof(vector2_t) * array->capacity);
-    }
-
-    array->data[array->size++] = vector;
-}
-
-void destroy_vector2_array(vector2_array_t* array){
-    free(array->data);
-    free(array);
-}
-
-vector2_pair_array_t* init_vector2_pair_array(){
-    vector2_pair_array_t* array = malloc(sizeof(vector2_pair_array_t));
-    array->size = 0;
-    array->capacity = 1;
-    array->data = malloc(sizeof(vector2_pair_t) * array->capacity);
-    return array;
-}
-
-void push_back_vector2_pair(vector2_pair_array_t* array, vector2_pair_t vector){
-    if (array->size == array->capacity){
-        array->capacity *= 2;
-        array->data = realloc(array->data, sizeof(vector2_pair_t) * array->capacity);
-    }
-
-    array->data[array->size++] = vector;
-}
-
-void delete_last_vector2_pair(vector2_pair_array_t* array){
-    array->size--;
-}
-
-void destroy_vector2_pair_array(vector2_pair_array_t* array){
-    free(array->data);
-    free(array);
 }
 
 void get_shuffled_directions(vector2_t directions[4]){
@@ -132,3 +86,48 @@ int is_valid_index(int index, int size){
 int is_valid_rect_index(vector2_t index, vector2_t size){
     return is_valid_index(index.x, size.x) && is_valid_index(index.y, size.y);
 }
+
+void make_action_along_the_line(vector2_t start, vector2_t end, int max_depth, level_t *level, void *argument2,
+                                char (*action)(vector2_t, level_t *, void *)){
+    vector2_t diff = sub(end, start);
+    vector2_t abs_diff = { .y = diff.y > 0 ? diff.y : -diff.y,  .x = diff.x > 0 ? diff.x : -diff.x};
+    int y_step = diff.y > 0 ? 1 : diff.y == 0 ? 0 : -1;
+    int x_step = diff.x > 0 ? 1 : diff.x == 0 ? 0 : -1;
+
+    vector2_t current = start;
+    int* bigger = abs_diff.y > abs_diff.x ? &(current.y) : &(current.x);
+    int* smaller = abs_diff.y > abs_diff.x ? &(current.x) : &(current.y);;
+    int bigger_step = abs_diff.y > abs_diff.x ? y_step : x_step;
+    int smaller_step = abs_diff.y > abs_diff.x ? x_step : y_step;
+    abs_diff = (vector2_t) { .x = MAX(abs_diff.y, abs_diff.x), .y = MIN(abs_diff.y, abs_diff.x) };
+
+    int error = 0;
+    char go_on = 1;
+    for (int i = 0; i < max_depth && go_on; i++){
+        *bigger += bigger_step;
+        error += (abs_diff.y);
+        if (error >= abs_diff.x){
+            error -= abs_diff.x;
+            *smaller += smaller_step;
+        }
+
+        go_on = action(current, level, argument2);
+    }
+}
+
+
+#define TYPE int
+#define NAME int
+#include "generic_array.h"
+
+#define TYPE vector2_t
+#define NAME vector2
+#include "generic_array.h"
+
+#define TYPE vector2_pair_t
+#define NAME vector2_pair
+#include "generic_array.h"
+
+#define TYPE item_t
+#define NAME item
+#include "generic_array.h"

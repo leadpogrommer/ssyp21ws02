@@ -1,15 +1,28 @@
 #include "inventory.h"
 #include <stdlib.h>
-#include "utility.h"
+#include "player.h"
+#include "world.h"
 
-static void (**callbacks)(struct world_t* world);
-static int callback_count = 0;
+void small_heal(world_t* world){
+    heal_player(world->player, 10);
+}
+
+void use_shotgun(world_t* world){
+    world->player->weapon_type = 1;
+}
+
+void god_vision(world_t* world){
+    world->player->god_vision = 1;
+}
+
+static void (*callbacks[3])(world_t* world) = {small_heal, use_shotgun, god_vision };
 
 inventory_t* init_inventory(int size){
     inventory_t* inventory = calloc(sizeof(inventory_t), 1);
     inventory->size = size;
     inventory->items = calloc(sizeof(item_t*), inventory->size);
     inventory->item_count = 0;
+    inventory->weapon_index = -1;
 
     return inventory;
 }
@@ -53,10 +66,28 @@ void destroy_inventory(inventory_t* inventory, int destroy_items){
     free(inventory);
 }
 
-int use_item(inventory_t* inventory, item_t* item, struct world_t* world){
-    if (item->callback_index != CALLBACK_NONE){
+int use_item(player_t* player, int index, struct world_t* world){
+    if (!is_valid_index(index, player->inventory->item_count)){
+        return 0;
+    }
+
+    item_t* item = player->inventory->items[index];
+    if (item->equipment_type == EQUIPMENT_WEAPON){
+        if (is_valid_index(player->inventory->weapon_index, player->inventory->item_count)){
+            deapply_item_to_player(player, player->inventory->items[player->inventory->weapon_index]);
+            player->weapon_type = 0;
+        }
+        if (item->callback_index != CALLBACK_NONE) {
+            callbacks[item->callback_index](world);
+        }
+        player->inventory->weapon_index = index;
+        apply_item_to_player(player, item);
+        return 1;
+    }
+    else if (item->callback_index != CALLBACK_NONE){
         callbacks[item->callback_index](world);
-        delete_item_from_inventory(inventory, item);
+        deapply_item_to_player(player, item);
+        delete_item_from_inventory(player->inventory, item);
         return 1;
     }
     return 0;

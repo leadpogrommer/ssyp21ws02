@@ -54,7 +54,17 @@ void clear_previous_pathfinder_data(pathfinder_t* pathfinder){
     }
 }
 
+char equal_for_pathfinder(vector2_t a, vector2_t b, level_t *level){
+    if (!level) return 0;
+    return equal(a, b);
+}
+
 vector2_array_t* find_path(pathfinder_t* pathfinder, vector2_t start, vector2_t end, int use_diagonals){
+    return find_path_advanced(pathfinder, start, end, use_diagonals, equal_for_pathfinder, vector2_distance);
+}
+
+vector2_array_t* find_path_advanced(pathfinder_t* pathfinder, vector2_t start, vector2_t end, int use_diagonals,
+                                    char (*is_target)(vector2_t, vector2_t, level_t *), int (*distance_to_target)(vector2_t, vector2_t)){
     clear_previous_pathfinder_data(pathfinder);
 
     pathfinder->heap_elements[start.y][start.x]->g_cost = 0;
@@ -62,8 +72,8 @@ vector2_array_t* find_path(pathfinder_t* pathfinder, vector2_t start, vector2_t 
     while (!is_heap_empty(pathfinder->heap)){
         heap_element_t* current = get_element_from_heap(pathfinder->heap);
 
-        if (equal(current->position, end)){
-            return retrace_path(pathfinder, start, end);
+        if (is_target(current->position, end, pathfinder->level)){
+            return retrace_path(pathfinder, start, current->position);
         }
 
         int count = 8;
@@ -92,7 +102,7 @@ vector2_array_t* find_path(pathfinder_t* pathfinder, vector2_t start, vector2_t 
             int new_g_cost = current->g_cost + vector2_distance(current->position, neighbour_cell);
             if (new_g_cost < neighbour->g_cost || !is_heap_contains(pathfinder->heap, neighbour)){
                 neighbour->g_cost = new_g_cost;
-                neighbour->h_cost = vector2_distance(end, neighbour_cell);
+                neighbour->h_cost = distance_to_target(neighbour_cell, end);
                 neighbour->parent = current;
 
                 if (!is_heap_contains(pathfinder->heap, neighbour)){
