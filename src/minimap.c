@@ -2,7 +2,7 @@
 #include <minimap.h>
 #include <string.h>
 
-minimap_data_t* minimap_init(WINDOW* game_window, int radius) {
+minimap_data_t* minimap_init(WINDOW* game_window, int radius, short color_id_base, short pair_id_base) {
     minimap_data_t* minimap_data = malloc(sizeof(minimap_data_t));
     minimap_data->radius = radius;
     minimap_data->window = newwin(radius * 2 + 1, radius * 2 + 1, 0, getmaxx(game_window) - radius * 2 - 1);
@@ -11,6 +11,18 @@ minimap_data_t* minimap_init(WINDOW* game_window, int radius) {
     minimap_data->visited_h = 1;
     minimap_data->visited = malloc(sizeof(int*));
     minimap_data->visited[0] = malloc(sizeof(int) * minimap_data->visited_h);
+    minimap_data->color_id_base = color_id_base;
+    minimap_data->pair_id_base = pair_id_base;
+
+    init_color(minimap_data->color_id_base, 650, 650, 650); // Background gray
+    init_color(minimap_data->color_id_base + 1, 1000, 1000, 1000); // Room white
+    init_color(minimap_data->color_id_base + 2, 700, 500, 500); // Player room background red
+
+    init_pair(minimap_data->pair_id_base, minimap_data->color_id_base + 1, minimap_data->color_id_base); // Background
+    init_pair(minimap_data->pair_id_base + 1, COLOR_BLACK, minimap_data->color_id_base + 1); // Room
+    init_pair(minimap_data->pair_id_base + 2, COLOR_BLACK, minimap_data->color_id_base + 2); // Player Room
+    wbkgd(minimap_data->window, COLOR_PAIR(minimap_data->pair_id_base));
+
     return minimap_data;
 }
 void minimap_destroy(minimap_data_t* minimap_data) {
@@ -75,14 +87,16 @@ void minimap_draw(minimap_data_t* minimap_data, WINDOW* game_window, level_t* le
                 }
 
                 if(minimap_data->visited[room.x][room.y] == 1) {
-                    if(equal(minimap_data->player_room, room))
-                        mvwaddch(minimap_data->window, j * 2 + minimap_data->radius, i * 2 + minimap_data->radius, '@');
-                    else if(equal(level->start_room_grid_position, room))
+                    wattron(minimap_data->window, COLOR_PAIR(equal(minimap_data->player_room, room) ? minimap_data->pair_id_base + 2 : minimap_data->pair_id_base + 1));
+
+                    if(equal(level->start_room_grid_position, room))
                         mvwaddch(minimap_data->window, j * 2 + minimap_data->radius, i * 2 + minimap_data->radius, 'S');
                     else if(strcmp(level->room_grid[room.y][room.x]->filename, "end_room.txt") == 0)
                         mvwaddch(minimap_data->window, j * 2 + minimap_data->radius, i * 2 + minimap_data->radius, 'E');
                     else
-                        mvwaddch(minimap_data->window, j * 2 + minimap_data->radius, i * 2 + minimap_data->radius, '#');
+                        mvwaddch(minimap_data->window, j * 2 + minimap_data->radius, i * 2 + minimap_data->radius, ' ');
+
+                    wattroff(minimap_data->window, COLOR_PAIR(equal(minimap_data->player_room, room) ? minimap_data->pair_id_base + 2 : minimap_data->pair_id_base + 1));
                 }
             }
         }

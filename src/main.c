@@ -55,7 +55,7 @@ void set_up_world(game_state_t* game_state){
     game_state->world->hud = init_hud(game_state->game_window, 3, game_state->world->player, &(game_state->world->current_level),
                                       game_state->palette);
 
-    game_state->world->minimap_data = minimap_init(game_state->game_window, 3);
+    game_state->world->minimap_data = minimap_init(game_state->game_window, 3, 228, 235);
 
     vector2_t inventory_left_up_padding = { .x = 24, .y = 0 };
     vector2_t inventory_right_down_padding = { .x = 9, .y = game_state->world->hud->height };
