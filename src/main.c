@@ -81,6 +81,7 @@ void end_game(game_state_t* game_state){
     if (game_state->achievements){
         destroy_achievements(game_state->achievements);
         destroy_int_array(game_state->achievement_queue);
+        game_state->achievements = NULL;
     }
 }
 

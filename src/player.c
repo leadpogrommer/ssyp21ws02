@@ -42,6 +42,11 @@ void heal_player(player_t* player, int amount){
     player->health = player->health + amount > player->max_health ? player->max_health : player->health + amount;
 }
 
+void give_gold(player_t *player, statistics_t *stats, int amount){
+    player->gold += amount;
+    stats->gold_picked_up_this_run += amount;
+}
+
 void pick_up_item(player_t* player, item_t* item){
     if (add_item_to_inventory(player->inventory, item) && !item->equippable){
         apply_item_to_player(player, item);
