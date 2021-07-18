@@ -129,6 +129,8 @@ void generate_new_level(world_t* world, int room_count){
 
     update_rich_presence_level(world->current_level);
     world->level_popup = init_popup(NULL, 7, POPUP_ULCORNER, "Level %d", world->current_level);
+
+    save_world(world);
 }
 
 void spawn_items_on_level(level_t* level, inventory_t* inventory){
