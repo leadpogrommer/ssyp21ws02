@@ -71,6 +71,7 @@ void set_up_world(game_state_t* game_state){
 }
 
 void end_game(game_state_t* game_state){
+    game_state->world->stats->max_gold_picked_up = MAX(game_state->world->stats->gold_picked_up_this_run, game_state->world->stats->max_gold_picked_up);
     save_statistics(game_state->world->stats);
     destroy_world(game_state->world);
     destroy_inventory_display(game_state->inventory_display);
@@ -251,6 +252,7 @@ int main() {
                         break;
                 }
                 title_screen_draw(stdscr, &menu_main, FALSE);
+                doupdate();
                 break;
             case STATE_PAUSE_MENU:
                 switch (title_screen_handle_input(&menu_pause)) {
@@ -267,6 +269,7 @@ int main() {
                         break;
                 }
                 title_screen_draw(stdscr, &menu_pause, TRUE);
+                doupdate();
                 break;
             case STATE_GAMEOVER:
                 switch (title_screen_handle_input(&menu_gameover)) {
@@ -280,6 +283,15 @@ int main() {
                         break;
                 }
                 title_screen_draw(stdscr, &menu_gameover, FALSE);
+
+                // Drawing high score
+                if (game_state.world){
+                    int half_screen = getmaxx(stdscr) / 2;
+                    mvwprintw(stdscr, 7, half_screen - 13, "Your previous highscore: %d", game_state.world->stats->max_gold_picked_up);
+                    mvwprintw(stdscr, 8, half_screen - 12, "Your score this run: %d", game_state.world->stats->gold_picked_up_this_run);
+                }
+                wnoutrefresh(stdscr);
+                doupdate();
                 break;
         }
         rp_tick();

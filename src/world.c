@@ -7,6 +7,7 @@
 
 world_t* start_new_world(){
     world_t* world = init_world();
+    world->stats->gold_picked_up_this_run = 0;
     world->player = init_player(10);
     world->fade_speed = 10;
     generate_new_level(world, 2);

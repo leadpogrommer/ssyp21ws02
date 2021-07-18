@@ -85,7 +85,7 @@ void title_screen_draw(WINDOW* window, title_screen_data* data, int frame) {
         mvwprintw(window, offset_y + i * 2, offset_x, data->pos == i ? "> %s <" : "  %s  ", data->items[i]);
     }
 
-    wrefresh(window);
+    wnoutrefresh(window);
 }
 
 void title_screen_destroy(title_screen_data* data){
