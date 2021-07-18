@@ -1,5 +1,6 @@
 #include <level.h>
 #include <minimap.h>
+#include <string.h>
 
 minimap_data_t* minimap_init(WINDOW* game_window, int radius) {
     minimap_data_t* minimap_data = malloc(sizeof(minimap_data_t));
@@ -78,6 +79,8 @@ void minimap_draw(minimap_data_t* minimap_data, WINDOW* game_window, level_t* le
                         mvwaddch(minimap_data->window, j * 2 + minimap_data->radius, i * 2 + minimap_data->radius, '@');
                     else if(equal(level->start_room_grid_position, room))
                         mvwaddch(minimap_data->window, j * 2 + minimap_data->radius, i * 2 + minimap_data->radius, 'S');
+                    else if(strcmp(level->room_grid[room.y][room.x]->filename, "end_room.txt") == 0)
+                        mvwaddch(minimap_data->window, j * 2 + minimap_data->radius, i * 2 + minimap_data->radius, 'E');
                     else
                         mvwaddch(minimap_data->window, j * 2 + minimap_data->radius, i * 2 + minimap_data->radius, '#');
                 }
