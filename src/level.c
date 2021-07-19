@@ -104,7 +104,7 @@ level_t* get_level_with_room_grid(int room_count, room_pool_t* room_pool){
     vector2_pair_array_t* connected_rooms = init_vector2_pair_array();
 
     int branch_count = (room_count - 2)/2;
-    if (room_placer(room_count, &branch_count, room_pool, room_count, room_grid, VEC2_ZERO, VEC2_SQUARE(room_count), connected_rooms) == 0){
+    if (room_placer(room_count, &branch_count, room_pool, room_count, room_count * 2 + 1, room_grid, VEC2_ZERO, VEC2_SQUARE(room_count), connected_rooms) == 0){
         fail_gracefully("Couldn't generate current_level");
     }
 
@@ -230,7 +230,7 @@ void destroy_level(level_t* level){
 }
 
 // TODO we need to give map item_count instead of hard-coded value for rooms item_count
-int room_placer(int rooms_left, int* branches_left, room_pool_t* room_pool, int room_count, room_t* rooms[room_count * 2 + 1][room_count * 2 + 1], vector2_t previous_direction, vector2_t pos, vector2_pair_array_t* connected_rooms){
+int room_placer(int rooms_left, int* branches_left, room_pool_t* room_pool, int room_count, int array_size, room_t* rooms[array_size][array_size], vector2_t previous_direction, vector2_t pos, vector2_pair_array_t* connected_rooms){
     if (rooms[pos.y][pos.x] != NULL) {
         return 0;
     }
@@ -279,7 +279,7 @@ int room_placer(int rooms_left, int* branches_left, room_pool_t* room_pool, int 
         if (successful && branches_left && *branches_left > 0 && rand() % 2 > 0){
             // If we already placed main path we try our chance at branches
             push_back_vector2_pair(connected_rooms, (vector2_pair_t){ pos, next_cell });
-            if (room_placer(2, 0, room_pool, room_count, rooms, directions[i], next_cell, connected_rooms)){
+            if (room_placer(2, 0, room_pool, room_count, room_count * 2 + 1, rooms, directions[i], next_cell, connected_rooms)){
                 (*branches_left)--;
             }else{
                 delete_vector2_pair_from_array(connected_rooms, connected_rooms->size - 1);
@@ -287,7 +287,7 @@ int room_placer(int rooms_left, int* branches_left, room_pool_t* room_pool, int 
         }else if (!successful){
             // Let's go find out if this variant viable This is the main path
             push_back_vector2_pair(connected_rooms, (vector2_pair_t) { pos, next_cell });
-            successful = room_placer(rooms_left - 1, branches_left, room_pool, room_count, rooms, directions[i], next_cell, connected_rooms);
+            successful = room_placer(rooms_left - 1, branches_left, room_pool, room_count, room_count * 2 + 1, rooms, directions[i], next_cell, connected_rooms);
             if (!successful){
                 delete_vector2_pair_from_array(connected_rooms, connected_rooms->size - 1);
             }
