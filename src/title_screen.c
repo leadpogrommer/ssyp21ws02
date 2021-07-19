@@ -6,10 +6,10 @@
 #include "palette.h"
 
 void main_menu_draw(WINDOW* window, int y_offset){
-    int x_offset = (getmaxx(window) - 36) / 2;
-    mvwprintw(window, y_offset    , x_offset, "┏┓╻┏━╸╻ ╻┏━┓┏━┓┏━╸┏━┓   ┏━╸┏━┓┏┳┓┏━╸");
-    mvwprintw(window, y_offset + 1, x_offset, "┃┗┫┃  ┃ ┃┣┳┛┗━┓┣╸ ┗━┓╺━╸┃╺┓┣━┫┃┃┃┣╸ ");
-    mvwprintw(window, y_offset + 2, x_offset, "╹ ╹┗━╸┗━┛╹┗╸┗━┛┗━╸┗━┛   ┗━┛╹ ╹╹ ╹┗━╸");
+    int x_offset = (getmaxx(window) - 45) / 2;
+    mvwprintw(window, y_offset    , x_offset, "┏┓╻┏━╸╻ ╻┏━┓┏━┓┏━╸╺┳┓   ╺┳┓╻ ╻┏┓╻┏━╸┏━╸┏━┓┏┓╻");
+    mvwprintw(window, y_offset + 1, x_offset, "┃┗┫┃  ┃ ┃┣┳┛┗━┓┣╸  ┃┃    ┃┃┃ ┃┃┗┫┃╺┓┣╸ ┃ ┃┃┗┫");
+    mvwprintw(window, y_offset + 2, x_offset, "╹ ╹┗━╸┗━┛╹┗╸┗━┛┗━╸╺┻┛   ╺┻┛┗━┛╹ ╹┗━┛┗━╸┗━┛╹ ╹");
 }
 
 void game_over_draw(WINDOW *window, int y_offset){

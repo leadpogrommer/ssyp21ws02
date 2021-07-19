@@ -30,14 +30,14 @@ void rp_tick() {
 }
 
 void update_rich_presence_level(int level) {
-    struct DiscordActivity activity = {0};
-    sprintf(activity.details, "Playing on current_level %d", level);
+    struct DiscordActivity activity = {.assets.large_image = "logo"};
+    sprintf(activity.details, "Playing on level %d", level);
     activity.timestamps.start = time(NULL);
     rp_update(&activity);
 }
 
 void update_rich_presence_menu() {
-    struct DiscordActivity activity = {0};
+    struct DiscordActivity activity = {.assets.large_image = "logo"};
     sprintf(activity.details, "In main menu");
     rp_update(&activity);
 }
