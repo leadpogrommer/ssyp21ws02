@@ -131,6 +131,8 @@ void generate_new_level(world_t* world, int room_count){
     update_rich_presence_level(world->current_level);
     world->level_popup = init_popup(NULL, 7, POPUP_ULCORNER, "Level %d", world->current_level);
 
+    give_gold(world->player, world->stats, 2);
+
     save_world(world);
 }
 
@@ -140,7 +142,7 @@ void spawn_items_on_level(level_t* level, inventory_t* inventory){
     for (int i = 0; i < level->size.y; i++){
         for (int j = 0; j < level->size.x; j++){
             if (level->data[i][j] == '?'){
-                push_back_item(level->item_array, *get_random_item(inventory));
+                push_back_item(level->item_array, get_random_item(inventory));
                 push_back_vector2(level->shrines_array, (vector2_t) {.x = j, .y = i});
             }
         }

@@ -55,7 +55,7 @@ void save_level(level_t* level, FILE* file){
     fwrite(&(level->shrines_array->size), sizeof(int), 1, file);
     fwrite(level->shrines_array->data, sizeof(vector2_t), level->shrines_array->size, file);
     for (int i = 0; i < level->item_array->size; i++){
-        fwrite(&(level->item_array->data[i].id), sizeof(int), 1, file);
+        fwrite(&(level->item_array->data[i]->id), sizeof(int), 1, file);
     }
 }
 
@@ -196,7 +196,7 @@ level_t* load_level(FILE* file, room_pool_t* room_pool, inventory_t* parent_inve
         int id;
         fread(&id, sizeof(int), 1, file);
         if (is_valid_index(id, parent_inventory->item_count)){
-            push_back_item(level->item_array, *parent_inventory->items[id]);
+            push_back_item(level->item_array, parent_inventory->items[id]);
         }
     }
 

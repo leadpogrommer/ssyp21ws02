@@ -4,7 +4,7 @@
 
 player_t* init_player(int max_health){
     player_t* player = calloc(sizeof(player_t), 1);
-    player->gold = 1;
+    player->gold = 100;
     player->max_health = max_health;
     player->health = max_health;
     player->inventory = init_inventory(10);
@@ -63,9 +63,9 @@ void shoot(player_t* player, bullets_t* bullets, vector2_t direction, unsigned l
         if (time - player->last_shot >= (unsigned long long)player->cooldowns[1]) {
             fire(bullets, player->pos, direction, player->damage, 0);
             vector2_t sideways = {direction.y, direction.x};
-            fire(bullets, player->pos, sum(direction, sideways), player->damage, 0);
+            fire(bullets, sum(player->pos, sideways), direction, player->damage, 0);
             sideways = scale(sideways, -1);
-            fire(bullets, player->pos, sum(direction, sideways), player->damage, 0);
+            fire(bullets, sum(player->pos, sideways), direction, player->damage, 0);
             player->last_shot = time;
         }
     }
