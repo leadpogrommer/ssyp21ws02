@@ -18,7 +18,7 @@ add_link_options(-L${CMAKE_SOURCE_DIR} -Wl,-rpath,.)
 
 include_directories(SYSTEM includes/thirdparty)
 
-add_compile_options(-Wall -Werror -pedantic-errors -Wextra -Wpedantic)
+add_compile_options(-Wall -Werror -pedantic-errors -Wextra -Wpedantic -Wno-error=unused-result)
 
 add_executable(game
                 src/main.c
