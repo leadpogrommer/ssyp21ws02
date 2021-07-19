@@ -28,6 +28,8 @@ void save_inventory(inventory_t* inventory, FILE* file){
     for (int i = 0; i < inventory->item_count; i++){
         fwrite(&(inventory->items[i]->id), sizeof(int), 1, file);
     }
+
+    fwrite(&(inventory->weapon_index), sizeof(int), 1, file);
 }
 
 void save_level(level_t* level, FILE* file){
@@ -143,6 +145,8 @@ inventory_t* load_inventory(FILE* file, inventory_t* parent_inventory){
             add_item_to_inventory(inventory, parent_inventory->items[id]);
         }
     }
+
+    fread(&(inventory->weapon_index), sizeof(int), 1, file);
 
     return inventory;
 }

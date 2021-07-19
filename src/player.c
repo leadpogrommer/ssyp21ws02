@@ -4,7 +4,7 @@
 
 player_t* init_player(int max_health){
     player_t* player = calloc(sizeof(player_t), 1);
-    player->gold = 100;
+    player->gold = 0;
     player->max_health = max_health;
     player->health = max_health;
     player->inventory = init_inventory(10);
