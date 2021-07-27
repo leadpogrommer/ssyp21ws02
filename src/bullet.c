@@ -60,7 +60,7 @@ void process_bullets(bullets_t* bullets, enemies_t* enemies, level_t* level, pla
                         enemies_remove(enemies, j);
                         if (j > 0) j--;
 
-                        give_gold(player, stats, rand() % 2 + 1);
+                        give_gold(player, stats, rand() % 2 + 1 + enemies->array[i].type);
                         stats->enemies_killed++;
                     }
 

@@ -62,6 +62,6 @@ void make_action_along_the_line(vector2_t start, vector2_t end, int max_depth, l
 typedef struct item_t item_t;
 
 #define ONLYDEFINE
-#define TYPE item_t
+#define TYPE item_t *
 #define NAME item
 #include "generic_array.h"

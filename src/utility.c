@@ -128,6 +128,6 @@ void make_action_along_the_line(vector2_t start, vector2_t end, int max_depth, l
 #define NAME vector2_pair
 #include "generic_array.h"
 
-#define TYPE item_t
+#define TYPE item_t *
 #define NAME item
 #include "generic_array.h"

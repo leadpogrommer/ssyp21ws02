@@ -279,7 +279,7 @@ int room_placer(int rooms_left, int* branches_left, room_pool_t* room_pool, int 
         if (successful && branches_left && *branches_left > 0 && rand() % 2 > 0){
             // If we already placed main path we try our chance at branches
             push_back_vector2_pair(connected_rooms, (vector2_pair_t){ pos, next_cell });
-            if (room_placer(3, 0, room_pool, room_count, room_count * 2 + 1, rooms, directions[i], next_cell, connected_rooms)){
+            if (room_placer(2, 0, room_pool, room_count, room_count * 2 + 1, rooms, directions[i], next_cell, connected_rooms)){
                 (*branches_left)--;
             }else{
                 delete_vector2_pair_from_array(connected_rooms, connected_rooms->size - 1);
@@ -396,7 +396,7 @@ vector2_t get_level_position(level_t* level, vector2_t room_grid_pos, vector2_t 
 item_t* get_item_on_position(level_t* level, vector2_t position){
     for (int i = 0; i < level->item_array->size; i++){
         if (equal(position, level->shrines_array->data[i])){
-            return &(level->item_array->data[i]);
+            return level->item_array->data[i];
         }
     }
     return NULL;
