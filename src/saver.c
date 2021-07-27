@@ -1,6 +1,6 @@
 #include "saver.h"
 #include "string.h"
-#include <bson/bson.h>
+//#include <bson/bson.h>
 
 void save_world(world_t* world){
     FILE* file = fopen("ms0:/save", "w");
@@ -60,25 +60,25 @@ void save_level(level_t* level, FILE* file){
 }
 
 void save_statistics(statistics_t* statistics){
-    FILE* file = fopen("statistics.bson", "w");
-
-    bson_t *b;
-    uint8_t *buf = NULL;
-    size_t buflen = 0;
-    bson_writer_t *writer = bson_writer_new(&buf, &buflen, 0, bson_realloc_ctx, NULL);
-
-    bson_writer_begin(writer, &b);
-    #define X(a) BSON_APPEND_INT32(b, #a, statistics->a);
-    STATISTICS
-    #undef X
-    bson_writer_end(writer);
-
-
-    fwrite(buf, buflen * sizeof(uint8_t), 1, file);
-    bson_free (buf);
-    bson_writer_destroy(writer);
-
-    fclose(file);
+//    FILE* file = fopen("statistics.bson", "w");
+//
+//    bson_t *b;
+//    uint8_t *buf = NULL;
+//    size_t buflen = 0;
+//    bson_writer_t *writer = bson_writer_new(&buf, &buflen, 0, bson_realloc_ctx, NULL);
+//
+//    bson_writer_begin(writer, &b);
+//    #define X(a) BSON_APPEND_INT32(b, #a, statistics->a);
+//    STATISTICS
+//    #undef X
+//    bson_writer_end(writer);
+//
+//
+//    fwrite(buf, buflen * sizeof(uint8_t), 1, file);
+//    bson_free (buf);
+//    bson_writer_destroy(writer);
+//
+//    fclose(file);
 }
 
 void save_room(room_t* room, FILE* file){
@@ -223,28 +223,28 @@ room_t* load_saved_room(FILE* file, room_pool_t* room_pool){
 statistics_t* load_statistics() {
     statistics_t * stats = init_statistics();
 
-    bson_reader_t *reader;
-    bson_error_t error;
-    const bson_t *doc;
-    bool eof;
-
-    reader = bson_reader_new_from_file("statistics.bson", &error);
-
-    if (reader) {
-        doc = bson_reader_read(reader, &eof);
-
-        bson_iter_t iter;
-
-        #define X(a) if (bson_iter_init_find(&iter, doc, #a) ){ \
-                        stats->a = bson_iter_value(&iter)->value.v_int32; \
-                     }
-        STATISTICS
-
-        #undef X
-
-
-        bson_reader_destroy(reader);
-    }
+//    bson_reader_t *reader;
+//    bson_error_t error;
+//    const bson_t *doc;
+//    bool eof;
+//
+//    reader = bson_reader_new_from_file("statistics.bson", &error);
+//
+//    if (reader) {
+//        doc = bson_reader_read(reader, &eof);
+//
+//        bson_iter_t iter;
+//
+//        #define X(a) if (bson_iter_init_find(&iter, doc, #a) ){ \
+//                        stats->a = bson_iter_value(&iter)->value.v_int32; \
+//                     }
+//        STATISTICS
+//
+//        #undef X
+//
+//
+//        bson_reader_destroy(reader);
+//    }
 
     return stats;
 }

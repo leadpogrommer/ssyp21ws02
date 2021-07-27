@@ -200,7 +200,7 @@ int draw(game_state_t* game_state){
     return 0;
 }
 
-void psp_handle_input(){
+void psp_handle_input(int state){
     static Uint32 prev_time = 0;
     Uint32 time = SDL_GetTicks();
     if(time - prev_time > 100){
@@ -208,12 +208,35 @@ void psp_handle_input(){
     } else{
         return;
     }
-    if(SDL_JoystickGetButton(joystick, 6))ungetch('s');
-    if(SDL_JoystickGetButton(joystick, 7))ungetch('a');
-    if(SDL_JoystickGetButton(joystick, 8))ungetch('w');
-    if(SDL_JoystickGetButton(joystick, 9))ungetch('d');
-    if(SDL_JoystickGetButton(joystick, 10))ungetch('p');
-    if(SDL_JoystickGetButton(joystick, 2))ungetch(' ');
+
+    if(state == STATE_GAME){
+        if(SDL_JoystickGetButton(joystick, 8))ungetch('w');
+        if(SDL_JoystickGetButton(joystick, 6))ungetch('s');
+        if(SDL_JoystickGetButton(joystick, 7))ungetch('a');
+        if(SDL_JoystickGetButton(joystick, 9))ungetch('d');
+
+        if(SDL_JoystickGetButton(joystick, 3))ungetch(KEY_LEFT);
+        if(SDL_JoystickGetButton(joystick, 1))ungetch(KEY_RIGHT);
+        if(SDL_JoystickGetButton(joystick, 2))ungetch(KEY_DOWN);
+        if(SDL_JoystickGetButton(joystick, 0))ungetch(KEY_UP);
+
+        if(SDL_JoystickGetButton(joystick, 11))ungetch('p');
+        if(SDL_JoystickGetButton(joystick, 10))ungetch('i');
+
+        if(SDL_JoystickGetButton(joystick, 5))ungetch('e');
+
+    } else if(state == STATE_INVENTORY) {
+        if (SDL_JoystickGetButton(joystick, 2))ungetch(' ');
+        if (SDL_JoystickGetButton(joystick, 8))ungetch(KEY_UP);
+        if (SDL_JoystickGetButton(joystick, 6))ungetch(KEY_DOWN);
+        if(SDL_JoystickGetButton(joystick, 10))ungetch('i');
+    }else{
+        if (SDL_JoystickGetButton(joystick, 2))ungetch(' ');
+        if(SDL_JoystickGetButton(joystick, 8))ungetch('w');
+        if(SDL_JoystickGetButton(joystick, 6))ungetch('s');
+    }
+
+
 }
 
 int SDL_main() {
@@ -244,7 +267,7 @@ int SDL_main() {
     wbkgd(stdscr, COLOR_PAIR(game_state.palette->text_pair));
 
     while (game_state.state != STATE_EXIT) {
-        psp_handle_input();
+        psp_handle_input(game_state.state);
         switch(game_state.state) {
             case STATE_GAME:
                 if(!game_state.world){

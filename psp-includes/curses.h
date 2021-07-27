@@ -4,7 +4,7 @@
 
 #ifndef __PDCURSES__
 #define __PDCURSES__ 1
-
+#define PDC_WIDE
 /*man-start**************************************************************
 
 Define before inclusion (only those needed):
