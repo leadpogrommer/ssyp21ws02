@@ -240,6 +240,7 @@ void psp_handle_input(int state){
 }
 
 int SDL_main() {
+    printf("HELLO WORLD FROM PSP\n");
     chdir("ms0:/");
     setlocale(LC_ALL, "");
     srand(time(NULL));

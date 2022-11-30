@@ -2,11 +2,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include <dirent.h>
+//#include <dirent.h>
 #include <unistd.h>
 #include <ncurses.h>
 #include <string.h>
-
+#include <ctype.h>
+#include <pspiofilemgr.h>
+#include <pspiofilemgr_stat.h>
+#include <pspiofilemgr_dirent.h>
+#include <errno.h>
+#include <dirent.h>
 
 room_t* load_room(const char* filename){
     char root_directory[256];
@@ -15,7 +20,9 @@ room_t* load_room(const char* filename){
     chdir("resources/rooms"); // Going in target directory
 
     FILE* file = fopen(filename, "r");
-    if (file == NULL) fail_gracefully("Cannot open this file: %s", filename);
+    if (file == NULL) {
+        fail_gracefully("Cannot open this file: %s", filename);
+    }
 
     room_t* room = calloc(sizeof(room_t), 1);
     for (int i = 0; i < 3; i++){
@@ -56,6 +63,7 @@ room_t* load_room(const char* filename){
             while (getc(file) != '\n'); // Last line might not contain \n bc it's last line
         }
     }
+    fclose(file);
 
     chdir(root_directory); // Going back to initial directory
 
@@ -117,6 +125,7 @@ room_t* get_room_by_name(room_pool_t* room_pool, const char* filename){
 }
 
 room_pool_t* load_room_directory(){
+    chdir("ms0:/");
     DIR* dir = opendir("resources/rooms");
     if (dir == NULL) fail_gracefully("Cannot open directory: %s", "resources/rooms");
 
@@ -124,7 +133,7 @@ room_pool_t* load_room_directory(){
 
     struct dirent* current_el = readdir(dir); // Reading next position
     while (current_el != NULL){
-        if (current_el->d_stat.st_attr & FIO_SO_IFREG){ // Element needs to be a file
+        if (current_el->d_name[0] != '.'){ // Element needs to be a file
             for(int i = 0; current_el->d_name[i]; i++){
                 current_el->d_name[i] = tolower(current_el->d_name[i]);
             }

@@ -10,7 +10,7 @@ void main_menu_draw(WINDOW* window, int y_offset){
     mvwprintw(window, y_offset    , x_offset, "┏┓╻┏━╸╻ ╻┏━┓┏━┓┏━╸╺┳┓   ╺┳┓╻ ╻┏┓╻┏━╸┏━╸┏━┓┏┓╻");
     mvwprintw(window, y_offset + 1, x_offset, "┃┗┫┃  ┃ ┃┣┳┛┗━┓┣╸  ┃┃    ┃┃┃ ┃┃┗┫┃╺┓┣╸ ┃ ┃┃┗┫");
     mvwprintw(window, y_offset + 2, x_offset, "╹ ╹┗━╸┗━┛╹┗╸┗━┛┗━╸╺┻┛   ╺┻┛┗━┛╹ ╹┗━┛┗━╸┗━┛╹ ╹");
-    mvwprintw(window, y_offset + 3, x_offset, "                               pocket edition");
+    mvwprintw(window, y_offset + 3, x_offset, "                               pocket edition new build");
 }
 
 void game_over_draw(WINDOW *window, int y_offset){

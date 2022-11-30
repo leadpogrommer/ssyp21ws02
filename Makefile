@@ -11,7 +11,7 @@ src/bullet.o src/minimap.o src/popup.o src/statistics.o
 PSP_LARGE_MEMORY = 1
 
 INCDIR = includes psp-includes
-CFLAGS = -O3 -G0 -Wall -DPDCDEBUG
+CFLAGS = -Og -g -G0 -Wall -DPDCDEBUG
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
 ASFLAGS = $(CFLAGS)
 
@@ -19,7 +19,7 @@ LIBDIR = libs
 LDFLAGS =
 LIBS = -lPDCurses -lSDL -lSDLmain -lSDL_ttf -lfreetype -lGL -lGLU -lglut -lz -lpspvfpu -lpsphprm -lpspsdk -lpspctrl -lpspumd -lpsprtc \
        -lpsppower -lpspgum -lpspgu -lpspaudiolib -lpspaudio -lpsphttp -lpspssl -lpspwlan \
-	   -lpspnet_adhocmatching -lpspnet_adhoc -lpspnet_adhocctl -lm -lpspvram
+	   -lpspnet_adhocmatching -lpspnet_adhoc -lpspnet_adhocctl -lm -lpspvram -lpng -lbz2 -lpspirkeyb
 
 EXTRA_TARGETS = EBOOT.PBP
 PSP_EBOOT_TITLE = SSYP Game
